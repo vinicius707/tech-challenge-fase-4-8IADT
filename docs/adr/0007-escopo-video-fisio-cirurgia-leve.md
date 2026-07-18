@@ -1,0 +1,3 @@
+# Escopo de vídeo: fisioterapia como foco, cirurgia como demo leve
+
+A demo cobre dois Casos de vídeo: o principal de fisioterapia/reabilitação (Análise Postural com MediaPipe Pose como protagonista) e um secundário de contexto cirúrgico tratado como Detecção em Cena com YOLOv8 pré-treinado (COCO) + regras heurísticas. Assumimos explicitamente que a parte cirúrgica é demonstração de visão computacional, sem fine-tune nem afirmação de análise clínica cirúrgica (ex.: sangramento). Motivo: cobrir os dois exemplos do PDF sem dobrar o esforço de dados/treino. Alternativas rejeitadas: apenas fisioterapia (menos abrangente); cirurgia com fine-tune real (fora do escopo de tempo/dados).

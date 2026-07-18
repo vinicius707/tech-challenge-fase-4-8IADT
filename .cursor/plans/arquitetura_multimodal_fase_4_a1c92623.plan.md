@@ -1,6 +1,6 @@
 ---
 name: Arquitetura Limen Fase 4
-overview: Plano incremental do Limen — épicos com entregas demonstráveis (SDD Markdown + TDD), frontend como diferencial (a11y/Lighthouse), backend multimodal com FastAPI/RQ/Azure F0. Épicos 1–5 detalhados em tarefas; 6–8 em etapas/DoD.
+overview: Plano incremental do Limen — épicos SDD/TDD, frontend a11y/Lighthouse, FastAPI/RQ/Azure F0, e catálogo explícito de datasets (Kaggle vitals + Hospital Deterioration + PhysioNet/AudioSet/vídeo) com consumo extensivo espalhado em E3/E6/E8.
 todos:
   - id: epic-01
     content: "Épico 1 Fundação: specs, Compose, health, MinIO bootstrap, Alembic, CI magro"
@@ -9,7 +9,7 @@ todos:
     content: "Épico 2 Identidade: JWT+refresh/logout, Paciente/PII/audit, cascade FK"
     status: pending
   - id: epic-03
-    content: "Épico 3 Caso+fila: outbox/RQ, vitais→Risco, Alerta v1 persistido"
+    content: "Épico 3 Caso+fila: calibração datasets vitais, fixtures, outbox/RQ, vitais→Risco, Alerta v1"
     status: pending
   - id: epic-04
     content: "Épico 4 Shell Next: auth, Pacientes/Caso vitais, baseline Lighthouse"
@@ -47,6 +47,35 @@ Produto: **Limen**. Glossário: [`CONTEXT.md`](CONTEXT.md). ADRs: [`docs/adr/`](
 **TDD:** teste vermelho → implementação → verde (pytest; Testing Library nas features críticas de UI).  
 **Contratos:** Pydantic ↔ types TS (leves); contract tests formais depois que a API estabilizar.  
 **Specs finas de 6–8:** escritas no início de cada épico (mesmo padrão), não todas upfront.
+
+## Datasets (catálogo canônico + quando entra)
+
+Estratégia: **fixtures/samples versionados no repo** para runtime, TDD e demo; **datasets públicos** para calibração, EDA, figuras e evidência no relatório (sem download obrigatório no CI). Brutos grandes em `.gitignore`; documentar URL + como regenerar fixtures.
+
+### URLs / slugs canônicos
+
+| Papel | Dataset | URL |
+|-------|---------|-----|
+| Vitais (CSV Kaggle, primário) | Human vital signs | https://www.kaggle.com/datasets/engrarri21/human-vital-signs |
+| Vitais / eventos (Kaggle) | Patient Vital Signs and Event Tracking | https://www.kaggle.com/datasets/parmajha/patient-vital-signs-and-event-tracking |
+| Deterioração | Hospital Deterioration | https://www.kaggle.com/datasets/tarekmasryo/hospital-deterioration-dataset · https://huggingface.co/datasets/tarekmasryo/hospital-deterioration-dataset · https://github.com/tarekmasryo/hospital-deterioration-dataset |
+| PhysioNet (PDF / relatório) | Challenge 2019 e/ou MC-MED | https://physionet.org/content/challenge-2019/ · https://physionet.org/content/mc-med/1.0.0/ |
+| Áudio (demo STT) | Medical Speech, Transcription and Intent | https://www.kaggle.com/datasets/paultimothymooney/medical-speech-transcription-and-intent |
+| Áudio (PDF / referência) | AudioSet | https://research.google.com/audioset/ |
+| Vídeo fisio | 3DYoga90 (ou gravação própria 30–60s) | https://github.com/seonokkim/3dyoga90 |
+| Vídeo cirurgia leve | Stock CC (sem dataset de sangramento) | fonte CC documentada no README |
+| Prescrições | Sintético Limen | `data/fixtures/prescriptions/` |
+
+### Consumo extensivo por etapa
+
+| Momento | Entrega |
+|---------|---------|
+| **Pré-E3 / E3.0** | Spec datasets vitais; EDA + calibração com `human-vital-signs` + `hospital-deterioration-dataset` (+ opcional event-tracking); `data/fixtures/vitals/`; notebook inicial |
+| **E3.2** | AnomalyEngine + Casos de teste só com fixtures calibradas |
+| **E6** | `data/samples/`: clip 3DYoga90 ou gravação; stock cirurgia; 1–3 utterances medical-speech ≤60s; AudioSet citado |
+| **E8** | Notebooks finais; capítulo de datasets no relatório (incl. PhysioNet); seed completo |
+
+Layout: `data/fixtures/`, `data/samples/`, `notebooks/`, `scripts/calibrate_vitals.py`.
 
 ## Ordem dos épicos
 
@@ -105,10 +134,11 @@ CI magro desde o Épico 1; publish GHCR + smoke Compose + Lighthouse budget no 7
 
 ## Épico 3 — Núcleo Caso + fila (tarefas)
 
+**E3.0 Dados vitais (pré / início)** Spec datasets vitais; calibração Kaggle Vital Signs + Hospital Deterioration; gerar `data/fixtures/vitals/`; notebook EDA inicial.  
 **E3.1** Spec + TDD outbox Postgres → RQ `default` + worker + reconciler básico.  
-**E3.2** Spec + TDD Caso (≥1 modalidade, Paciente, idempotency); vitais sintéticos → AnomalyEngine → Fusion; Artefato MinIO; **Alerta v1 persistido** se Risco ≥ MEDIO (sem SSE).
+**E3.2** Spec + TDD Caso (≥1 modalidade, Paciente, idempotency); fixtures calibradas → AnomalyEngine → Fusion; Artefato MinIO; **Alerta v1 persistido** se Risco ≥ MEDIO (sem SSE).
 
-**DoD:** POST Caso vitais autenticado → `done` + Risco (+ Alerta se limiar); job na fila.
+**DoD:** fixtures versionadas documentadas; POST Caso vitais → `done` + Risco (+ Alerta se limiar); job na fila.
 
 ---
 
@@ -137,9 +167,9 @@ CI magro desde o Épico 1; publish GHCR + smoke Compose + Lighthouse budget no 7
 
 | Etapa | DoD |
 |-------|-----|
-| E6.1 Vídeo | Pose (fisio) + YOLO cirurgia leve; fila `video`; frames no MinIO |
-| E6.2 Áudio | Azure F0 + cache + fallback + CB real; badge provider |
-| E6.3 Prescrições | Regras + desvio longitudinal; Casos demo seed |
+| E6.1 Vídeo | Samples de yoga/HAR ou gravação + stock cirurgia leve; Pose + YOLO; fila `video`; frames no MinIO |
+| E6.2 Áudio | Sample AudioSet/speech ≤60s; Azure F0 + cache + fallback + CB; badge provider |
+| E6.3 Prescrições | Regras + histórico; CSV sintético seed; Casos demo multimodais |
 
 Specs finas criadas no início de cada etapa.
 
@@ -160,7 +190,7 @@ Specs finas criadas no início de cada etapa.
 | Etapa | DoD |
 |-------|-----|
 | E8.1 | Publish GHCR só `main`; smoke Compose + Caso vitais (`AZURE_ENABLED=false`) |
-| E8.2 | Seed demo; `docs/relatorio-tecnico.md`; `docs/roteiro-video.md`; README completo |
+| E8.2 | Seed demo; notebooks finais; relatório com capítulo de datasets (Kaggle, Hospital Deterioration, PhysioNet, AudioSet); roteiro vídeo; README |
 
 ---
 

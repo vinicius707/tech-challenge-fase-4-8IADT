@@ -4,7 +4,7 @@ overview: Plano incremental do Limen — épicos SDD/TDD, frontend a11y/Lighthou
 todos:
   - id: epic-01
     content: "Épico 1 Fundação: specs, Compose, health, MinIO bootstrap, Alembic, CI magro"
-    status: pending
+    status: completed
   - id: epic-02
     content: "Épico 2 Identidade: JWT+refresh/logout, Paciente/PII/audit, cascade FK"
     status: pending
@@ -92,23 +92,23 @@ CI magro desde o Épico 1; publish GHCR + smoke Compose + Lighthouse budget no 7
 
 ---
 
-## Épico 1 — Fundação (tarefas)
+## Épico 1 — Fundação (concluído)
 
 **E1.1 Compose + health + bootstrap**
 
-| ID | Tarefa |
-|----|--------|
-| T1.0 | Spec `specs/epic-01-foundation/01-compose-health.md` |
-| T1.1 | Skeleton FastAPI + teste vermelho `/health` |
-| T1.2 | `/health` checa Postgres, Redis, MinIO |
-| T1.3 | `docker-compose.yml` (postgres, redis, minio, backend) |
-| T1.3b | Bootstrap MinIO: bucket `limen` |
-| T1.3c | Alembic + migration inicial; entrypoint migra |
-| T1.4 | `.env.example` + README mínimo |
-| T1.5 | Smoke local health |
-| T1.6 | CI magro: pytest (+ lint placeholder) |
+| ID | Tarefa | Status |
+|----|--------|--------|
+| T1.0 | Spec `specs/epic-01-foundation/01-compose-health.md` | Concluída |
+| T1.1 | Skeleton FastAPI + teste vermelho `/health` | Concluída |
+| T1.2 | `/health` checa Postgres, Redis, MinIO | Concluída |
+| T1.3 | `docker-compose.yml` (postgres, redis, minio, backend) | Concluída |
+| T1.3b | Bootstrap MinIO: bucket `limen` | Concluída |
+| T1.3c | Alembic + migration inicial; entrypoint migra | Concluída |
+| T1.4 | `.env.example` + README mínimo | Concluída |
+| T1.5 | Smoke local health | Concluída |
+| T1.6 | CI magro: pytest (+ lint placeholder) | Concluída |
 
-**DoD:** `compose up` → health 200; bucket existe; migrations ok; CI verde.
+**DoD validado:** `compose up` → health 200; bucket existe; migrations ok; CI verde.
 
 ---
 
@@ -219,4 +219,4 @@ flowchart LR
 
 ## Próximo passo de execução
 
-Começar pelo **Épico 1**: escrever `specs/epic-01-foundation/01-compose-health.md` e seguir T1.1–T1.6 até o DoD.
+O **Épico 1 está concluído**. Iniciar o **Épico 2 — Identidade e privacidade** pela T2.0, criando a spec `01-auth-login.md` antes da implementação TDD de autenticação.

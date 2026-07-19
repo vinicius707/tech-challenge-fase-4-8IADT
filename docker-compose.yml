@@ -45,6 +45,22 @@ services:
       retries: 10
       start_period: 5s
 
+  minio-bootstrap:
+    image: minio/mc:RELEASE.2025-04-16T18-13-26Z
+    environment:
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      MINIO_BUCKET: ${MINIO_BUCKET:-limen}
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        mc alias set limen-local http://minio:9000 "$${MINIO_ACCESS_KEY}" "$${MINIO_SECRET_KEY}"
+        mc mb --ignore-existing "limen-local/$${MINIO_BUCKET}"
+    restart: "no"
+
   backend:
     build:
       context: ./backend
@@ -66,6 +82,8 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
+      minio-bootstrap:
+        condition: service_completed_successfully
     healthcheck:
       test:
         [

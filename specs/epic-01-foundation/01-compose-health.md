@@ -8,6 +8,23 @@ se Backend, PostgreSQL, Redis e MinIO estão disponíveis.
 
 > O Limen é um protótipo acadêmico e não é um dispositivo médico.
 
+## Status da entrega
+
+**Concluída em 18 de julho de 2026.**
+
+- Contrato `/health` implementado em `backend/app/health.py`, com respostas 200
+  e 503, timeouts e supressão de detalhes internos.
+- Cinco testes automatizados cobrem prontidão, indisponibilidade individual de
+  PostgreSQL, Redis e MinIO e ausência de vazamento de erros.
+- `docker-compose.yml` provisiona a infraestrutura e executa o bootstrap
+  idempotente do bucket `limen`.
+- O entrypoint do backend aplica o baseline Alembic `20260718_0001` antes de
+  iniciar a API.
+- `scripts/smoke-foundation.sh` valida a stack, o contrato de health, o bucket e
+  a revisão do banco.
+- A [CI de fechamento](https://github.com/vinicius707/tech-challenge-fase-4-8IADT/actions/runs/29667220157)
+  concluiu lint placeholder e pytest com sucesso.
+
 ## Escopo
 
 - Backend FastAPI com endpoint público `GET /health`.
@@ -168,12 +185,13 @@ migrações
 para lint  
 **E** não deve publicar imagens nem exigir um Caso sintético nesta etapa.
 
-## Definição de pronto
+## Definição de pronto — validada
 
-- Todos os cenários desta especificação estão cobertos por teste automatizado ou
-  por smoke test documentado, conforme indicado.
-- `docker compose up --build` resulta em `GET /health` com HTTP 200.
-- O bucket `limen` existe e seu bootstrap é idempotente.
-- As migrações estão na revisão mais recente e são idempotentes na reinicialização.
-- A configuração mínima está documentada sem segredos reais.
-- A CI está verde.
+- [x] Todos os cenários desta especificação estão cobertos por teste
+  automatizado ou por smoke test documentado, conforme indicado.
+- [x] `docker compose up --build` resulta em `GET /health` com HTTP 200.
+- [x] O bucket `limen` existe e seu bootstrap é idempotente.
+- [x] As migrações estão na revisão mais recente e são idempotentes na
+  reinicialização.
+- [x] A configuração mínima está documentada sem segredos reais.
+- [x] A CI está verde.

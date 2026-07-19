@@ -6,13 +6,24 @@ precoce de risco clínico.
 > O Limen não é um dispositivo médico e não deve ser usado para decisões
 > clínicas reais.
 
-## Stack de fundação
+## Estado atual
+
+O **Épico 1 — Fundação** está concluído. A entrega atual fornece a API de
+prontidão, a infraestrutura local, o bootstrap do object store, o baseline de
+banco, testes automatizados, smoke test e CI magra.
+
+Ainda não fazem parte da implementação: autenticação, Pacientes, Casos, worker
+RQ, processamento multimodal, Azure, frontend e alertas. Essas capacidades
+entram nos épicos seguintes.
+
+## Fundação entregue
 
 - FastAPI no backend.
-- PostgreSQL para estado de domínio.
-- Redis para a fila RQ.
+- PostgreSQL preparado para o estado de domínio, com baseline Alembic
+  `20260718_0001`.
+- Redis preparado como broker da futura fila RQ.
 - MinIO S3-compatible para Artefatos.
-- Alembic para versionamento do schema.
+- Bucket `limen` criado de forma idempotente.
 - Docker Compose para execução local.
 
 As decisões estão registradas em [`docs/adr/`](docs/adr/), especialmente as ADRs
@@ -119,7 +130,11 @@ uv run pytest
 
 ## Integração contínua
 
-O workflow `.github/workflows/ci.yml` executa em pushes e pull requests. Nesta
-etapa ele instala as dependências pelo lockfile, verifica a sintaxe Python como
-placeholder explícito de lint e executa pytest. Build e publicação de imagens,
-smoke com Caso sintético e frontend serão adicionados no Épico 8.
+O workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) executa em
+pushes e pull requests. Nesta etapa ele instala as dependências pelo lockfile,
+verifica a sintaxe Python como placeholder explícito de lint e executa pytest.
+A [execução de fechamento do Épico 1](https://github.com/vinicius707/tech-challenge-fase-4-8IADT/actions/runs/29667220157)
+foi concluída com sucesso.
+
+Build e publicação de imagens, smoke com Caso sintético e frontend serão
+adicionados no Épico 8.

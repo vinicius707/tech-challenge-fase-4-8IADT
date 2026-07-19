@@ -67,7 +67,7 @@ services:
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     environment:
-      POSTGRES_URL: ${POSTGRES_URL:-postgresql://limen:limen@postgres:5432/limen}
+      POSTGRES_URL: postgresql://${POSTGRES_USER:-limen}:${POSTGRES_PASSWORD:-limen}@postgres:5432/${POSTGRES_DB:-limen}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
       MINIO_ENDPOINT: ${MINIO_ENDPOINT:-minio:9000}
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}

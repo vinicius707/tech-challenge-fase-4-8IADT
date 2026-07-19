@@ -57,6 +57,20 @@ Resposta esperada:
 }
 ```
 
+## Smoke test da fundação
+
+O smoke test sobe a stack, aguarda os healthchecks e valida o contrato de
+`/health`, a existência do bucket `limen` e o banco na revisão mais recente do
+Alembic:
+
+```bash
+./scripts/smoke-foundation.sh
+```
+
+A stack permanece em execução para inspeção. Use `docker compose down` ao
+terminar. O teste desta etapa não cria um Caso sintético; esse fluxo será
+adicionado no Épico 8, conforme a ADR 0028.
+
 Endpoints locais:
 
 - API: <http://localhost:8000>

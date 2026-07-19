@@ -116,3 +116,10 @@ cd backend
 uv sync
 uv run pytest
 ```
+
+## Integração contínua
+
+O workflow `.github/workflows/ci.yml` executa em pushes e pull requests. Nesta
+etapa ele instala as dependências pelo lockfile, verifica a sintaxe Python como
+placeholder explícito de lint e executa pytest. Build e publicação de imagens,
+smoke com Caso sintético e frontend serão adicionados no Épico 8.

@@ -5,7 +5,22 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Protocol
 
-from app.patients.schemas import PatientResponse
+from app.patients.audit import (
+    AuditStore,
+    InMemoryAuditStore,
+    new_reveal_audit,
+)
+from app.patients.cases_stub import CaseStubStore, InMemoryCaseStubStore
+from app.patients.crypto import PiiKeyUnavailableError, SensitiveLabelCipher
+from app.patients.schemas import PatientResponse, SensitiveLabelRevealResponse
+
+
+class PatientNotFoundError(Exception):
+    pass
+
+
+class SensitiveLabelUnavailableError(Exception):
+    pass
 
 
 @dataclass
@@ -56,6 +71,13 @@ class InMemoryPatientStore:
         return max(numbers, default=0) + 1
 
 
+def _normalize_label(value: str | None) -> str | None:
+    if value is None:
+        return None
+    stripped = value.strip()
+    return stripped or None
+
+
 def _to_response(patient: PatientRecord) -> PatientResponse:
     has_label = patient.sensitive_label_ciphertext is not None
     return PatientResponse(
@@ -69,16 +91,27 @@ def _to_response(patient: PatientRecord) -> PatientResponse:
 
 
 class PatientService:
-    def __init__(self, *, store: PatientStore) -> None:
+    def __init__(
+        self,
+        *,
+        store: PatientStore,
+        audit_store: AuditStore | None = None,
+        case_stub_store: CaseStubStore | None = None,
+        cipher: SensitiveLabelCipher | None = None,
+    ) -> None:
         self._store = store
+        self._audit_store = audit_store or InMemoryAuditStore()
+        self._case_stub_store = case_stub_store or InMemoryCaseStubStore()
+        self._cipher = cipher or SensitiveLabelCipher.from_environment()
 
-    def create(self) -> PatientResponse:
+    def create(self, *, sensitive_label: str | None = None) -> PatientResponse:
+        ciphertext = self._encrypt_optional(sensitive_label)
         now = datetime.now(tz=UTC)
         number = self._store.next_code_number()
         patient = PatientRecord(
             id=uuid.uuid4(),
             code=f"PAC-{number:03d}",
-            sensitive_label_ciphertext=None,
+            sensitive_label_ciphertext=ciphertext,
             created_at=now,
             updated_at=now,
         )
@@ -94,20 +127,63 @@ class PatientService:
             return None
         return _to_response(patient)
 
-    def update(self, patient_id: uuid.UUID) -> PatientResponse | None:
+    def update(
+        self,
+        patient_id: uuid.UUID,
+        *,
+        sensitive_label: str | None = None,
+        update_sensitive_label: bool = False,
+    ) -> PatientResponse | None:
         patient = self._store.get_by_id(patient_id)
         if patient is None:
             return None
+        if update_sensitive_label:
+            patient.sensitive_label_ciphertext = self._encrypt_optional(sensitive_label)
         patient.updated_at = datetime.now(tz=UTC)
         self._store.save(patient)
         return _to_response(patient)
 
     def delete(self, patient_id: uuid.UUID) -> bool:
-        return self._store.delete(patient_id)
+        deleted = self._store.delete(patient_id)
+        if deleted:
+            self._audit_store.delete_by_patient(patient_id)
+            self._case_stub_store.delete_by_patient(patient_id)
+        return deleted
+
+    def reveal(
+        self, patient_id: uuid.UUID, *, operator_id: uuid.UUID
+    ) -> SensitiveLabelRevealResponse:
+        patient = self._store.get_by_id(patient_id)
+        if patient is None:
+            raise PatientNotFoundError()
+        if patient.sensitive_label_ciphertext is None:
+            raise SensitiveLabelUnavailableError()
+
+        plaintext = self._cipher.decrypt(patient.sensitive_label_ciphertext)
+        audit = new_reveal_audit(operator_id=operator_id, patient_id=patient_id)
+        self._audit_store.append(audit)
+        return SensitiveLabelRevealResponse(
+            id=patient.id,
+            code=patient.code,
+            sensitive_label=plaintext,
+            revealed_at=audit.created_at,
+        )
+
+    def _encrypt_optional(self, sensitive_label: str | None) -> str | None:
+        normalized = _normalize_label(sensitive_label)
+        if normalized is None:
+            return None
+        return self._cipher.encrypt(normalized)
 
 
 _default_store = InMemoryPatientStore()
+_default_audit_store = InMemoryAuditStore()
+_default_case_stub_store = InMemoryCaseStubStore()
 
 
 def get_patient_service() -> PatientService:
-    return PatientService(store=_default_store)
+    return PatientService(
+        store=_default_store,
+        audit_store=_default_audit_store,
+        case_stub_store=_default_case_stub_store,
+    )

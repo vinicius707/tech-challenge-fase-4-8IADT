@@ -9,6 +9,16 @@ com cascata preparada para Casos e Artefatos futuros.
 
 > O Limen é um protótipo acadêmico e não é um dispositivo médico.
 
+## Status da entrega
+
+**Concluída em 21 de julho de 2026** (tarefas T2.5–T2.10).
+
+- CRUD `/patients` com código `PAC-NNN` e respostas mascaradas.
+- Rótulo Sensível via Fernet (`PII_ENCRYPTION_KEY`); reveal com
+  `audit_records` append-only.
+- Stub `cases` com `patient_id ON DELETE CASCADE` (API de Caso no Épico 3).
+- Suíte TDD cobrindo CRUD, Fernet, reveal, 401 e cascatas.
+
 ## Escopo
 
 - Modelo de Paciente com `código` público (`PAC-001`) e Rótulo Sensível opcional.
@@ -355,11 +365,11 @@ rótulo devem continuar possíveis.
 
 ## Definição de pronto
 
-- Spec aprovada como contrato antes da implementação T2.6–T2.10.
+- Spec aprovada como contrato antes da implementação T2.6–T2.10. ✅
 - Testes TDD cobrem CRUD mascarado, Fernet, reveal + auditoria, 401, exclusão
-  com cascata de auditoria e preparação de FK CASCADE para Caso.
+  com cascata de auditoria e preparação de FK CASCADE para Caso. ✅
 - `.env.example`, Compose e README documentam `PII_ENCRYPTION_KEY` e a rotação
-  manual, sem secrets reais.
-- Nenhuma resposta padrão de Paciente expõe PII em claro.
+  manual, sem secrets reais. ✅
+- Nenhuma resposta padrão de Paciente expõe PII em claro. ✅
 - Glossário de [`CONTEXT.md`](../../CONTEXT.md) respeitado: Paciente, Código do
-  Paciente, Rótulo Sensível, Registro de Auditoria, Operador.
+  Paciente, Rótulo Sensível, Registro de Auditoria, Operador. ✅

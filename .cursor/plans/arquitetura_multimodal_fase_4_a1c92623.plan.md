@@ -7,7 +7,7 @@ todos:
     status: completed
   - id: epic-02
     content: "Épico 2 Identidade: JWT+refresh/logout, Paciente/PII/audit, cascade FK"
-    status: pending
+    status: completed
   - id: epic-03
     content: "Épico 3 Caso+fila: calibração datasets vitais, fixtures, outbox/RQ, vitais→Risco, Alerta v1"
     status: pending
@@ -112,14 +112,14 @@ CI magro desde o Épico 1; publish GHCR + smoke Compose + Lighthouse budget no 7
 
 ---
 
-## Épico 2 — Identidade e privacidade (tarefas)
+## Épico 2 — Identidade e privacidade (concluído)
 
 **E2.1 Auth**
 
 | ID | Tarefa |
 |----|--------|
-| T2.0 | Spec `01-auth-login.md` (login, refresh, logout/blacklist, papéis) |
-| T2.1–2.4 | TDD JWT access curto + refresh + logout; rate limit login; seed `medico`/`admin` |
+| T2.0 | Spec `01-auth-login.md` (**concluída**) |
+| T2.1–2.4 | TDD JWT access curto + refresh + logout; rate limit; seed (**concluída**) |
 
 **E2.2 Paciente**
 
@@ -127,9 +127,13 @@ CI magro desde o Épico 1; publish GHCR + smoke Compose + Lighthouse budget no 7
 |----|--------|
 | T2.5 | Spec `02-paciente-privacidade.md` (**concluída**) |
 | T2.6 | TDD CRUD Paciente + migração `patients` (**concluída**) |
-| T2.7–2.10 | TDD rótulo Fernet; reveal + audit; FKs `ON DELETE CASCADE` preparadas |
+| T2.7 | TDD rótulo Fernet + `PII_ENCRYPTION_KEY` (**concluída**) |
+| T2.8 | TDD reveal + Registro de Auditoria (**concluída**) |
+| T2.9 | Stub `cases` + FK `ON DELETE CASCADE` (**concluída**) |
+| T2.10 | Fechamento E2.2 / DoD Paciente (**concluída**) |
 
-**DoD:** login/refresh/logout; Paciente mascarado; audit de reveal; cascade no schema.
+**DoD validado:** login/refresh/logout; Paciente mascarado; audit de reveal;
+cascade no schema (`audit_records` + stub `cases`).
 
 ---
 
@@ -220,6 +224,6 @@ flowchart LR
 
 ## Próximo passo de execução
 
-O **Épico 1 está concluído**. O **Épico 2 — Identidade e privacidade** avançou:
-auth T2.0–T2.4, spec T2.5 e CRUD Paciente T2.6. Próximo: T2.7–T2.10 (Fernet,
-reveal+audit, CASCADE).
+O **Épico 1** e o **Épico 2 — Identidade e privacidade** estão concluídos.
+Próximo: **Épico 3 — Núcleo Caso + fila** (começar por E3.0 / spec de datasets
+vitais).

@@ -8,25 +8,43 @@ precoce de risco clínico.
 
 ## Estado atual
 
-O **Épico 1 — Fundação** está concluído. A entrega atual fornece a API de
-prontidão, a infraestrutura local, o bootstrap do object store, o baseline de
-banco, testes automatizados, smoke test e CI magra.
+O **Épico 1 — Fundação** e o **Épico 2 — Identidade e privacidade** estão
+concluídos.
 
-Ainda não fazem parte da implementação: autenticação, Pacientes, Casos, worker
-RQ, processamento multimodal, Azure, frontend e alertas. Essas capacidades
-entram nos épicos seguintes.
+A entrega atual inclui a API de prontidão, infraestrutura local, autenticação
+JWT (login, refresh, logout com blacklist, rate limit e seed), CRUD de Paciente
+com Rótulo Sensível criptografado (Fernet), reveal com Registro de Auditoria e
+cascata de schema para Caso stub.
+
+Ainda não fazem parte da implementação: Casos multimodais, worker RQ, Azure,
+frontend, Alertas SSE e o restante dos épicos 3–8.
 
 ## Fundação entregue
 
 - FastAPI no backend.
 - PostgreSQL preparado para o estado de domínio, com baseline Alembic
-  `20260718_0001`.
+  `20260718_0001` e migrações de identidade até `20260721_0007`.
 - Redis preparado como broker da futura fila RQ.
 - MinIO S3-compatible para Artefatos.
 - Bucket `limen` criado de forma idempotente.
 - Docker Compose para execução local.
 
+## Identidade e privacidade entregues
+
+- Auth: `POST /auth/login`, `/auth/refresh`, `/auth/logout`; papéis `medico` e
+  `admin`; rate limit e seed locais.
+- Pacientes: CRUD em `/patients` com código `PAC-NNN`; Rótulo Sensível mascarado
+  por padrão; `POST …/sensitive-label/reveal` com auditoria append-only.
+- Schema: `patients`, `audit_records` e stub `cases` com
+  `patient_id ON DELETE CASCADE`.
+- Contratos: specs
+  [`01-auth-login.md`](specs/epic-02-identity/01-auth-login.md) e
+  [`02-paciente-privacidade.md`](specs/epic-02-identity/02-paciente-privacidade.md).
+
 As decisões estão registradas em [`docs/adr/`](docs/adr/), especialmente as ADRs
+[0001](docs/adr/0001-privacidade-paciente.md),
+[0004](docs/adr/0004-auth-jwt-papeis.md),
+[0005](docs/adr/0005-chave-pii-ambiente.md),
 [0009](docs/adr/0009-postgres-redis.md),
 [0011](docs/adr/0011-artefatos-minio.md) e
 [0019](docs/adr/0019-observabilidade.md).
@@ -124,14 +142,17 @@ A autenticação usa as variáveis abaixo, documentadas na spec
   `SEED_ADMIN_USERNAME`/`SEED_ADMIN_PASSWORD`: Operadores seed criados de forma
   idempotente no startup. Somente para uso local/demo; se ausentes, nenhum
   Operador é criado.
+- `PII_ENCRYPTION_KEY`: chave Fernet (URL-safe base64) para o Rótulo Sensível.
+  Obrigatória apenas ao criar/atualizar Paciente **com** rótulo; sem ela, essas
+  escritas respondem `503`. Gere com
+  `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"`.
+  Contrato em
+  [`specs/epic-02-identity/02-paciente-privacidade.md`](specs/epic-02-identity/02-paciente-privacidade.md).
 
-A chave `PII_ENCRYPTION_KEY`, definida na spec
-[`specs/epic-02-identity/02-paciente-privacidade.md`](specs/epic-02-identity/02-paciente-privacidade.md),
-deverá existir somente no ambiente (implementação nas tarefas T2.6–T2.10). Sua
-rotação será manual: pausar escritas, manter a chave anterior durante a
-recriptografia dos dados, validar a leitura com a nova chave e só então remover
-a anterior. Substituir a chave sem recriptografar torna os dados existentes
-ilegíveis.
+Rotação manual da chave PII: pausar escritas de rótulo, recriptografar os
+ciphertext com a nova chave (ou dual-key transitória, se implementada), validar
+reveal/máscara e só então remover a chave antiga. Substituir a chave sem
+recriptografar torna rótulos existentes ilegíveis.
 
 ## Testes do backend
 

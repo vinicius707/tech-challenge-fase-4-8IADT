@@ -6,6 +6,7 @@ requires-python = ">=3.12"
 dependencies = [
     "alembic>=1.14,<2",
     "bcrypt>=4.2,<5",
+    "cryptography>=44,<47",
     "fastapi>=0.115,<1",
     "minio>=7.2,<8",
     "psycopg[binary]>=3.2,<4",

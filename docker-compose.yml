@@ -83,6 +83,7 @@ services:
       SEED_MEDICO_PASSWORD: ${SEED_MEDICO_PASSWORD:-}
       SEED_ADMIN_USERNAME: ${SEED_ADMIN_USERNAME:-}
       SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
+      PII_ENCRYPTION_KEY: ${PII_ENCRYPTION_KEY:-}
     depends_on:
       postgres:
         condition: service_healthy

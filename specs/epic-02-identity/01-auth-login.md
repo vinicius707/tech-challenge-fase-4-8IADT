@@ -8,6 +8,15 @@ sessão no logout e distinguir os papéis `medico` e `admin`.
 
 > O Limen é um protótipo acadêmico e não é um dispositivo médico.
 
+## Status da entrega
+
+**Concluída em 21 de julho de 2026** (tarefas T2.0–T2.4).
+
+- Login, refresh com rotação, logout com blacklist e rate limit cobertos por
+  testes TDD.
+- Seed idempotente dos Operadores `medico` e `admin` no startup.
+- Variáveis documentadas em `.env.example`, Compose e README.
+
 ## Escopo
 
 - Modelo de Operador com username, senha bcrypt e papel.
@@ -289,10 +298,10 @@ traces.
 
 ## Definição de pronto
 
-- Spec aprovada como contrato antes da implementação T2.1–T2.4.
+- Spec aprovada como contrato antes da implementação T2.1–T2.4. ✅
 - Testes TDD cobrem login, refresh, logout, rate limit, seed e proteção de
-  rotas.
-- Access token curto e refresh rotativo funcionam localmente.
-- Logout blacklista o access e revoga o refresh.
-- `.env.example` e README documentam as novas variáveis sem secrets reais.
-- `/health` permanece público; demais rotas exigem JWT.
+  rotas. ✅
+- Access token curto e refresh rotativo funcionam localmente. ✅
+- Logout blacklista o access e revoga o refresh. ✅
+- `.env.example` e README documentam as novas variáveis sem secrets reais. ✅
+- `/health` permanece público; demais rotas exigem JWT. ✅

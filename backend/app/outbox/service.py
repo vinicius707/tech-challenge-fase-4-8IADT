@@ -8,6 +8,9 @@ from datetime import UTC, datetime
 from typing import Any, Protocol
 
 
+ELIGIBLE_STATUSES = ("pending", "enqueue_failed")
+
+
 @dataclass
 class OutboxRecord:
     id: uuid.UUID
@@ -28,6 +31,8 @@ class OutboxStore(Protocol):
 
     def get(self, job_id: uuid.UUID) -> OutboxRecord | None: ...
 
+    def list_by_statuses(self, statuses: tuple[str, ...]) -> list[OutboxRecord]: ...
+
 
 class JobEnqueuer(Protocol):
     def enqueue(self, *, job_type: str, payload: dict[str, Any]) -> str:
@@ -45,6 +50,10 @@ class InMemoryOutboxStore:
 
     def get(self, job_id: uuid.UUID) -> OutboxRecord | None:
         return self._by_id.get(job_id)
+
+    def list_by_statuses(self, statuses: tuple[str, ...]) -> list[OutboxRecord]:
+        allowed = set(statuses)
+        return [r for r in self._by_id.values() if r.status in allowed]
 
 
 @dataclass
@@ -111,10 +120,14 @@ class OutboxDispatcher:
 
         now = datetime.now(tz=UTC)
         attempts = record.attempts + 1
+        enqueue_payload = {
+            **record.payload,
+            "outbox_job_id": str(record.id),
+        }
         try:
             rq_job_id = self._enqueuer.enqueue(
                 job_type=record.job_type,
-                payload=record.payload,
+                payload=enqueue_payload,
             )
         except Exception as exc:  # noqa: BLE001 — falha de broker vira enqueue_failed
             failed = OutboxRecord(
@@ -146,3 +159,26 @@ class OutboxDispatcher:
             updated_at=now,
         )
         return self._store.save(enqueued)
+
+    def mark_processed(self, job_id: uuid.UUID) -> OutboxRecord:
+        record = self._store.get(job_id)
+        if record is None:
+            raise KeyError(f"outbox job not found: {job_id}")
+        if record.status == "processed":
+            return record
+
+        now = datetime.now(tz=UTC)
+        processed = OutboxRecord(
+            id=record.id,
+            aggregate_type=record.aggregate_type,
+            aggregate_id=record.aggregate_id,
+            job_type=record.job_type,
+            payload=record.payload,
+            status="processed",
+            rq_job_id=record.rq_job_id,
+            attempts=record.attempts,
+            last_error=None,
+            created_at=record.created_at,
+            updated_at=now,
+        )
+        return self._store.save(processed)

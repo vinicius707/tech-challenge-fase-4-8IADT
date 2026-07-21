@@ -11,8 +11,11 @@ indisponível no momento do enqueue.
 
 ## Status da entrega
 
-**Parcial — T3.3:** migração `outbox_jobs` + dispatcher/enqueue cobertos por TDD
-(cenários 1–3). Worker Compose e reconciler: **T3.4**.
+**Concluída em 21 de julho de 2026** (T3.3 enqueue + T3.4 worker/reconciler).
+
+- Migração `outbox_jobs` e dispatcher com enqueue na fila `default`.
+- Serviços Compose `worker` (RQ) e `outbox-reconciler`.
+- Job `process_modality` marca outbox como `processed` (corpo AnomalyEngine no T3.8+).
 
 ## Escopo
 
@@ -132,7 +135,7 @@ conclusão (`processed` ou equivalente).
 ## Critérios de pronto (DoD T3.3–T3.4)
 
 - [x] Migração da tabela de outbox. *(T3.3)*
-- [x] Enqueue cobertos por testes TDD. *(T3.3; worker no T3.4)*
-- [ ] Reconciler básico coberto por pelo menos um teste de recuperação.
-- [ ] Serviço worker no Compose e variáveis no `.env.example`.
-- [ ] Cenários 1–5 verificáveis sem DLQ nem fila `video`.
+- [x] Enqueue + worker `default` cobertos por testes TDD.
+- [x] Reconciler básico coberto por pelo menos um teste de recuperação.
+- [x] Serviço worker no Compose e variáveis no `.env.example`.
+- [x] Cenários 1–5 verificáveis sem DLQ nem fila `video`.

@@ -11,7 +11,8 @@ indisponível no momento do enqueue.
 
 ## Status da entrega
 
-**Pendente** (tarefas T3.2–T3.4).
+**Parcial — T3.3:** migração `outbox_jobs` + dispatcher/enqueue cobertos por TDD
+(cenários 1–3). Worker Compose e reconciler: **T3.4**.
 
 ## Escopo
 
@@ -130,8 +131,8 @@ conclusão (`processed` ou equivalente).
 
 ## Critérios de pronto (DoD T3.3–T3.4)
 
-- [ ] Migração da tabela de outbox.
-- [ ] Enqueue + worker `default` cobertos por testes TDD.
+- [x] Migração da tabela de outbox. *(T3.3)*
+- [x] Enqueue cobertos por testes TDD. *(T3.3; worker no T3.4)*
 - [ ] Reconciler básico coberto por pelo menos um teste de recuperação.
 - [ ] Serviço worker no Compose e variáveis no `.env.example`.
 - [ ] Cenários 1–5 verificáveis sem DLQ nem fila `video`.

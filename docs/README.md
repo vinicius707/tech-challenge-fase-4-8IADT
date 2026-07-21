@@ -19,6 +19,9 @@ Contratos Given/When/Then escritos **antes** da implementação TDD.
 | 1 Fundação | [`../specs/epic-01-foundation/01-compose-health.md`](../specs/epic-01-foundation/01-compose-health.md) | Concluída |
 | 2 Identidade | [`../specs/epic-02-identity/01-auth-login.md`](../specs/epic-02-identity/01-auth-login.md) | Concluída |
 | 2 Identidade | [`../specs/epic-02-identity/02-paciente-privacidade.md`](../specs/epic-02-identity/02-paciente-privacidade.md) | Concluída |
+| 3 Caso + fila | [`../specs/epic-03-caso-fila/01-datasets-vitais.md`](../specs/epic-03-caso-fila/01-datasets-vitais.md) | Concluída |
+| 3 Caso + fila | [`../specs/epic-03-caso-fila/02-outbox-rq.md`](../specs/epic-03-caso-fila/02-outbox-rq.md) | Concluída |
+| 3 Caso + fila | [`../specs/epic-03-caso-fila/03-caso-vitais-risco.md`](../specs/epic-03-caso-fila/03-caso-vitais-risco.md) | Concluída |
 
 ## ADRs
 
@@ -47,7 +50,7 @@ arquivo quando o plano supersede uma decisão anterior.
 | [0019](adr/0019-observabilidade.md) | Healthchecks e observabilidade |
 | [0028](adr/0028-cicd-actions-ghcr.md) | CI/CD Actions + GHCR |
 
-### Domínio clínico / fila (épicos seguintes)
+### Domínio clínico / fila
 
 | ADR | Tema |
 | --- | ---- |
@@ -79,5 +82,6 @@ arquivo quando o plano supersede uma decisão anterior.
 | ----- | ---- | ------ |
 | 1 | Fundação | Concluído |
 | 2 | Identidade e privacidade | Concluído |
-| 3 | Núcleo Caso + fila | Próximo |
-| 4–8 | Shell UI, resiliência, modalidades, Alertas, CI/CD | Pendente |
+| 3 | Núcleo Caso + fila | Concluído |
+| 4 | Shell Frontend | Próximo |
+| 5–8 | Resiliência, modalidades, Alertas, CI/CD | Pendente |

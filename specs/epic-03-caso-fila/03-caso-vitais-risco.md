@@ -11,8 +11,10 @@ quando o nível for MEDIO ou ALTO — sem SSE.
 
 ## Status da entrega
 
-**Parcial — T3.6–T3.9:** Caso + Artefato/outbox + AnomalyEngine/Fusion → Risco
-+ Alerta v1 (≥ MEDIO, dedupe, sem SSE). Fechamento docs: **T3.10**.
+**Concluída em 21 de julho de 2026** (T3.6–T3.10).
+
+Caso + Artefato/outbox + AnomalyEngine/Fusion → Risco + Alerta v1 (≥ MEDIO,
+dedupe, sem SSE). Docs e índice atualizados.
 
 ## Escopo
 
@@ -230,9 +232,9 @@ modalidades e Alertas persistidos quando houver.
 
 ## Critérios de pronto (DoD do Épico 3)
 
-- [ ] Fixtures documentadas (spec `01`) em uso nos testes deste contrato.
-- [ ] Outbox + worker `default` (spec `02`) integrados ao fluxo de Caso.
-- [ ] `POST` Caso vitais → processamento → `done` + Risco.
-- [ ] Alerta v1 persistido quando Risco ≥ MEDIO; ausente quando BAIXO.
-- [ ] Cenários 1–8 cobertos por TDD (pytest).
-- [ ] README / `docs/README.md` atualizados: Épico 3 concluído, próximo Épico 4.
+- [x] Fixtures documentadas (spec `01`) em uso nos testes deste contrato.
+- [x] Outbox + worker `default` (spec `02`) integrados ao fluxo de Caso.
+- [x] `POST` Caso vitais → processamento → `done` + Risco.
+- [x] Alerta v1 persistido quando Risco ≥ MEDIO; ausente quando BAIXO.
+- [x] Cenários 1–8 cobertos por TDD (pytest).
+- [x] README / `docs/README.md` atualizados: Épico 3 concluído, próximo Épico 4.

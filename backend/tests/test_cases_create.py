@@ -17,8 +17,10 @@ from app.auth.service import (
     get_auth_service,
     get_blacklist_store,
 )
-from app.cases.service import InMemoryCaseStore, get_case_service
+from app.cases.service import CaseService, InMemoryCaseStore, get_case_service
+from app.cases.storage import InMemoryArtifactBlobStore
 from app.main import app
+from app.outbox.service import InMemoryOutboxStore, OutboxDispatcher, RecordingJobEnqueuer
 from app.patients.service import InMemoryPatientStore, PatientService, get_patient_service
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -63,9 +65,15 @@ def client(
 ) -> TestClient:
     auth_service = AuthService(store=operator_store, blacklist_store=blacklist_store)
     patient_service = PatientService(store=patient_store, case_store=case_store)
-    from app.cases.service import CaseService
-
-    case_service = CaseService(store=case_store, patient_store=patient_store)
+    case_service = CaseService(
+        store=case_store,
+        patient_store=patient_store,
+        blob_store=InMemoryArtifactBlobStore(),
+        outbox_dispatcher=OutboxDispatcher(
+            store=InMemoryOutboxStore(),
+            enqueuer=RecordingJobEnqueuer(),
+        ),
+    )
     app.dependency_overrides[get_auth_service] = lambda: auth_service
     app.dependency_overrides[get_blacklist_store] = lambda: blacklist_store
     app.dependency_overrides[get_patient_service] = lambda: patient_service

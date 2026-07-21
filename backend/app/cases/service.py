@@ -1,8 +1,9 @@
-"""Serviço de Caso — criação idempotente (T3.6); MinIO/outbox no T3.7+."""
+"""Serviço de Caso — criação idempotente com Artefato (MinIO) e outbox."""
 
 from __future__ import annotations
 
 import hashlib
+import os
 import uuid
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -13,6 +14,12 @@ from app.cases.schemas import (
     CaseResponse,
     ModalityResponse,
 )
+from app.cases.storage import (
+    ArtifactBlobStore,
+    InMemoryArtifactBlobStore,
+    MinioArtifactBlobStore,
+)
+from app.outbox.service import OutboxDispatcher
 from app.patients.service import PatientStore
 
 
@@ -80,7 +87,6 @@ class CaseStore(Protocol):
 class InMemoryCaseStore:
     _by_id: dict[uuid.UUID, CaseRecord] = field(default_factory=dict)
     _by_idempotency: dict[str, uuid.UUID] = field(default_factory=dict)
-    _blobs: dict[uuid.UUID, bytes] = field(default_factory=dict)
 
     def save(self, case: CaseRecord) -> CaseRecord:
         self._by_id[case.id] = case
@@ -107,15 +113,7 @@ class InMemoryCaseStore:
             record = self._by_id.pop(case_id)
             if record.idempotency_key:
                 self._by_idempotency.pop(record.idempotency_key, None)
-            for artifact in record.artifacts:
-                self._blobs.pop(artifact.id, None)
         return len(to_remove)
-
-    def put_blob(self, artifact_id: uuid.UUID, content: bytes) -> None:
-        self._blobs[artifact_id] = content
-
-    def get_blob(self, artifact_id: uuid.UUID) -> bytes | None:
-        return self._blobs.get(artifact_id)
 
 
 def _to_response(case: CaseRecord) -> CaseResponse:
@@ -156,11 +154,15 @@ class CaseService:
         *,
         store: CaseStore,
         patient_store: PatientStore,
-        default_bucket: str = "limen",
+        blob_store: ArtifactBlobStore,
+        outbox_dispatcher: OutboxDispatcher,
+        default_bucket: str | None = None,
     ) -> None:
         self._store = store
         self._patient_store = patient_store
-        self._bucket = default_bucket
+        self._blobs = blob_store
+        self._outbox = outbox_dispatcher
+        self._bucket = default_bucket or os.getenv("MINIO_BUCKET", "limen")
 
     def create(
         self,
@@ -186,6 +188,13 @@ class CaseService:
         case_id = uuid.uuid4()
         artifact_id = uuid.uuid4()
         object_key = f"cases/{case_id}/vitals/{filename}"
+
+        self._blobs.put(
+            bucket=self._bucket,
+            object_key=object_key,
+            content=content,
+            content_type=content_type,
+        )
 
         artifact = ArtifactRecord(
             id=artifact_id,
@@ -220,8 +229,15 @@ class CaseService:
             artifacts=[artifact],
         )
         self._store.save(case)
-        if isinstance(self._store, InMemoryCaseStore):
-            self._store.put_blob(artifact_id, content)
+
+        outbox_job = self._outbox.create_pending(
+            aggregate_type="case",
+            aggregate_id=case_id,
+            job_type="process_modality",
+            payload={"case_id": str(case_id), "modality": "vitals"},
+        )
+        self._outbox.try_enqueue(outbox_job.id)
+
         return _to_response(case), True
 
     def get(self, case_id: uuid.UUID) -> CaseResponse:
@@ -232,9 +248,37 @@ class CaseService:
 
 
 _default_case_store = InMemoryCaseStore()
+_default_blob_store: ArtifactBlobStore = InMemoryArtifactBlobStore()
+_default_outbox_dispatcher: OutboxDispatcher | None = None
+
+
+def _default_dispatcher() -> OutboxDispatcher:
+    global _default_outbox_dispatcher
+    if _default_outbox_dispatcher is None:
+        from app.outbox.rq_client import RqJobEnqueuer
+        from app.outbox.service import InMemoryOutboxStore
+
+        # Em processo único de API (testes/dev sem Postgres outbox), usa memória.
+        # Compose/runtime com SQLAlchemy outbox entra quando o Caso persistir no PG.
+        _default_outbox_dispatcher = OutboxDispatcher(
+            store=InMemoryOutboxStore(),
+            enqueuer=RqJobEnqueuer(),
+        )
+    return _default_outbox_dispatcher
 
 
 def get_case_service() -> CaseService:
     from app.patients.service import _default_store as default_patient_store
 
-    return CaseService(store=_default_case_store, patient_store=default_patient_store)
+    blob: ArtifactBlobStore
+    if os.getenv("MINIO_ENDPOINT"):
+        blob = MinioArtifactBlobStore()
+    else:
+        blob = _default_blob_store
+
+    return CaseService(
+        store=_default_case_store,
+        patient_store=default_patient_store,
+        blob_store=blob,
+        outbox_dispatcher=_default_dispatcher(),
+    )

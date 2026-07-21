@@ -11,9 +11,8 @@ quando o nível for MEDIO ou ALTO — sem SSE.
 
 ## Status da entrega
 
-**Parcial — T3.6:** schema real de Caso + `POST`/`GET` + `Idempotency-Key`
-(cenários 1 parcial, 2, 8). MinIO/outbox no create: **T3.7**. Risco/Alerta:
-**T3.8–T3.9**.
+**Parcial — T3.6–T3.7:** schema/API de Caso + Idempotency-Key + Artefato no
+object store + outbox/enqueue na criação. Risco/Alerta: **T3.8–T3.9**.
 
 ## Escopo
 

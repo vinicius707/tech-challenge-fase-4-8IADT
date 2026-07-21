@@ -23,6 +23,7 @@ from app.cases.service import (
     PatientNotFoundError,
     get_case_service,
 )
+from app.cases.storage import ArtifactStorageError
 
 patients_cases_router = APIRouter(prefix="/patients", tags=["cases"])
 cases_router = APIRouter(prefix="/cases", tags=["cases"])
@@ -39,6 +40,7 @@ cases_router = APIRouter(prefix="/cases", tags=["cases"])
         401: {"description": "Não autenticado"},
         404: {"description": "Paciente não encontrado"},
         409: {"description": "Idempotency-Key reutilizada com conteúdo diferente"},
+        503: {"description": "Object store (MinIO) indisponível"},
     },
 )
 async def create_case(
@@ -74,6 +76,11 @@ async def create_case(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Idempotency-Key já usada com conteúdo diferente",
+        ) from exc
+    except ArtifactStorageError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Armazenamento de Artefatos indisponível",
         ) from exc
 
     if not created:

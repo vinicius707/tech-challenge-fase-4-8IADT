@@ -40,17 +40,3 @@ class AuditRecord(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
-
-
-class CaseStub(Base):
-    """Stub de Caso: só ancora patient_id com CASCADE até o Épico 3."""
-
-    __tablename__ = "cases"
-
-    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
-    patient_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid, ForeignKey("patients.id", ondelete="CASCADE"), nullable=False
-    )
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )

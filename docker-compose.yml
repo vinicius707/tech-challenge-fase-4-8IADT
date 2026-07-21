@@ -84,6 +84,7 @@ services:
       SEED_ADMIN_USERNAME: ${SEED_ADMIN_USERNAME:-}
       SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
       PII_ENCRYPTION_KEY: ${PII_ENCRYPTION_KEY:-}
+      RQ_QUEUE_NAME: ${RQ_QUEUE_NAME:-default}
     depends_on:
       postgres:
         condition: service_healthy
@@ -103,6 +104,50 @@ services:
       timeout: 5s
       retries: 10
       start_period: 10s
+
+  worker:
+    build:
+      context: ./backend
+    command:
+      [
+        "sh",
+        "-c",
+        'exec rq worker -u "$$REDIS_URL" "$${RQ_QUEUE_NAME:-default}"',
+      ]
+    environment:
+      POSTGRES_URL: postgresql://${POSTGRES_USER:-limen}:${POSTGRES_PASSWORD:-limen}@postgres:5432/${POSTGRES_DB:-limen}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT:-minio:9000}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      MINIO_BUCKET: ${MINIO_BUCKET:-limen}
+      MINIO_SECURE: ${MINIO_SECURE:-false}
+      RQ_QUEUE_NAME: ${RQ_QUEUE_NAME:-default}
+      PII_ENCRYPTION_KEY: ${PII_ENCRYPTION_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+
+  outbox-reconciler:
+    build:
+      context: ./backend
+    command: ["python", "-m", "app.outbox.reconciler"]
+    environment:
+      POSTGRES_URL: postgresql://${POSTGRES_USER:-limen}:${POSTGRES_PASSWORD:-limen}@postgres:5432/${POSTGRES_DB:-limen}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      RQ_QUEUE_NAME: ${RQ_QUEUE_NAME:-default}
+      OUTBOX_RECONCILE_INTERVAL_SECONDS: ${OUTBOX_RECONCILE_INTERVAL_SECONDS:-5}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
 
 volumes:
   postgres_data:

@@ -11,25 +11,23 @@ Glossário de domínio: [`CONTEXT.md`](CONTEXT.md). Decisão de arquitetura:
 
 ## Estado atual
 
-O **Épico 1 — Fundação** e o **Épico 2 — Identidade e privacidade** estão
-concluídos.
+Os **Épicos 1–3** estão concluídos (Fundação, Identidade e Núcleo Caso + fila).
 
-A entrega atual inclui a API de prontidão, infraestrutura local, autenticação
-JWT (login, refresh, logout com blacklist, rate limit e seed), CRUD de Paciente
-com Rótulo Sensível criptografado (Fernet), reveal com Registro de Auditoria e
-cascata de schema para Caso stub.
+A entrega atual inclui autenticação JWT, Paciente com Rótulo Sensível, Caso com
+modalidade `vitals` (Artefato no MinIO, outbox → RQ → Risco e Alerta v1 se ≥
+MEDIO), worker e reconciler no Compose.
 
-Ainda não fazem parte da implementação: Casos multimodais, worker RQ, Azure,
-frontend, Alertas SSE e o restante dos épicos 3–8. O próximo passo do plano é o
-**Épico 3 — Núcleo Caso + fila**.
+Ainda não fazem parte da implementação: frontend, modalidades além de vitais,
+Azure, Alertas SSE / feed, DLQ admin e o restante dos épicos 4–8. O próximo
+passo do plano é o **Épico 4 — Shell Frontend**.
 
 ## O que já foi entregue
 
 ### Fundação (Épico 1)
 
 - FastAPI no backend.
-- PostgreSQL com migrações Alembic até `20260721_0007`.
-- Redis preparado como broker da futura fila RQ.
+- PostgreSQL com migrações Alembic até `20260721_0010`.
+- Redis como broker da fila RQ.
 - MinIO S3-compatible; bucket `limen` criado de forma idempotente.
 - Docker Compose, smoke local e CI magra (pytest).
 
@@ -39,11 +37,21 @@ frontend, Alertas SSE e o restante dos épicos 3–8. O próximo passo do plano 
   `admin`; rate limit e seed locais.
 - Pacientes: CRUD em `/patients` com código `PAC-NNN`; Rótulo Sensível mascarado
   por padrão; `POST …/sensitive-label/reveal` com auditoria append-only.
-- Schema: `operators`, `refresh_tokens`, `token_blacklist`, `patients`,
-  `audit_records` e stub `cases` (`patient_id ON DELETE CASCADE`).
 - Contratos SDD:
   [`01-auth-login.md`](specs/epic-02-identity/01-auth-login.md) e
   [`02-paciente-privacidade.md`](specs/epic-02-identity/02-paciente-privacidade.md).
+
+### Núcleo Caso + fila (Épico 3)
+
+- Fixtures sintéticas de vitais (`normal` / `medium` / `high`) e script de
+  calibração.
+- Outbox Postgres → fila RQ `default`; serviços Compose `worker` e
+  `outbox-reconciler`.
+- `POST /patients/{id}/cases` (CSV + `Idempotency-Key`) e `GET /cases/{id}`.
+- Pipeline: Artefato MinIO → AnomalyEngine → Fusion → Risco; Alerta v1 se
+  `MEDIO` ou `ALTO` (dedupe; sem SSE).
+- Schema: `cases`, `artifacts`, `case_modalities`, `outbox_jobs`, `alerts`.
+- Contratos SDD em [`specs/epic-03-caso-fila/`](specs/epic-03-caso-fila/).
 
 ## Executar localmente
 
@@ -57,7 +65,7 @@ docker compose up --build --wait
 
 O Compose aguarda PostgreSQL, Redis e MinIO, cria o bucket `limen`, aplica
 `alembic upgrade head`, faz o seed dos Operadores (se `SEED_*` estiver no `.env`)
-e sobe o backend.
+e sobe o backend, o worker RQ e o reconciler de outbox.
 
 Endpoints locais:
 
@@ -119,6 +127,24 @@ curl -s -X POST \
   -H "Authorization: Bearer $TOKEN" | jq
 ```
 
+### Criar Caso com vitais
+
+```bash
+CASE=$(curl -s -X POST "http://localhost:8000/patients/$PATIENT_ID/cases" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Idempotency-Key: demo-caso-1" \
+  -F "file=@data/fixtures/vitals/vitals_medium.csv;type=text/csv")
+echo "$CASE" | jq
+CASE_ID=$(echo "$CASE" | jq -r .id)
+```
+
+Após o worker processar, o GET traz Risco e Alerta (se ≥ MEDIO):
+
+```bash
+curl -s "http://localhost:8000/cases/$CASE_ID" \
+  -H "Authorization: Bearer $TOKEN" | jq
+```
+
 Rotas públicas nesta etapa: `GET /health`, `POST /auth/login`,
 `POST /auth/refresh`. Demais rotas exigem Bearer access token.
 
@@ -168,6 +194,16 @@ Rotação manual: pausar escritas de rótulo → recriptografar ciphertext (ou
 dual-key transitória) → validar reveal/máscara → remover a chave antiga.
 Trocar a chave sem recriptografar torna rótulos existentes ilegíveis.
 
+### Fila e outbox
+
+| Variável | Função |
+| -------- | ------ |
+| `REDIS_URL` | Broker RQ |
+| `RQ_QUEUE_NAME` | Nome da fila (padrão `default`) |
+| `OUTBOX_RECONCILE_INTERVAL_SECONDS` | Intervalo do reconciler (padrão `5`) |
+
+Contrato: [`specs/epic-03-caso-fila/02-outbox-rq.md`](specs/epic-03-caso-fila/02-outbox-rq.md).
+
 ## Testes do backend
 
 ```bash
@@ -191,4 +227,5 @@ de imagens, smoke com Caso sintético e frontend entram no Épico 8
 | [`docs/README.md`](docs/README.md) | Índice de ADRs e specs |
 | [`specs/epic-01-foundation/`](specs/epic-01-foundation/) | Contrato Compose/health |
 | [`specs/epic-02-identity/`](specs/epic-02-identity/) | Contratos auth e Paciente |
+| [`specs/epic-03-caso-fila/`](specs/epic-03-caso-fila/) | Vitais, outbox/RQ, Caso → Risco/Alerta |
 | [`.cursor/plans/arquitetura_multimodal_fase_4_a1c92623.plan.md`](.cursor/plans/arquitetura_multimodal_fase_4_a1c92623.plan.md) | Plano incremental dos épicos |

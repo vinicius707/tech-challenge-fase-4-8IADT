@@ -10,7 +10,6 @@ from app.patients.audit import (
     InMemoryAuditStore,
     new_reveal_audit,
 )
-from app.patients.cases_stub import CaseStubStore, InMemoryCaseStubStore
 from app.patients.crypto import PiiKeyUnavailableError, SensitiveLabelCipher
 from app.patients.schemas import PatientResponse, SensitiveLabelRevealResponse
 
@@ -21,6 +20,10 @@ class PatientNotFoundError(Exception):
 
 class SensitiveLabelUnavailableError(Exception):
     pass
+
+
+class _CaseCascadeStore(Protocol):
+    def delete_by_patient(self, patient_id: uuid.UUID) -> int: ...
 
 
 @dataclass
@@ -96,12 +99,16 @@ class PatientService:
         *,
         store: PatientStore,
         audit_store: AuditStore | None = None,
-        case_stub_store: CaseStubStore | None = None,
+        case_store: _CaseCascadeStore | None = None,
         cipher: SensitiveLabelCipher | None = None,
     ) -> None:
         self._store = store
         self._audit_store = audit_store or InMemoryAuditStore()
-        self._case_stub_store = case_stub_store or InMemoryCaseStubStore()
+        if case_store is None:
+            from app.cases.service import InMemoryCaseStore
+
+            case_store = InMemoryCaseStore()
+        self._case_store = case_store
         self._cipher = cipher or SensitiveLabelCipher.from_environment()
 
     def create(self, *, sensitive_label: str | None = None) -> PatientResponse:
@@ -147,7 +154,7 @@ class PatientService:
         deleted = self._store.delete(patient_id)
         if deleted:
             self._audit_store.delete_by_patient(patient_id)
-            self._case_stub_store.delete_by_patient(patient_id)
+            self._case_store.delete_by_patient(patient_id)
         return deleted
 
     def reveal(
@@ -178,12 +185,13 @@ class PatientService:
 
 _default_store = InMemoryPatientStore()
 _default_audit_store = InMemoryAuditStore()
-_default_case_stub_store = InMemoryCaseStubStore()
 
 
 def get_patient_service() -> PatientService:
+    from app.cases.service import _default_case_store
+
     return PatientService(
         store=_default_store,
         audit_store=_default_audit_store,
-        case_stub_store=_default_case_stub_store,
+        case_store=_default_case_store,
     )

@@ -3,3 +3,9 @@
 !.env.example
 
 .DS_Store
+
+# Datasets brutos (calibração offline) — fixtures versionadas entram no Git
+data/raw/
+data/downloads/
+
+.ipynb_checkpoints/

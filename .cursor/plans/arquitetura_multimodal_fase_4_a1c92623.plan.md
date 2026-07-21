@@ -10,7 +10,7 @@ todos:
     status: completed
   - id: epic-03
     content: "Épico 3 Caso+fila: calibração datasets vitais, fixtures, outbox/RQ, vitais→Risco, Alerta v1"
-    status: pending
+    status: completed
   - id: epic-04
     content: "Épico 4 Shell Next: auth, Pacientes/Caso vitais, baseline Lighthouse"
     status: pending
@@ -224,6 +224,6 @@ flowchart LR
 
 ## Próximo passo de execução
 
-O **Épico 1** e o **Épico 2 — Identidade e privacidade** estão concluídos.
-Próximo: **Épico 3 — Núcleo Caso + fila** (começar por E3.0 / spec de datasets
-vitais).
+Os **Épicos 1–3** estão concluídos.
+Próximo: **Épico 4 — Shell Frontend** (auth UI, Pacientes/Caso vitais, baseline
+Lighthouse).

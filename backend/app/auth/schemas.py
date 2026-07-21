@@ -17,6 +17,10 @@ class RefreshRequest(BaseModel):
     refresh_token: str = Field(min_length=1)
 
 
+class LogoutRequest(BaseModel):
+    refresh_token: str | None = None
+
+
 class OperatorResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

@@ -42,9 +42,17 @@ class RefreshStore(Protocol):
 
     def get_by_hash(self, token_hash: str) -> RefreshRecord | None: ...
 
+    def get_by_access_jti(self, access_jti: str) -> RefreshRecord | None: ...
+
     def revoke(self, token_hash: str) -> None: ...
 
     def revoke_family(self, family_id: uuid.UUID) -> None: ...
+
+
+class BlacklistStore(Protocol):
+    def add(self, jti: str, expires_at: datetime) -> None: ...
+
+    def is_blacklisted(self, jti: str) -> bool: ...
 
 
 @dataclass
@@ -73,6 +81,12 @@ class InMemoryRefreshStore:
     def get_by_hash(self, token_hash: str) -> RefreshRecord | None:
         return self._tokens.get(token_hash)
 
+    def get_by_access_jti(self, access_jti: str) -> RefreshRecord | None:
+        for record in self._tokens.values():
+            if record.access_jti == access_jti and not record.revoked:
+                return record
+        return None
+
     def revoke(self, token_hash: str) -> None:
         record = self._tokens.get(token_hash)
         if record is not None:
@@ -82,6 +96,23 @@ class InMemoryRefreshStore:
         for record in self._tokens.values():
             if record.family_id == family_id:
                 record.revoked = True
+
+
+@dataclass
+class InMemoryBlacklistStore:
+    _entries: dict[str, datetime] = field(default_factory=dict)
+
+    def add(self, jti: str, expires_at: datetime) -> None:
+        self._entries[jti] = expires_at
+
+    def is_blacklisted(self, jti: str) -> bool:
+        expires_at = self._entries.get(jti)
+        if expires_at is None:
+            return False
+        if expires_at <= datetime.now(tz=UTC):
+            del self._entries[jti]
+            return False
+        return True
 
 
 def hash_refresh_token(token: str) -> str:
@@ -94,10 +125,12 @@ class AuthService:
         *,
         store: OperatorStore,
         refresh_store: RefreshStore | None = None,
+        blacklist_store: BlacklistStore | None = None,
         settings: AuthSettings | None = None,
     ) -> None:
         self._store = store
         self._refresh_store = refresh_store or InMemoryRefreshStore()
+        self._blacklist_store = blacklist_store or InMemoryBlacklistStore()
         self._settings = settings or AuthSettings.from_environment()
 
     def login(self, *, username: str, password: str) -> LoginResponse | None:
@@ -127,6 +160,27 @@ class AuthService:
 
         self._refresh_store.revoke(token_hash)
         return self._issue_tokens(operator, family_id=record.family_id)
+
+    def logout(
+        self,
+        *,
+        jti: str,
+        exp: datetime,
+        operator_id: uuid.UUID,
+        refresh_token: str | None = None,
+    ) -> None:
+        self._blacklist_store.add(jti, exp)
+
+        if refresh_token is not None:
+            token_hash = hash_refresh_token(refresh_token)
+            record = self._refresh_store.get_by_hash(token_hash)
+            if record is not None and record.operator_id == operator_id:
+                self._refresh_store.revoke(token_hash)
+                return
+
+        linked = self._refresh_store.get_by_access_jti(jti)
+        if linked is not None and linked.operator_id == operator_id:
+            self._refresh_store.revoke(linked.token_hash)
 
     def _issue_tokens(
         self, operator: OperatorRecord, *, family_id: uuid.UUID
@@ -162,7 +216,16 @@ class AuthService:
 
 _default_store = InMemoryOperatorStore()
 _default_refresh_store = InMemoryRefreshStore()
+_default_blacklist_store = InMemoryBlacklistStore()
 
 
 def get_auth_service() -> AuthService:
-    return AuthService(store=_default_store, refresh_store=_default_refresh_store)
+    return AuthService(
+        store=_default_store,
+        refresh_store=_default_refresh_store,
+        blacklist_store=_default_blacklist_store,
+    )
+
+
+def get_blacklist_store() -> BlacklistStore:
+    return _default_blacklist_store

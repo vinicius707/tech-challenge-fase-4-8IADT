@@ -17,9 +17,9 @@ A entrega atual inclui autenticação JWT, Paciente com Rótulo Sensível, Caso 
 modalidade `vitals` (Artefato no MinIO, outbox → RQ → Risco e Alerta v1 se ≥
 MEDIO), worker e reconciler no Compose.
 
-Ainda não fazem parte da implementação: frontend, modalidades além de vitais,
-Azure, Alertas SSE / feed, DLQ admin e o restante dos épicos 4–8. O próximo
-passo do plano é o **Épico 4 — Shell Frontend**.
+Ainda não fazem parte da implementação: login/shell completo do frontend
+(Épico 4 em andamento), modalidades além de vitais, Azure, Alertas SSE / feed,
+DLQ admin e o restante dos épicos 5–8.
 
 ## O que já foi entregue
 
@@ -53,10 +53,16 @@ passo do plano é o **Épico 4 — Shell Frontend**.
 - Schema: `cases`, `artifacts`, `case_modalities`, `outbox_jobs`, `alerts`.
 - Contratos SDD em [`specs/epic-03-caso-fila/`](specs/epic-03-caso-fila/).
 
+### Shell Frontend (Épico 4 — em andamento)
+
+- Scaffold Next.js (App Router) + Tailwind + shadcn/ui em [`frontend/`](frontend/).
+- Proxy `/api/*` → FastAPI (`BACKEND_URL`); serviço `frontend` no Compose.
+- Specs: [`specs/epic-04-shell-frontend/`](specs/epic-04-shell-frontend/).
+
 ## Executar localmente
 
-Pré-requisitos: Docker Compose v2; portas 5432, 6379, 8000, 9000 e 9001 livres
-(ou remapeadas no `.env`).
+Pré-requisitos: Docker Compose v2; portas 3000, 5432, 6379, 8000, 9000 e 9001
+livres (ou remapeadas no `.env`).
 
 ```bash
 cp .env.example .env
@@ -65,13 +71,15 @@ docker compose up --build --wait
 
 O Compose aguarda PostgreSQL, Redis e MinIO, cria o bucket `limen`, aplica
 `alembic upgrade head`, faz o seed dos Operadores (se `SEED_*` estiver no `.env`)
-e sobe o backend, o worker RQ e o reconciler de outbox.
+e sobe o backend, o worker RQ, o reconciler de outbox e o frontend Next.
 
 Endpoints locais:
 
 | Recurso | URL |
 | ------- | --- |
+| UI | <http://localhost:3000> |
 | API | <http://localhost:8000> |
+| API via proxy UI | <http://localhost:3000/api/health> |
 | OpenAPI | <http://localhost:8000/docs> |
 | Console MinIO | <http://localhost:9001> |
 
@@ -204,12 +212,29 @@ Trocar a chave sem recriptografar torna rótulos existentes ilegíveis.
 
 Contrato: [`specs/epic-03-caso-fila/02-outbox-rq.md`](specs/epic-03-caso-fila/02-outbox-rq.md).
 
+### Frontend
+
+| Variável | Função |
+| -------- | ------ |
+| `FRONTEND_PORT` | Porta publicada da UI (padrão `3000`) |
+| `BACKEND_URL` | Origem FastAPI para o rewrite `/api` do Next |
+
+Detalhes: [`frontend/README.md`](frontend/README.md).
+
 ## Testes do backend
 
 ```bash
 cd backend
 uv sync
 uv run pytest
+```
+
+## Testes do frontend
+
+```bash
+cd frontend
+npm ci
+npm test
 ```
 
 ## Integração contínua
@@ -228,4 +253,6 @@ de imagens, smoke com Caso sintético e frontend entram no Épico 8
 | [`specs/epic-01-foundation/`](specs/epic-01-foundation/) | Contrato Compose/health |
 | [`specs/epic-02-identity/`](specs/epic-02-identity/) | Contratos auth e Paciente |
 | [`specs/epic-03-caso-fila/`](specs/epic-03-caso-fila/) | Vitais, outbox/RQ, Caso → Risco/Alerta |
+| [`specs/epic-04-shell-frontend/`](specs/epic-04-shell-frontend/) | Shell Next (scaffold → login → Pacientes) |
+| [`frontend/`](frontend/) | App Next.js (Épico 4) |
 | [`.cursor/plans/arquitetura_multimodal_fase_4_a1c92623.plan.md`](.cursor/plans/arquitetura_multimodal_fase_4_a1c92623.plan.md) | Plano incremental dos épicos |

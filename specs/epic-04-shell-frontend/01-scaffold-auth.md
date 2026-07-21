@@ -11,7 +11,8 @@ landmarks acessíveis e layout responsivo.
 
 ## Status da entrega
 
-**Spec aprovada (T4.0).** Implementação: **T4.1–T4.3**.
+**Parcial — T4.0–T4.1:** specs + scaffold Next/Tailwind/shadcn + proxy `/api`
++ Compose. Login/Zustand/shell: **T4.2–T4.3**.
 
 ## Escopo
 
@@ -114,8 +115,8 @@ obrigatório browser→backend direto nesta configuração).
 
 ## Critérios de pronto (DoD desta spec / T4.1–T4.3)
 
-- [ ] Scaffold Next + Tailwind + shadcn commitado e documentado.
-- [ ] Proxy `/api` configurado; Compose/README atualizados se necessário.
+- [x] Scaffold Next + Tailwind + shadcn commitado e documentado. *(T4.1)*
+- [x] Proxy `/api` configurado; Compose/README atualizados se necessário. *(T4.1)*
 - [ ] Zustand de sessão + `/login` + guard + logout.
 - [ ] Shell com landmarks responsivo.
 - [ ] Cenários 1–5 cobertos por testes automatizados (e/ou e2e leve acordado).

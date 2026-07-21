@@ -11,8 +11,8 @@ quando o nível for MEDIO ou ALTO — sem SSE.
 
 ## Status da entrega
 
-**Parcial — T3.6–T3.8:** Caso + Artefato/outbox + AnomalyEngine/Fusion → Risco.
-Alerta v1: **T3.9**. Fechamento docs: **T3.10**.
+**Parcial — T3.6–T3.9:** Caso + Artefato/outbox + AnomalyEngine/Fusion → Risco
++ Alerta v1 (≥ MEDIO, dedupe, sem SSE). Fechamento docs: **T3.10**.
 
 ## Escopo
 

@@ -10,6 +10,7 @@ from datetime import UTC, datetime
 from typing import Protocol
 
 from app.cases.schemas import (
+    AlertResponse,
     ArtifactResponse,
     CaseResponse,
     ModalityResponse,
@@ -59,6 +60,15 @@ class ModalityRecord:
 
 
 @dataclass
+class AlertRecord:
+    id: uuid.UUID
+    case_id: uuid.UUID
+    level: str
+    version: int
+    created_at: datetime
+
+
+@dataclass
 class CaseRecord:
     id: uuid.UUID
     patient_id: uuid.UUID
@@ -71,6 +81,7 @@ class CaseRecord:
     updated_at: datetime
     modalities: list[ModalityRecord] = field(default_factory=list)
     artifacts: list[ArtifactRecord] = field(default_factory=list)
+    alerts: list[AlertRecord] = field(default_factory=list)
 
 
 class CaseStore(Protocol):
@@ -142,7 +153,16 @@ def _to_response(case: CaseRecord) -> CaseResponse:
             )
             for a in case.artifacts
         ],
-        alerts=[],
+        alerts=[
+            AlertResponse(
+                id=a.id,
+                case_id=a.case_id,
+                level=a.level,
+                version=a.version,
+                created_at=a.created_at,
+            )
+            for a in case.alerts
+        ],
         created_at=case.created_at,
         updated_at=case.updated_at,
     )

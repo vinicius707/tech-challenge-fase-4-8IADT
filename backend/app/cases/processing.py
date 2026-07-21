@@ -1,4 +1,4 @@
-"""Pipeline assíncrono: vitais → AnomalyEngine → Fusion → Risco no Caso."""
+"""Pipeline assíncrono: vitais → AnomalyEngine → Fusion → Risco → Alerta v1."""
 
 from __future__ import annotations
 
@@ -6,8 +6,36 @@ import uuid
 from datetime import UTC, datetime
 
 from app.cases.runtime import CaseRuntime, get_case_runtime
-from app.cases.service import CaseRecord, ModalityRecord
+from app.cases.service import AlertRecord, CaseRecord, ModalityRecord
 from app.cases.vitals_engine import VitalsAnomalyEngine, fuse_vitals_only
+
+ALERT_VERSION_V1 = 1
+
+
+def _alerts_after_fusion(
+    case: CaseRecord,
+    risk_level: str,
+    *,
+    now: datetime,
+) -> list[AlertRecord]:
+    """Emite Alerta v1 se ≥ MEDIO; dedupe por (case_id, level, version)."""
+    alerts = list(case.alerts)
+    if risk_level not in {"MEDIO", "ALTO"}:
+        return alerts
+    if any(
+        a.level == risk_level and a.version == ALERT_VERSION_V1 for a in alerts
+    ):
+        return alerts
+    alerts.append(
+        AlertRecord(
+            id=uuid.uuid4(),
+            case_id=case.id,
+            level=risk_level,
+            version=ALERT_VERSION_V1,
+            created_at=now,
+        )
+    )
+    return alerts
 
 
 def process_vitals_for_case(
@@ -16,7 +44,7 @@ def process_vitals_for_case(
     runtime: CaseRuntime | None = None,
     engine: VitalsAnomalyEngine | None = None,
 ) -> CaseRecord | None:
-    """Atualiza o Caso com Risco. No-op se modalidade vitais já estiver `done`."""
+    """Atualiza o Caso com Risco e Alerta v1. No-op se modalidade já `done`."""
     ctx = runtime or get_case_runtime()
     if ctx is None:
         return None
@@ -66,6 +94,7 @@ def process_vitals_for_case(
         updated_at=now,
         modalities=processing_mods,
         artifacts=case.artifacts,
+        alerts=case.alerts,
     )
     ctx.case_store.save(case)
 
@@ -97,5 +126,6 @@ def process_vitals_for_case(
         updated_at=now,
         modalities=done_mods,
         artifacts=case.artifacts,
+        alerts=_alerts_after_fusion(case, fused.level, now=now),
     )
     return ctx.case_store.save(done)

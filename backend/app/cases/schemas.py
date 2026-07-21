@@ -25,6 +25,16 @@ class ArtifactResponse(BaseModel):
     content_type: str
 
 
+class AlertResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    case_id: uuid.UUID
+    level: str
+    version: int
+    created_at: datetime
+
+
 class CaseResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -35,6 +45,6 @@ class CaseResponse(BaseModel):
     risk_level: str | None = None
     modalities: list[ModalityResponse] = Field(default_factory=list)
     artifacts: list[ArtifactResponse] = Field(default_factory=list)
-    alerts: list[dict] = Field(default_factory=list)
+    alerts: list[AlertResponse] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime

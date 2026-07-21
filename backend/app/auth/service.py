@@ -24,6 +24,7 @@ class RefreshRecord:
     token_hash: str
     operator_id: uuid.UUID
     access_jti: str
+    family_id: uuid.UUID
     expires_at: datetime
     revoked: bool = False
 
@@ -31,22 +32,35 @@ class RefreshRecord:
 class OperatorStore(Protocol):
     def get_by_username(self, username: str) -> OperatorRecord | None: ...
 
+    def get_by_id(self, operator_id: uuid.UUID) -> OperatorRecord | None: ...
+
     def save(self, operator: OperatorRecord) -> None: ...
 
 
 class RefreshStore(Protocol):
     def save(self, record: RefreshRecord) -> None: ...
 
+    def get_by_hash(self, token_hash: str) -> RefreshRecord | None: ...
+
+    def revoke(self, token_hash: str) -> None: ...
+
+    def revoke_family(self, family_id: uuid.UUID) -> None: ...
+
 
 @dataclass
 class InMemoryOperatorStore:
-    _operators: dict[str, OperatorRecord] = field(default_factory=dict)
+    _operators_by_username: dict[str, OperatorRecord] = field(default_factory=dict)
+    _operators_by_id: dict[uuid.UUID, OperatorRecord] = field(default_factory=dict)
 
     def get_by_username(self, username: str) -> OperatorRecord | None:
-        return self._operators.get(username)
+        return self._operators_by_username.get(username)
+
+    def get_by_id(self, operator_id: uuid.UUID) -> OperatorRecord | None:
+        return self._operators_by_id.get(operator_id)
 
     def save(self, operator: OperatorRecord) -> None:
-        self._operators[operator.username] = operator
+        self._operators_by_username[operator.username] = operator
+        self._operators_by_id[operator.id] = operator
 
 
 @dataclass
@@ -55,6 +69,19 @@ class InMemoryRefreshStore:
 
     def save(self, record: RefreshRecord) -> None:
         self._tokens[record.token_hash] = record
+
+    def get_by_hash(self, token_hash: str) -> RefreshRecord | None:
+        return self._tokens.get(token_hash)
+
+    def revoke(self, token_hash: str) -> None:
+        record = self._tokens.get(token_hash)
+        if record is not None:
+            record.revoked = True
+
+    def revoke_family(self, family_id: uuid.UUID) -> None:
+        for record in self._tokens.values():
+            if record.family_id == family_id:
+                record.revoked = True
 
 
 def hash_refresh_token(token: str) -> str:
@@ -77,7 +104,33 @@ class AuthService:
         operator = self._store.get_by_username(username)
         if operator is None or not verify_password(password, operator.password_hash):
             return None
+        return self._issue_tokens(operator, family_id=uuid.uuid4())
 
+    def refresh(self, *, refresh_token: str) -> LoginResponse | None:
+        token_hash = hash_refresh_token(refresh_token)
+        record = self._refresh_store.get_by_hash(token_hash)
+        if record is None:
+            return None
+
+        if record.revoked:
+            self._refresh_store.revoke_family(record.family_id)
+            return None
+
+        if record.expires_at <= datetime.now(tz=UTC):
+            self._refresh_store.revoke(token_hash)
+            return None
+
+        operator = self._store.get_by_id(record.operator_id)
+        if operator is None:
+            self._refresh_store.revoke_family(record.family_id)
+            return None
+
+        self._refresh_store.revoke(token_hash)
+        return self._issue_tokens(operator, family_id=record.family_id)
+
+    def _issue_tokens(
+        self, operator: OperatorRecord, *, family_id: uuid.UUID
+    ) -> LoginResponse:
         access_token, claims = create_access_token(
             operator_id=operator.id,
             username=operator.username,
@@ -90,6 +143,7 @@ class AuthService:
                 token_hash=hash_refresh_token(refresh_token),
                 operator_id=operator.id,
                 access_jti=str(claims["jti"]),
+                family_id=family_id,
                 expires_at=datetime.now(tz=UTC)
                 + timedelta(seconds=self._settings.refresh_ttl_seconds),
             )

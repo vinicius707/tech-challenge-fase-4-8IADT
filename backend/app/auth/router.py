@@ -4,7 +4,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.auth.schemas import LoginRequest, LoginResponse
+from app.auth.schemas import LoginRequest, LoginResponse, RefreshRequest
 from app.auth.service import AuthService, get_auth_service
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -25,5 +25,24 @@ def login(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Credenciais inválidas",
+        )
+    return result
+
+
+@router.post(
+    "/refresh",
+    response_model=LoginResponse,
+    summary="Renova access e refresh tokens",
+    responses={401: {"description": "Refresh token inválido"}},
+)
+def refresh(
+    payload: RefreshRequest,
+    service: Annotated[AuthService, Depends(get_auth_service)],
+) -> LoginResponse:
+    result = service.refresh(refresh_token=payload.refresh_token)
+    if result is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token inválido",
         )
     return result

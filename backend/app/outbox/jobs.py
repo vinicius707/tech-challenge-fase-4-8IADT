@@ -1,4 +1,4 @@
-"""Placeholder do job RQ — AnomalyEngine/Fusion entram nas tarefas de Caso."""
+"""Job RQ — processa modalidade e marca outbox como processed."""
 
 from __future__ import annotations
 
@@ -10,11 +10,12 @@ def process_modality(
     modality: str,
     outbox_job_id: str | None = None,
 ) -> None:
-    """Entrypoint enfileirado na fila `default`.
+    """Entrypoint enfileirado na fila `default`."""
+    if modality == "vitals":
+        from app.cases.processing import process_vitals_for_case
 
-    Nesta etapa (T3.4) só confirma consumo e marca o outbox como `processed`.
-    """
-    _ = (case_id, modality)
+        process_vitals_for_case(uuid.UUID(case_id))
+
     if outbox_job_id:
         from app.outbox.completion import complete_job
 

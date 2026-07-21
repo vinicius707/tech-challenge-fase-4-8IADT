@@ -11,8 +11,8 @@ quando o nível for MEDIO ou ALTO — sem SSE.
 
 ## Status da entrega
 
-**Parcial — T3.6–T3.7:** schema/API de Caso + Idempotency-Key + Artefato no
-object store + outbox/enqueue na criação. Risco/Alerta: **T3.8–T3.9**.
+**Parcial — T3.6–T3.8:** Caso + Artefato/outbox + AnomalyEngine/Fusion → Risco.
+Alerta v1: **T3.9**. Fechamento docs: **T3.10**.
 
 ## Escopo
 

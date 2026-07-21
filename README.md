@@ -125,11 +125,13 @@ A autenticação usa as variáveis abaixo, documentadas na spec
   idempotente no startup. Somente para uso local/demo; se ausentes, nenhum
   Operador é criado.
 
-A futura chave `PII_ENCRYPTION_KEY`, introduzida com o Rótulo Sensível no Épico
-2, deverá existir somente no ambiente. Sua rotação será manual: pausar escritas,
-manter a chave anterior durante a recriptografia dos dados, validar a leitura com
-a nova chave e só então remover a anterior. Substituir a chave sem recriptografar
-torna os dados existentes ilegíveis.
+A chave `PII_ENCRYPTION_KEY`, definida na spec
+[`specs/epic-02-identity/02-paciente-privacidade.md`](specs/epic-02-identity/02-paciente-privacidade.md),
+deverá existir somente no ambiente (implementação nas tarefas T2.6–T2.10). Sua
+rotação será manual: pausar escritas, manter a chave anterior durante a
+recriptografia dos dados, validar a leitura com a nova chave e só então remover
+a anterior. Substituir a chave sem recriptografar torna os dados existentes
+ilegíveis.
 
 ## Testes do backend
 

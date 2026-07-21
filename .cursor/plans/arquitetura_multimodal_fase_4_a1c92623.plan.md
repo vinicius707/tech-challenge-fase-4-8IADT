@@ -125,8 +125,9 @@ CI magro desde o Épico 1; publish GHCR + smoke Compose + Lighthouse budget no 7
 
 | ID | Tarefa |
 |----|--------|
-| T2.5 | Spec `02-paciente-privacidade.md` |
-| T2.6–2.10 | TDD CRUD Paciente; rótulo Fernet; reveal + audit; FKs `ON DELETE CASCADE` preparadas |
+| T2.5 | Spec `02-paciente-privacidade.md` (**concluída**) |
+| T2.6 | TDD CRUD Paciente + migração `patients` (**concluída**) |
+| T2.7–2.10 | TDD rótulo Fernet; reveal + audit; FKs `ON DELETE CASCADE` preparadas |
 
 **DoD:** login/refresh/logout; Paciente mascarado; audit de reveal; cascade no schema.
 
@@ -219,4 +220,6 @@ flowchart LR
 
 ## Próximo passo de execução
 
-O **Épico 1 está concluído**. Iniciar o **Épico 2 — Identidade e privacidade** pela T2.0, criando a spec `01-auth-login.md` antes da implementação TDD de autenticação.
+O **Épico 1 está concluído**. O **Épico 2 — Identidade e privacidade** avançou:
+auth T2.0–T2.4, spec T2.5 e CRUD Paciente T2.6. Próximo: T2.7–T2.10 (Fernet,
+reveal+audit, CASCADE).

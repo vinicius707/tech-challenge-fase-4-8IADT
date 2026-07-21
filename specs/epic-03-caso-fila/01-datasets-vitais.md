@@ -10,7 +10,12 @@ repositório para runtime/TDD/demo, e o caminho documentado para regenerá-las.
 
 ## Status da entrega
 
-**Pendente** (tarefa T3.0 / T3.1).
+**Concluída em 21 de julho de 2026** (T3.0 spec + T3.1 fixtures/script/notebook).
+
+- Fixtures `vitals_normal` / `vitals_medium` / `vitals_high` versionadas.
+- `scripts/calibrate_vitals.py` regenera de forma bit-a-bit estável.
+- Notebook EDA em `notebooks/eda_vitals_inicial.ipynb`.
+- Testes de contrato em `backend/tests/test_vitals_fixtures.py`.
 
 ## Escopo
 
@@ -121,7 +126,7 @@ de paciente.
 
 ## Critérios de pronto (DoD desta spec / T3.1)
 
-- [ ] `data/fixtures/vitals/` com cenários normal/medium/high e README.
-- [ ] Script de regeneração e notebook EDA inicial commitados.
-- [ ] Catálogo de URLs espelhado no README das fixtures (e alinhado ao plano).
-- [ ] Cenários 1–4 acima verificáveis sem download externo no CI.
+- [x] `data/fixtures/vitals/` com cenários normal/medium/high e README.
+- [x] Script de regeneração e notebook EDA inicial commitados.
+- [x] Catálogo de URLs espelhado no README das fixtures (e alinhado ao plano).
+- [x] Cenários 1–4 acima verificáveis sem download externo no CI.

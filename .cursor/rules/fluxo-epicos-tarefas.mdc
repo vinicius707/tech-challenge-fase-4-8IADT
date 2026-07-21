@@ -1,0 +1,68 @@
+---
+description: Fluxo obrigatório de trabalho por épico/tarefa (SDD → TDD), branch feature/, commit por tarefa, validar/commit/push e nova sessão por tarefa.
+alwaysApply: true
+---
+
+# Fluxo de épicos e tarefas (Limen)
+
+Fluxo obrigatório para executar specs, implementações e ADRs neste repositório.
+Ordem sempre: **SDD (spec) → TDD (testes) → implementação → validação → commit → push**.
+
+## Regra de ouro: escopo fechado
+
+- Faça **apenas o que está descrito na tarefa/spec atual**. Não antecipe outras
+  tarefas, épicos ou refactors "de brinde".
+- O que estiver em "Ficam fora desta etapa" da spec é proibido nesta tarefa.
+- Se faltar informação ou aparecer decisão nova de arquitetura, **pare e pergunte**;
+  registre a decisão como ADR em `docs/adr/NNNN-titulo.md` antes de codificar.
+
+## Ao iniciar um épico
+
+1. Confirme a spec do épico em `specs/epic-XX-nome/` (crie/valide antes de codar).
+2. Crie a branch a partir de `main` atualizada, no padrão:
+   `feature/limen-epic-XX-nome-curto` (ex.: `feature/limen-epic-03-caso-fila`).
+3. Nunca commite direto em `main`/`master`.
+
+## Uma tarefa = um commit
+
+- Quebre o épico em tarefas pequenas (ex.: `T3.0`, `T3.1`, …), cada uma vira **um commit**.
+- Trabalhe uma tarefa por vez; só comece a próxima após a atual estar validada e commitada.
+- Mensagem de commit: uma frase em português, no imperativo, capitalizada e com ponto final,
+  descrevendo o "o quê" (ex.: `Implementar refresh JWT com rotação e proteção a reuso.`).
+  Sem prefixo tipo `feat:`.
+
+## Ao encerrar a tarefa: validar → commit → push
+
+Antes de commitar, rode a validação no `backend/` e só siga se passar:
+
+```bash
+cd backend
+uv sync --frozen
+uv run python -m compileall -q app migrations tests
+uv run pytest
+```
+
+Depois:
+
+```bash
+git add -A
+git commit -m "Mensagem no padrão do projeto."
+git push -u origin HEAD
+```
+
+- Se a validação falhar, corrija **dentro do escopo da tarefa** e revalide; não commite código quebrado.
+- Atualize docs/índices afetados pela tarefa (`docs/README.md`, `.env.example`, `README.md`) quando a spec pedir.
+
+## Nova sessão por tarefa (janela de contexto)
+
+- Ao terminar uma tarefa (push concluído), **encerre aqui**: informe o resultado e peça
+  para o usuário abrir uma **nova sessão** para a próxima tarefa/épico.
+- Não emende várias tarefas na mesma sessão — cada feature/épico/tarefa começa em sessão limpa
+  para manter a janela de contexto enxuta.
+
+## Convenções do projeto
+
+- Specs (Given/When/Then) em `specs/epic-XX-nome/NN-slug.md`; escritas **antes** da implementação.
+- ADRs numeradas e estáveis em `docs/adr/NNNN-slug.md`; emendas ficam no próprio arquivo.
+- Backend Python gerenciado por `uv` em `backend/`; testes com `pytest` (TDD, testes antes do código).
+- Nunca commitar secrets: `.env`/`.env.*` são ignorados; só `.env.example` entra no Git.

@@ -28,7 +28,7 @@ frontend, Alertas SSE e o restante dos épicos 3–8. O próximo passo do plano 
 ### Fundação (Épico 1)
 
 - FastAPI no backend.
-- PostgreSQL com migrações Alembic até `20260721_0007`.
+- PostgreSQL com migrações Alembic até `20260721_0009`.
 - Redis preparado como broker da futura fila RQ.
 - MinIO S3-compatible; bucket `limen` criado de forma idempotente.
 - Docker Compose, smoke local e CI magra (pytest).
@@ -40,7 +40,8 @@ frontend, Alertas SSE e o restante dos épicos 3–8. O próximo passo do plano 
 - Pacientes: CRUD em `/patients` com código `PAC-NNN`; Rótulo Sensível mascarado
   por padrão; `POST …/sensitive-label/reveal` com auditoria append-only.
 - Schema: `operators`, `refresh_tokens`, `token_blacklist`, `patients`,
-  `audit_records` e stub `cases` (`patient_id ON DELETE CASCADE`).
+  `audit_records`, `cases` (schema de Caso + modalidades/artefatos) e
+  `outbox_jobs`.
 - Contratos SDD:
   [`01-auth-login.md`](specs/epic-02-identity/01-auth-login.md) e
   [`02-paciente-privacidade.md`](specs/epic-02-identity/02-paciente-privacidade.md).

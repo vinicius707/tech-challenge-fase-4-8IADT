@@ -11,7 +11,9 @@ quando o nível for MEDIO ou ALTO — sem SSE.
 
 ## Status da entrega
 
-**Pendente** (tarefas T3.5–T3.10).
+**Parcial — T3.6:** schema real de Caso + `POST`/`GET` + `Idempotency-Key`
+(cenários 1 parcial, 2, 8). MinIO/outbox no create: **T3.7**. Risco/Alerta:
+**T3.8–T3.9**.
 
 ## Escopo
 

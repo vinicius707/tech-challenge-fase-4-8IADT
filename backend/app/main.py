@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import Depends, FastAPI
 from fastapi.responses import JSONResponse
 
+from app.auth.router import router as auth_router
 from app.health import HealthService, get_health_service
 
 app = FastAPI(
@@ -10,6 +11,7 @@ app = FastAPI(
     description="API do protótipo acadêmico Limen.",
     version="0.1.0",
 )
+app.include_router(auth_router)
 
 
 @app.get(

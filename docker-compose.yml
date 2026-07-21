@@ -75,6 +75,9 @@ services:
       MINIO_BUCKET: ${MINIO_BUCKET:-limen}
       MINIO_SECURE: ${MINIO_SECURE:-false}
       HEALTH_CHECK_TIMEOUT_SECONDS: ${HEALTH_CHECK_TIMEOUT_SECONDS:-2}
+      JWT_SECRET: ${JWT_SECRET:-dev-only-change-me-use-32chars-min}
+      JWT_ACCESS_TTL_SECONDS: ${JWT_ACCESS_TTL_SECONDS:-900}
+      JWT_REFRESH_TTL_SECONDS: ${JWT_REFRESH_TTL_SECONDS:-604800}
     depends_on:
       postgres:
         condition: service_healthy

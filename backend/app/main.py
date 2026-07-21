@@ -1,15 +1,30 @@
+from contextlib import asynccontextmanager
 from typing import Annotated
 
 from fastapi import Depends, FastAPI
 from fastapi.responses import JSONResponse
 
+from app.auth.router import router as auth_router
+from app.auth.seed import seed_operators
+from app.auth.service import get_operator_store
 from app.health import HealthService, get_health_service
+from app.patients.router import router as patients_router
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    seed_operators(get_operator_store())
+    yield
+
 
 app = FastAPI(
     title="Limen API",
     description="API do protótipo acadêmico Limen.",
     version="0.1.0",
+    lifespan=lifespan,
 )
+app.include_router(auth_router)
+app.include_router(patients_router)
 
 
 @app.get(

@@ -3,9 +3,13 @@ import os
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
+from app.auth import models as _auth_models  # noqa: F401
+from app.patients import models as _patient_models  # noqa: F401
+from app.db import Base
+
 config = context.config
 
-target_metadata = None
+target_metadata = Base.metadata
 
 
 def _database_url() -> str:

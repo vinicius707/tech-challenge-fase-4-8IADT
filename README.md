@@ -112,6 +112,19 @@ As variáveis disponíveis controlam credenciais, nomes de recursos, portas e o
 timeout do healthcheck. `POSTGRES_USER`, `POSTGRES_PASSWORD` e `POSTGRES_DB`
 também compõem automaticamente a URL usada pelo backend.
 
+A autenticação usa as variáveis abaixo, documentadas na spec
+[`specs/epic-02-identity/01-auth-login.md`](specs/epic-02-identity/01-auth-login.md):
+
+- `JWT_SECRET`: chave de assinatura dos access tokens (obrigatória fora do dev).
+- `JWT_ACCESS_TTL_SECONDS` (padrão `900`) e `JWT_REFRESH_TTL_SECONDS`
+  (padrão `604800`): expiração dos tokens.
+- `AUTH_LOGIN_RATE_LIMIT` (padrão `5/minute`): limite de tentativas de login
+  por originador; excedente recebe `429`.
+- `SEED_MEDICO_USERNAME`/`SEED_MEDICO_PASSWORD` e
+  `SEED_ADMIN_USERNAME`/`SEED_ADMIN_PASSWORD`: Operadores seed criados de forma
+  idempotente no startup. Somente para uso local/demo; se ausentes, nenhum
+  Operador é criado.
+
 A futura chave `PII_ENCRYPTION_KEY`, introduzida com o Rótulo Sensível no Épico
 2, deverá existir somente no ambiente. Sua rotação será manual: pausar escritas,
 manter a chave anterior durante a recriptografia dos dados, validar a leitura com

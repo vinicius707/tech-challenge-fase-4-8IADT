@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 
 from app.auth.deps import AccessTokenClaims, get_current_access_claims
+from app.auth.rate_limit import LoginRateLimiter, get_login_rate_limiter
 from app.auth.schemas import LoginRequest, LoginResponse, LogoutRequest, RefreshRequest
 from app.auth.service import AuthService, get_auth_service
 
@@ -15,12 +16,23 @@ router = APIRouter(prefix="/auth", tags=["auth"])
     "/login",
     response_model=LoginResponse,
     summary="Autentica um Operador e emite tokens",
-    responses={401: {"description": "Credenciais inválidas"}},
+    responses={
+        401: {"description": "Credenciais inválidas"},
+        429: {"description": "Muitas tentativas de login"},
+    },
 )
 def login(
+    request: Request,
     payload: LoginRequest,
     service: Annotated[AuthService, Depends(get_auth_service)],
+    rate_limiter: Annotated[LoginRateLimiter, Depends(get_login_rate_limiter)],
 ) -> LoginResponse:
+    originator = request.client.host if request.client else "unknown"
+    if not rate_limiter.try_acquire(originator):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Muitas tentativas de login. Tente novamente mais tarde.",
+        )
     result = service.login(username=payload.username, password=payload.password)
     if result is None:
         raise HTTPException(

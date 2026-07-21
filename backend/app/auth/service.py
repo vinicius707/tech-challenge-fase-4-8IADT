@@ -229,3 +229,7 @@ def get_auth_service() -> AuthService:
 
 def get_blacklist_store() -> BlacklistStore:
     return _default_blacklist_store
+
+
+def get_operator_store() -> OperatorStore:
+    return _default_store

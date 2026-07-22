@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+import hashlib
 import os
 import time
 import uuid
 from datetime import UTC, datetime
 
 from app.cases.runtime import CaseRuntime, get_case_runtime
-from app.cases.service import AlertRecord, CaseRecord, ModalityRecord
+from app.cases.service import AlertRecord, ArtifactRecord, CaseRecord, ModalityRecord
 from app.cases.vitals_engine import (
     ModalityRisk,
     VitalsAnomalyEngine,
@@ -153,6 +154,18 @@ def _risk_for_done_modality(
         return engine.analyze_csv(content)
     if modality == "audio":
         return STUB_SUCCESS_RISK
+    if modality == "video":
+        artifact = next((a for a in case.artifacts if a.modality == "video"), None)
+        if artifact is None:
+            return None
+        content = runtime.blob_store.get(artifact.bucket, artifact.object_key)
+        if content is None:
+            return None
+        from app.cases.pose_engine import PosturePoseEngine, resolve_video_analysis
+
+        if resolve_video_analysis(artifact.object_key) != "pose":
+            return None
+        return PosturePoseEngine().analyze_avi(content).risk
     return None
 
 
@@ -224,6 +237,94 @@ def _finalize_case(
         alerts=_alerts_after_fusion(case, fused.level, now=now),
         video_idempotency_key=case.video_idempotency_key,
         video_content_sha256=case.video_content_sha256,
+    )
+
+
+def _copy_case_meta(
+    case: CaseRecord,
+    *,
+    now: datetime,
+    status: str | None = None,
+    risk_score: float | None = None,
+    risk_level: str | None = None,
+    modalities: list[ModalityRecord] | None = None,
+    artifacts: list[ArtifactRecord] | None = None,
+    alerts: list[AlertRecord] | None = None,
+) -> CaseRecord:
+    return CaseRecord(
+        id=case.id,
+        patient_id=case.patient_id,
+        status=case.status if status is None else status,
+        risk_score=case.risk_score if risk_score is None else risk_score,
+        risk_level=case.risk_level if risk_level is None else risk_level,
+        idempotency_key=case.idempotency_key,
+        content_sha256=case.content_sha256,
+        created_at=case.created_at,
+        updated_at=now,
+        modalities=case.modalities if modalities is None else modalities,
+        artifacts=case.artifacts if artifacts is None else artifacts,
+        alerts=case.alerts if alerts is None else alerts,
+        video_idempotency_key=case.video_idempotency_key,
+        video_content_sha256=case.video_content_sha256,
+    )
+
+
+def _process_video_modality(
+    case: CaseRecord,
+    *,
+    runtime: CaseRuntime,
+    now: datetime,
+) -> CaseRecord:
+    from app.cases.pose_engine import PosturePoseEngine, resolve_video_analysis
+
+    artifact = next((a for a in case.artifacts if a.modality == "video"), None)
+    if artifact is None:
+        return _replace_modality_status(case, "video", "failed", now=now)
+
+    kind = resolve_video_analysis(artifact.object_key)
+    if kind != "pose":
+        # Detecção em Cena (YOLO) = T6.4.
+        raise PermanentProcessingError(
+            "Detecção em Cena ainda não disponível para este Artefato"
+        )
+
+    content = runtime.blob_store.get(artifact.bucket, artifact.object_key)
+    if content is None:
+        raise PermanentProcessingError(
+            f"Artefato ausente: {artifact.bucket}/{artifact.object_key}"
+        )
+
+    analysis = PosturePoseEngine().analyze_avi(content)
+    frame_artifacts: list[ArtifactRecord] = []
+    for frame in analysis.annotated_frames:
+        frame_id = uuid.uuid4()
+        object_key = (
+            f"cases/{case.id}/video/frames/pose_{frame.index:03d}.png"
+        )
+        runtime.blob_store.put(
+            bucket=artifact.bucket,
+            object_key=object_key,
+            content=frame.content,
+            content_type=frame.content_type,
+        )
+        frame_artifacts.append(
+            ArtifactRecord(
+                id=frame_id,
+                case_id=case.id,
+                modality="video_frame",
+                bucket=artifact.bucket,
+                object_key=object_key,
+                content_sha256=hashlib.sha256(frame.content).hexdigest(),
+                content_type=frame.content_type,
+                created_at=now,
+            )
+        )
+
+    updated = _replace_modality_status(case, "video", "done", now=now)
+    return _copy_case_meta(
+        updated,
+        now=now,
+        artifacts=[*updated.artifacts, *frame_artifacts],
     )
 
 
@@ -314,6 +415,8 @@ def process_modality_for_case(
             return _replace_modality_status(current, modality, "done", now=now)
         if modality == "audio":
             return _replace_modality_status(current, modality, "done", now=now)
+        if modality == "video":
+            return _process_video_modality(current, runtime=ctx, now=now)
         fail_reason = f"modalidade sem handler: {modality}"
         return _replace_modality_status(current, modality, "failed", now=now)
 

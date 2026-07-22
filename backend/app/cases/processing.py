@@ -134,6 +134,8 @@ def _replace_modality_status(
         video_content_sha256=case.video_content_sha256,
         audio_idempotency_key=case.audio_idempotency_key,
         audio_content_sha256=case.audio_content_sha256,
+        prescriptions_idempotency_key=case.prescriptions_idempotency_key,
+        prescriptions_content_sha256=case.prescriptions_content_sha256,
     )
 
 
@@ -221,6 +223,8 @@ def _finalize_case(
             video_content_sha256=case.video_content_sha256,
             audio_idempotency_key=case.audio_idempotency_key,
             audio_content_sha256=case.audio_content_sha256,
+            prescriptions_idempotency_key=case.prescriptions_idempotency_key,
+            prescriptions_content_sha256=case.prescriptions_content_sha256,
         )
 
     done_names = [m.modality for m in case.modalities if m.status == "done"]
@@ -242,6 +246,8 @@ def _finalize_case(
             video_content_sha256=case.video_content_sha256,
             audio_idempotency_key=case.audio_idempotency_key,
             audio_content_sha256=case.audio_content_sha256,
+            prescriptions_idempotency_key=case.prescriptions_idempotency_key,
+            prescriptions_content_sha256=case.prescriptions_content_sha256,
         )
 
     risks: list[ModalityRisk] = []
@@ -269,6 +275,8 @@ def _finalize_case(
         video_content_sha256=case.video_content_sha256,
         audio_idempotency_key=case.audio_idempotency_key,
         audio_content_sha256=case.audio_content_sha256,
+        prescriptions_idempotency_key=case.prescriptions_idempotency_key,
+        prescriptions_content_sha256=case.prescriptions_content_sha256,
     )
 
 
@@ -300,6 +308,8 @@ def _copy_case_meta(
         video_content_sha256=case.video_content_sha256,
         audio_idempotency_key=case.audio_idempotency_key,
         audio_content_sha256=case.audio_content_sha256,
+        prescriptions_idempotency_key=case.prescriptions_idempotency_key,
+        prescriptions_content_sha256=case.prescriptions_content_sha256,
     )
 
 
@@ -458,6 +468,8 @@ def process_modality_for_case(
         video_content_sha256=case.video_content_sha256,
         audio_idempotency_key=case.audio_idempotency_key,
         audio_content_sha256=case.audio_content_sha256,
+        prescriptions_idempotency_key=case.prescriptions_idempotency_key,
+        prescriptions_content_sha256=case.prescriptions_content_sha256,
     )
     ctx.case_store.save(case)
 

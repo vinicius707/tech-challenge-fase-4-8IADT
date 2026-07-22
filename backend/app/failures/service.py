@@ -170,6 +170,8 @@ class FailureService:
             video_content_sha256=case.video_content_sha256,
             audio_idempotency_key=case.audio_idempotency_key,
             audio_content_sha256=case.audio_content_sha256,
+            prescriptions_idempotency_key=case.prescriptions_idempotency_key,
+            prescriptions_content_sha256=case.prescriptions_content_sha256,
         )
         self._case_store.save(updated_case)
 

@@ -38,6 +38,8 @@ def _to_record(
         video_content_sha256=case_row.video_content_sha256,
         audio_idempotency_key=case_row.audio_idempotency_key,
         audio_content_sha256=case_row.audio_content_sha256,
+        prescriptions_idempotency_key=case_row.prescriptions_idempotency_key,
+        prescriptions_content_sha256=case_row.prescriptions_content_sha256,
         modalities=[
             ModalityRecord(
                 id=m.id,
@@ -97,6 +99,8 @@ class SqlAlchemyCaseStore:
             row.video_content_sha256 = case.video_content_sha256
             row.audio_idempotency_key = case.audio_idempotency_key
             row.audio_content_sha256 = case.audio_content_sha256
+            row.prescriptions_idempotency_key = case.prescriptions_idempotency_key
+            row.prescriptions_content_sha256 = case.prescriptions_content_sha256
             row.updated_at = case.updated_at or datetime.now(tz=UTC)
 
             self._sync_artifacts(session, case)
@@ -135,6 +139,15 @@ class SqlAlchemyCaseStore:
         with self._session_factory() as session:
             row = session.scalars(
                 select(Case).where(Case.audio_idempotency_key == key)
+            ).first()
+            if row is None:
+                return None
+            return self._load(session, row.id)
+
+    def get_by_prescriptions_idempotency_key(self, key: str) -> CaseRecord | None:
+        with self._session_factory() as session:
+            row = session.scalars(
+                select(Case).where(Case.prescriptions_idempotency_key == key)
             ).first()
             if row is None:
                 return None

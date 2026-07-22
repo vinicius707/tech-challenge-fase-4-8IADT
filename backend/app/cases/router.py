@@ -22,6 +22,7 @@ from app.cases.service import (
     IdempotencyConflictError,
     NoFailedModalitiesError,
     PatientNotFoundError,
+    VideoModalityExistsError,
     get_case_service,
 )
 from app.cases.storage import ArtifactStorageError
@@ -110,6 +111,70 @@ def get_case(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Caso não encontrado",
         ) from exc
+
+
+@cases_router.post(
+    "/{case_id}/modalities/video",
+    response_model=CaseResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Anexa modalidade video ao Caso (idempotente)",
+    responses={
+        200: {"description": "Replay idempotente"},
+        400: {"description": "Idempotency-Key ausente"},
+        401: {"description": "Não autenticado"},
+        404: {"description": "Caso não encontrado"},
+        409: {"description": "Conflito de idempotência ou vídeo já anexado"},
+        503: {"description": "Object store (MinIO) indisponível"},
+    },
+)
+async def attach_video_modality(
+    case_id: UUID,
+    response: Response,
+    _claims: Annotated[AccessTokenClaims, Depends(get_current_access_claims)],
+    service: Annotated[CaseService, Depends(get_case_service)],
+    file: Annotated[UploadFile, File(description="Clip de vídeo")],
+    idempotency_key: Annotated[str | None, Header(alias="Idempotency-Key")] = None,
+) -> CaseResponse:
+    if not idempotency_key or not idempotency_key.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Header Idempotency-Key é obrigatório",
+        )
+    content = await file.read()
+    content_type = file.content_type or "video/x-msvideo"
+    filename = file.filename or "video.avi"
+    try:
+        case, created = service.attach_video(
+            case_id,
+            idempotency_key=idempotency_key.strip(),
+            content=content,
+            content_type=content_type,
+            filename=filename,
+        )
+    except CaseNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Caso não encontrado",
+        ) from exc
+    except IdempotencyConflictError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Idempotency-Key já usada com conteúdo diferente",
+        ) from exc
+    except VideoModalityExistsError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Caso já possui modalidade video",
+        ) from exc
+    except ArtifactStorageError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Armazenamento de Artefatos indisponível",
+        ) from exc
+
+    if not created:
+        response.status_code = status.HTTP_200_OK
+    return case
 
 
 @cases_router.post(

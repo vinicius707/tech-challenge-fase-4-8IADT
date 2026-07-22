@@ -123,6 +123,8 @@ def _replace_modality_status(
         modalities=modalities,
         artifacts=case.artifacts,
         alerts=case.alerts,
+        video_idempotency_key=case.video_idempotency_key,
+        video_content_sha256=case.video_content_sha256,
     )
 
 
@@ -176,6 +178,8 @@ def _finalize_case(
             modalities=case.modalities,
             artifacts=case.artifacts,
             alerts=case.alerts,
+            video_idempotency_key=case.video_idempotency_key,
+            video_content_sha256=case.video_content_sha256,
         )
 
     done_names = [m.modality for m in case.modalities if m.status == "done"]
@@ -193,6 +197,8 @@ def _finalize_case(
             modalities=case.modalities,
             artifacts=case.artifacts,
             alerts=case.alerts,
+            video_idempotency_key=case.video_idempotency_key,
+            video_content_sha256=case.video_content_sha256,
         )
 
     risks: list[ModalityRisk] = []
@@ -216,6 +222,8 @@ def _finalize_case(
         modalities=case.modalities,
         artifacts=case.artifacts,
         alerts=_alerts_after_fusion(case, fused.level, now=now),
+        video_idempotency_key=case.video_idempotency_key,
+        video_content_sha256=case.video_content_sha256,
     )
 
 
@@ -275,6 +283,8 @@ def process_modality_for_case(
         modalities=case.modalities,
         artifacts=case.artifacts,
         alerts=case.alerts,
+        video_idempotency_key=case.video_idempotency_key,
+        video_content_sha256=case.video_content_sha256,
     )
     ctx.case_store.save(case)
 

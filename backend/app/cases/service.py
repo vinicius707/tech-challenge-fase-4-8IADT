@@ -42,6 +42,12 @@ class NoFailedModalitiesError(Exception):
     pass
 
 
+class VideoModalityExistsError(Exception):
+    """Caso já possui modalidade `video` (fora de replay idempotente)."""
+
+    pass
+
+
 @dataclass
 class ArtifactRecord:
     id: uuid.UUID
@@ -88,6 +94,8 @@ class CaseRecord:
     modalities: list[ModalityRecord] = field(default_factory=list)
     artifacts: list[ArtifactRecord] = field(default_factory=list)
     alerts: list[AlertRecord] = field(default_factory=list)
+    video_idempotency_key: str | None = None
+    video_content_sha256: str | None = None
 
 
 class CaseStore(Protocol):
@@ -97,6 +105,8 @@ class CaseStore(Protocol):
 
     def get_by_idempotency_key(self, key: str) -> CaseRecord | None: ...
 
+    def get_by_video_idempotency_key(self, key: str) -> CaseRecord | None: ...
+
     def delete_by_patient(self, patient_id: uuid.UUID) -> int: ...
 
 
@@ -104,11 +114,14 @@ class CaseStore(Protocol):
 class InMemoryCaseStore:
     _by_id: dict[uuid.UUID, CaseRecord] = field(default_factory=dict)
     _by_idempotency: dict[str, uuid.UUID] = field(default_factory=dict)
+    _by_video_idempotency: dict[str, uuid.UUID] = field(default_factory=dict)
 
     def save(self, case: CaseRecord) -> CaseRecord:
         self._by_id[case.id] = case
         if case.idempotency_key:
             self._by_idempotency[case.idempotency_key] = case.id
+        if case.video_idempotency_key:
+            self._by_video_idempotency[case.video_idempotency_key] = case.id
         return case
 
     def get(self, case_id: uuid.UUID) -> CaseRecord | None:
@@ -116,6 +129,12 @@ class InMemoryCaseStore:
 
     def get_by_idempotency_key(self, key: str) -> CaseRecord | None:
         case_id = self._by_idempotency.get(key)
+        if case_id is None:
+            return None
+        return self._by_id.get(case_id)
+
+    def get_by_video_idempotency_key(self, key: str) -> CaseRecord | None:
+        case_id = self._by_video_idempotency.get(key)
         if case_id is None:
             return None
         return self._by_id.get(case_id)
@@ -130,6 +149,8 @@ class InMemoryCaseStore:
             record = self._by_id.pop(case_id)
             if record.idempotency_key:
                 self._by_idempotency.pop(record.idempotency_key, None)
+            if record.video_idempotency_key:
+                self._by_video_idempotency.pop(record.video_idempotency_key, None)
         return len(to_remove)
 
 
@@ -272,6 +293,86 @@ class CaseService:
             raise CaseNotFoundError()
         return _to_response(case)
 
+    def attach_video(
+        self,
+        case_id: uuid.UUID,
+        *,
+        idempotency_key: str,
+        content: bytes,
+        content_type: str = "video/x-msvideo",
+        filename: str = "video.avi",
+    ) -> tuple[CaseResponse, bool]:
+        """Anexa modalidade `video` e enfileira na fila RQ `video`."""
+        digest = hashlib.sha256(content).hexdigest()
+        existing_by_key = self._store.get_by_video_idempotency_key(idempotency_key)
+        if existing_by_key is not None:
+            if existing_by_key.id != case_id:
+                raise IdempotencyConflictError()
+            if existing_by_key.video_content_sha256 == digest:
+                return _to_response(existing_by_key), False
+            raise IdempotencyConflictError()
+
+        case = self._store.get(case_id)
+        if case is None:
+            raise CaseNotFoundError()
+        if any(m.modality == "video" for m in case.modalities):
+            raise VideoModalityExistsError()
+
+        now = datetime.now(tz=UTC)
+        artifact_id = uuid.uuid4()
+        object_key = f"cases/{case_id}/video/{filename}"
+        self._blobs.put(
+            bucket=self._bucket,
+            object_key=object_key,
+            content=content,
+            content_type=content_type,
+        )
+        artifact = ArtifactRecord(
+            id=artifact_id,
+            case_id=case_id,
+            modality="video",
+            bucket=self._bucket,
+            object_key=object_key,
+            content_sha256=digest,
+            content_type=content_type,
+            created_at=now,
+        )
+        modality = ModalityRecord(
+            id=uuid.uuid4(),
+            case_id=case_id,
+            modality="video",
+            status="pending",
+            artifact_id=artifact_id,
+            created_at=now,
+            updated_at=now,
+        )
+        updated = CaseRecord(
+            id=case.id,
+            patient_id=case.patient_id,
+            status="processing" if case.status in {"done", "failed"} else case.status,
+            risk_score=case.risk_score,
+            risk_level=case.risk_level,
+            idempotency_key=case.idempotency_key,
+            content_sha256=case.content_sha256,
+            created_at=case.created_at,
+            updated_at=now,
+            modalities=[*case.modalities, modality],
+            artifacts=[*case.artifacts, artifact],
+            alerts=case.alerts,
+            video_idempotency_key=idempotency_key,
+            video_content_sha256=digest,
+        )
+        self._store.save(updated)
+
+        outbox_job = self._outbox.create_pending(
+            aggregate_type="case",
+            aggregate_id=case_id,
+            job_type="process_modality",
+            payload={"case_id": str(case_id), "modality": "video"},
+        )
+        self._outbox.try_enqueue(outbox_job.id)
+        return _to_response(updated), True
+
     def reprocess(
         self,
         case_id: uuid.UUID,
@@ -317,6 +418,8 @@ class CaseService:
             modalities=updated_modalities,
             artifacts=case.artifacts,
             alerts=case.alerts,
+            video_idempotency_key=case.video_idempotency_key,
+            video_content_sha256=case.video_content_sha256,
         )
         self._store.save(updated)
 

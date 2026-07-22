@@ -228,7 +228,8 @@ Trocar a chave sem recriptografar torna rótulos existentes ilegíveis.
 | Variável | Função |
 | -------- | ------ |
 | `REDIS_URL` | Broker RQ |
-| `RQ_QUEUE_NAME` | Nome da fila (padrão `default`) |
+| `RQ_QUEUE_NAME` | Fila do worker `default` (padrão `default`) |
+| `RQ_VIDEO_QUEUE_NAME` | Fila do worker `worker-video` (padrão `video`) |
 | `OUTBOX_RECONCILE_INTERVAL_SECONDS` | Intervalo do reconciler (padrão `5`) |
 
 Contrato: [`specs/epic-03-caso-fila/02-outbox-rq.md`](specs/epic-03-caso-fila/02-outbox-rq.md).

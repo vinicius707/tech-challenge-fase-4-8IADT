@@ -14,7 +14,7 @@ Risco do Caso.
 
 ## Status da entrega
 
-**Pendente** (T6.0–T6.3 ok; falta T6.4–T6.6 desta etapa E6.1).
+**Pendente** (T6.0–T6.4 ok; falta T6.5–T6.6 desta etapa E6.1).
 
 Etapas posteriores do Épico 6 (specs próprias no início de cada uma):
 
@@ -131,10 +131,9 @@ Risco fundido quando o Caso fechar.
 - [x] Spec SDD aprovada e versionada.
 - [x] Fixtures vídeo + README de fontes/regeneração.
 - [x] Upload → Artefato MinIO → job na fila `video`.
-- [ ] Pose (fisio) e YOLO+heurística (cirurgia leve) cobertos por TDD.
-      *(T6.3: Pose/fisio ok; YOLO = T6.4)*
+- [x] Pose (fisio) e YOLO+heurística (cirurgia leve) cobertos por TDD.
 - [x] Frames anotados no MinIO; modalidade contribui ao Risco.
-      *(frames Pose; contribuição ao Risco via fusão)*
+      *(frames Pose e scene; contribuição ao Risco via fusão)*
 - [ ] Stub de `modality=video` do Épico 5 substituído por processamento real.
-      *(Pose real; cena/YOLO em T6.4)*
+      *(Pose + cena/YOLO reais; fechamento worker/E2E = T6.5)*
 - [ ] Sem áudio Azure real; sem UI polish de upload (Épico 7).

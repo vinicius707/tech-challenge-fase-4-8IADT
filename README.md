@@ -240,6 +240,7 @@ Trocar a chave sem recriptografar torna rótulos existentes ilegíveis.
 | `LIMEN_AZURE_CB_OPEN_SECONDS` | Segundos com CB aberto forçando `local` (padrão `300`) |
 | `LIMEN_AZURE_CB_FORCE_OPEN` | Força CB aberto no stub (`true`/`1`) |
 | `LIMEN_POSE_BACKEND` | Análise Postural: `synthetic` (padrão) ou `mediapipe` |
+| `LIMEN_YOLO_BACKEND` | Detecção em Cena: `synthetic` (padrão) ou `ultralytics` |
 | `OUTBOX_RECONCILE_INTERVAL_SECONDS` | Intervalo do reconciler (padrão `5`) |
 
 Contrato: [`specs/epic-03-caso-fila/02-outbox-rq.md`](specs/epic-03-caso-fila/02-outbox-rq.md).

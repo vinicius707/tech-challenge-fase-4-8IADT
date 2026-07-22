@@ -162,10 +162,14 @@ def _risk_for_done_modality(
         if content is None:
             return None
         from app.cases.pose_engine import PosturePoseEngine, resolve_video_analysis
+        from app.cases.scene_engine import SceneDetectionEngine
 
-        if resolve_video_analysis(artifact.object_key) != "pose":
-            return None
-        return PosturePoseEngine().analyze_avi(content).risk
+        kind = resolve_video_analysis(artifact.object_key)
+        if kind == "pose":
+            return PosturePoseEngine().analyze_avi(content).risk
+        if kind == "scene":
+            return SceneDetectionEngine().analyze_avi(content).risk
+        return None
     return None
 
 
@@ -276,17 +280,11 @@ def _process_video_modality(
     now: datetime,
 ) -> CaseRecord:
     from app.cases.pose_engine import PosturePoseEngine, resolve_video_analysis
+    from app.cases.scene_engine import SceneDetectionEngine
 
     artifact = next((a for a in case.artifacts if a.modality == "video"), None)
     if artifact is None:
         return _replace_modality_status(case, "video", "failed", now=now)
-
-    kind = resolve_video_analysis(artifact.object_key)
-    if kind != "pose":
-        # Detecção em Cena (YOLO) = T6.4.
-        raise PermanentProcessingError(
-            "Detecção em Cena ainda não disponível para este Artefato"
-        )
 
     content = runtime.blob_store.get(artifact.bucket, artifact.object_key)
     if content is None:
@@ -294,12 +292,25 @@ def _process_video_modality(
             f"Artefato ausente: {artifact.bucket}/{artifact.object_key}"
         )
 
-    analysis = PosturePoseEngine().analyze_avi(content)
+    kind = resolve_video_analysis(artifact.object_key)
+    if kind == "pose":
+        analysis = PosturePoseEngine().analyze_avi(content)
+        frame_prefix = "pose"
+        annotated = analysis.annotated_frames
+    elif kind == "scene":
+        analysis = SceneDetectionEngine().analyze_avi(content)
+        frame_prefix = "scene"
+        annotated = analysis.annotated_frames
+    else:
+        raise PermanentProcessingError(
+            f"análise de vídeo não suportada: {kind}"
+        )
+
     frame_artifacts: list[ArtifactRecord] = []
-    for frame in analysis.annotated_frames:
+    for frame in annotated:
         frame_id = uuid.uuid4()
         object_key = (
-            f"cases/{case.id}/video/frames/pose_{frame.index:03d}.png"
+            f"cases/{case.id}/video/frames/{frame_prefix}_{frame.index:03d}.png"
         )
         runtime.blob_store.put(
             bucket=artifact.bucket,

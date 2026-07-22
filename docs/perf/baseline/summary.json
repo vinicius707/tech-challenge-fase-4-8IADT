@@ -1,0 +1,29 @@
+{
+  "generatedAt": "2026-07-22T00:21:53.781Z",
+  "gitSha": "8873403",
+  "baseUrl": "http://127.0.0.1:3000",
+  "formFactor": "desktop",
+  "routes": [
+    {
+      "slug": "login-desktop",
+      "url": "http://127.0.0.1:3000/login",
+      "scores": {
+        "performance": 88,
+        "accessibility": 100,
+        "bestPractices": 100,
+        "seo": 100
+      }
+    },
+    {
+      "slug": "pacientes-desktop",
+      "url": "http://127.0.0.1:3000/pacientes",
+      "scores": {
+        "performance": 97,
+        "accessibility": 100,
+        "bestPractices": 96,
+        "seo": 100
+      }
+    }
+  ],
+  "note": "Baseline do Épico 4 — sem gate de CI. Sessão de /pacientes é token sintético só para renderizar o shell autenticado."
+}

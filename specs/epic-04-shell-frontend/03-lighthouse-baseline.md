@@ -10,7 +10,8 @@ Lighthouse, sem gate de CI neste épico — apenas artefato em
 
 ## Status da entrega
 
-**Spec aprovada (T4.0).** Implementação: **T4.7**.
+**Concluída em 21 de julho de 2026** (T4.7): baseline Lighthouse versionada em
+`docs/perf/baseline/`, sem gate de CI.
 
 ## Escopo
 
@@ -48,6 +49,6 @@ gate adicionado neste épico).
 
 ## Critérios de pronto (DoD desta spec / T4.7)
 
-- [ ] `docs/perf/baseline/` com relatórios + README de regeneração.
-- [ ] Referência cruzada no README principal ou `docs/README.md`.
-- [ ] Nenhum gate de Lighthouse adicionado ao CI nesta etapa.
+- [x] `docs/perf/baseline/` com relatórios + README de regeneração.
+- [x] Referência cruzada no README principal ou `docs/README.md`.
+- [x] Nenhum gate de Lighthouse adicionado ao CI nesta etapa.

@@ -53,10 +53,13 @@ DLQ admin e o restante dos épicos 5–8.
 - Schema: `cases`, `artifacts`, `case_modalities`, `outbox_jobs`, `alerts`.
 - Contratos SDD em [`specs/epic-03-caso-fila/`](specs/epic-03-caso-fila/).
 
-### Shell Frontend (Épico 4 — em andamento)
+### Shell Frontend (Épico 4)
 
 - Scaffold Next.js (App Router) + Tailwind + shadcn/ui em [`frontend/`](frontend/).
 - Proxy `/api/*` → FastAPI (`BACKEND_URL`); serviço `frontend` no Compose.
+- Login (Zustand), shell landmarks, Pacientes, Novo Caso vitais e detalhe de
+  Caso com polling/Risco/Alertas.
+- Baseline Lighthouse (sem gate): [`docs/perf/baseline/`](docs/perf/baseline/).
 - Specs: [`specs/epic-04-shell-frontend/`](specs/epic-04-shell-frontend/).
 
 ## Executar localmente
@@ -241,9 +244,10 @@ npm test
 ## Integração contínua
 
 O workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) roda em pushes
-e PRs: `uv sync`, lint placeholder (sintaxe Python) e pytest. Build/publicação
-de imagens, smoke com Caso sintético e frontend entram no Épico 8
-(ADR [0028](docs/adr/0028-cicd-actions-ghcr.md)).
+e PRs: `uv sync`, lint placeholder (sintaxe Python) e pytest. A baseline
+Lighthouse em [`docs/perf/baseline/`](docs/perf/baseline/) é artefato versionado
+**sem gate** neste épico. Build/publicação de imagens, smoke com Caso sintético
+e frontend entram no Épico 8 (ADR [0028](docs/adr/0028-cicd-actions-ghcr.md)).
 
 ## Documentação
 

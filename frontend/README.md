@@ -26,6 +26,7 @@ Health via proxy: <http://localhost:3000/api/health>
 | `npm run build` / `npm start` | Produção |
 | `npm test` | Vitest (proxy + auth/sessão) |
 | `npm run lint` | ESLint |
+| `npm run lighthouse:baseline` | Regenera [`docs/perf/baseline/`](../docs/perf/baseline/) (frontend no ar) |
 
 ## Variáveis
 

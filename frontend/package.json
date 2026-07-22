@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "lighthouse:baseline": "node ../scripts/lighthouse-baseline.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -29,8 +30,11 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "chrome-launcher": "^1.2.1",
     "eslint": "^9",
     "eslint-config-next": "15.5.9",
+    "lighthouse": "^13.4.1",
+    "puppeteer-core": "^25.3.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.10"

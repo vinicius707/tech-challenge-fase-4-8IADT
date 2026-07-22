@@ -13,7 +13,7 @@ Speech Azure F0 com **cache**, **fallback local** e **circuit breaker**
 
 ## Status da entrega
 
-**Pendente** (T6.7–T6.8 ok; falta T6.9–T6.12 desta etapa E6.2).
+**Pendente** (T6.7–T6.9 ok; falta T6.10–T6.12 desta etapa E6.2).
 
 Pré-requisito: E6.1 (vídeo) concluída nesta branch.
 
@@ -158,7 +158,7 @@ reforçar no pipeline do Caso).
 
 - [x] Spec SDD aprovada e versionada.
 - [x] Fixtures áudio + README de fontes/regeneração.
-- [ ] Upload → Artefato MinIO → job na fila `default`.
+- [x] Upload → Artefato MinIO → job na fila `default`.
 - [ ] Analyzer local + cache + Azure injetável cobertos por TDD.
 - [ ] Badge `provider` no `GET /cases/{id}`; áudio contribui ao Risco.
 - [ ] Stub de `modality=audio` do Épico 5 substituído por processamento real.

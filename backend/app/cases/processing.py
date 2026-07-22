@@ -126,6 +126,8 @@ def _replace_modality_status(
         alerts=case.alerts,
         video_idempotency_key=case.video_idempotency_key,
         video_content_sha256=case.video_content_sha256,
+        audio_idempotency_key=case.audio_idempotency_key,
+        audio_content_sha256=case.audio_content_sha256,
     )
 
 
@@ -197,6 +199,8 @@ def _finalize_case(
             alerts=case.alerts,
             video_idempotency_key=case.video_idempotency_key,
             video_content_sha256=case.video_content_sha256,
+            audio_idempotency_key=case.audio_idempotency_key,
+            audio_content_sha256=case.audio_content_sha256,
         )
 
     done_names = [m.modality for m in case.modalities if m.status == "done"]
@@ -216,6 +220,8 @@ def _finalize_case(
             alerts=case.alerts,
             video_idempotency_key=case.video_idempotency_key,
             video_content_sha256=case.video_content_sha256,
+            audio_idempotency_key=case.audio_idempotency_key,
+            audio_content_sha256=case.audio_content_sha256,
         )
 
     risks: list[ModalityRisk] = []
@@ -241,6 +247,8 @@ def _finalize_case(
         alerts=_alerts_after_fusion(case, fused.level, now=now),
         video_idempotency_key=case.video_idempotency_key,
         video_content_sha256=case.video_content_sha256,
+        audio_idempotency_key=case.audio_idempotency_key,
+        audio_content_sha256=case.audio_content_sha256,
     )
 
 
@@ -270,6 +278,8 @@ def _copy_case_meta(
         alerts=case.alerts if alerts is None else alerts,
         video_idempotency_key=case.video_idempotency_key,
         video_content_sha256=case.video_content_sha256,
+        audio_idempotency_key=case.audio_idempotency_key,
+        audio_content_sha256=case.audio_content_sha256,
     )
 
 
@@ -397,6 +407,8 @@ def process_modality_for_case(
         alerts=case.alerts,
         video_idempotency_key=case.video_idempotency_key,
         video_content_sha256=case.video_content_sha256,
+        audio_idempotency_key=case.audio_idempotency_key,
+        audio_content_sha256=case.audio_content_sha256,
     )
     ctx.case_store.save(case)
 

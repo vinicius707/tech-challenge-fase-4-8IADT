@@ -11,7 +11,7 @@ sobre store compartilhado entre API e worker (Compose).
 
 ## Status da entrega
 
-**Pendente** (T5.0: specs SDD; implementação T5.1–T5.4 desta spec).
+**Pendente** (T5.0 specs; **T5.1 store compartilhado**; falta T5.2–T5.4).
 
 ## Escopo
 
@@ -96,7 +96,7 @@ no teste)
 
 ## Critérios de pronto (DoD desta spec)
 
-- [ ] Store compartilhado API↔worker (Caso/outbox) validado no Compose.
+- [x] Store compartilhado API↔worker (Caso/outbox) validado no Compose.
 - [ ] Falha parcial + Caso `done` cobertos por TDD.
 - [ ] Reprocess seletivo + refundição cobertos por TDD.
 - [ ] Alerta v2 append-only quando o nível muda.

@@ -11,15 +11,16 @@ Glossário de domínio: [`CONTEXT.md`](CONTEXT.md). Decisão de arquitetura:
 
 ## Estado atual
 
-Os **Épicos 1–3** estão concluídos (Fundação, Identidade e Núcleo Caso + fila).
+Os **Épicos 1–4** estão concluídos (Fundação, Identidade, Núcleo Caso + fila e
+Shell Frontend).
 
 A entrega atual inclui autenticação JWT, Paciente com Rótulo Sensível, Caso com
 modalidade `vitals` (Artefato no MinIO, outbox → RQ → Risco e Alerta v1 se ≥
-MEDIO), worker e reconciler no Compose.
+MEDIO), worker e reconciler no Compose, e o shell Next.js (login, Pacientes,
+Novo Caso e detalhe com polling).
 
-Ainda não fazem parte da implementação: frontend, modalidades além de vitais,
-Azure, Alertas SSE / feed, DLQ admin e o restante dos épicos 4–8. O próximo
-passo do plano é o **Épico 4 — Shell Frontend**.
+Ainda não fazem parte da implementação: modalidades além de vitais, Azure,
+Alertas SSE / feed, DLQ admin e o restante dos épicos 5–8.
 
 ## O que já foi entregue
 
@@ -53,10 +54,36 @@ passo do plano é o **Épico 4 — Shell Frontend**.
 - Schema: `cases`, `artifacts`, `case_modalities`, `outbox_jobs`, `alerts`.
 - Contratos SDD em [`specs/epic-03-caso-fila/`](specs/epic-03-caso-fila/).
 
+### Shell Frontend (Épico 4)
+
+- Scaffold Next.js (App Router) + Tailwind + shadcn/ui em [`frontend/`](frontend/).
+- Proxy `/api/*` → FastAPI (`BACKEND_URL`); serviço `frontend` no Compose.
+- Login (Zustand), shell landmarks, Pacientes, Novo Caso vitais e detalhe de
+  Caso com polling/Risco/Alertas.
+- Baseline Lighthouse (sem gate): [`docs/perf/baseline/`](docs/perf/baseline/).
+- Guia de uso + prints + troubleshooting:
+  [`docs/frontend/`](docs/frontend/).
+- Script de start: [`scripts/start-limen.sh`](scripts/start-limen.sh).
+- Specs: [`specs/epic-04-shell-frontend/`](specs/epic-04-shell-frontend/).
+
 ## Executar localmente
 
-Pré-requisitos: Docker Compose v2; portas 5432, 6379, 8000, 9000 e 9001 livres
-(ou remapeadas no `.env`).
+Pré-requisitos: Docker Compose v2; portas 3000, 5432, 6379, 8000, 9000 e 9001
+livres (ou remapeadas no `.env`).
+
+### Forma recomendada (script)
+
+```bash
+./scripts/start-limen.sh
+```
+
+O script cria `.env` se necessário, sobe o Compose com `--build --wait`, valida
+API + UI e imprime as URLs. Variantes: `--smoke`, `--down`, `--reset`.
+
+Guia visual da UI: [`docs/frontend/guia-de-uso.md`](docs/frontend/guia-de-uso.md).  
+Problemas comuns: [`docs/frontend/troubleshooting.md`](docs/frontend/troubleshooting.md).
+
+### Forma manual
 
 ```bash
 cp .env.example .env
@@ -65,13 +92,15 @@ docker compose up --build --wait
 
 O Compose aguarda PostgreSQL, Redis e MinIO, cria o bucket `limen`, aplica
 `alembic upgrade head`, faz o seed dos Operadores (se `SEED_*` estiver no `.env`)
-e sobe o backend, o worker RQ e o reconciler de outbox.
+e sobe o backend, o worker RQ, o reconciler de outbox e o frontend Next.
 
 Endpoints locais:
 
 | Recurso | URL |
 | ------- | --- |
+| UI | <http://localhost:3000> |
 | API | <http://localhost:8000> |
+| API via proxy UI | <http://localhost:3000/api/health> |
 | OpenAPI | <http://localhost:8000/docs> |
 | Console MinIO | <http://localhost:9001> |
 
@@ -204,6 +233,16 @@ Trocar a chave sem recriptografar torna rótulos existentes ilegíveis.
 
 Contrato: [`specs/epic-03-caso-fila/02-outbox-rq.md`](specs/epic-03-caso-fila/02-outbox-rq.md).
 
+### Frontend
+
+| Variável | Função |
+| -------- | ------ |
+| `FRONTEND_PORT` | Porta publicada da UI (padrão `3000`) |
+| `BACKEND_URL` | Origem FastAPI para o rewrite `/api` do Next |
+
+Detalhes: [`frontend/README.md`](frontend/README.md). Login em `/login` (sessão
+Zustand; proxy `/api/auth/*`).
+
 ## Testes do backend
 
 ```bash
@@ -212,12 +251,21 @@ uv sync
 uv run pytest
 ```
 
+## Testes do frontend
+
+```bash
+cd frontend
+npm ci
+npm test
+```
+
 ## Integração contínua
 
 O workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) roda em pushes
-e PRs: `uv sync`, lint placeholder (sintaxe Python) e pytest. Build/publicação
-de imagens, smoke com Caso sintético e frontend entram no Épico 8
-(ADR [0028](docs/adr/0028-cicd-actions-ghcr.md)).
+e PRs: `uv sync`, lint placeholder (sintaxe Python) e pytest. A baseline
+Lighthouse em [`docs/perf/baseline/`](docs/perf/baseline/) é artefato versionado
+**sem gate** neste épico. Build/publicação de imagens, smoke com Caso sintético
+e frontend entram no Épico 8 (ADR [0028](docs/adr/0028-cicd-actions-ghcr.md)).
 
 ## Documentação
 
@@ -228,4 +276,6 @@ de imagens, smoke com Caso sintético e frontend entram no Épico 8
 | [`specs/epic-01-foundation/`](specs/epic-01-foundation/) | Contrato Compose/health |
 | [`specs/epic-02-identity/`](specs/epic-02-identity/) | Contratos auth e Paciente |
 | [`specs/epic-03-caso-fila/`](specs/epic-03-caso-fila/) | Vitais, outbox/RQ, Caso → Risco/Alerta |
+| [`specs/epic-04-shell-frontend/`](specs/epic-04-shell-frontend/) | Shell Next (scaffold → login → Pacientes) |
+| [`frontend/`](frontend/) | App Next.js (Épico 4) |
 | [`.cursor/plans/arquitetura_multimodal_fase_4_a1c92623.plan.md`](.cursor/plans/arquitetura_multimodal_fase_4_a1c92623.plan.md) | Plano incremental dos épicos |

@@ -22,6 +22,10 @@ Contratos Given/When/Then escritos **antes** da implementação TDD.
 | 3 Caso + fila | [`../specs/epic-03-caso-fila/01-datasets-vitais.md`](../specs/epic-03-caso-fila/01-datasets-vitais.md) | Concluída |
 | 3 Caso + fila | [`../specs/epic-03-caso-fila/02-outbox-rq.md`](../specs/epic-03-caso-fila/02-outbox-rq.md) | Concluída |
 | 3 Caso + fila | [`../specs/epic-03-caso-fila/03-caso-vitais-risco.md`](../specs/epic-03-caso-fila/03-caso-vitais-risco.md) | Concluída |
+| 4 Shell Frontend | [`../specs/epic-04-shell-frontend/01-scaffold-auth.md`](../specs/epic-04-shell-frontend/01-scaffold-auth.md) | Concluída |
+| 4 Shell Frontend | [`../specs/epic-04-shell-frontend/02-pacientes-caso-ui.md`](../specs/epic-04-shell-frontend/02-pacientes-caso-ui.md) | Concluída |
+| 4 Shell Frontend | [`../specs/epic-04-shell-frontend/03-lighthouse-baseline.md`](../specs/epic-04-shell-frontend/03-lighthouse-baseline.md) | Concluída |
+| 4 Shell Frontend | [`../specs/epic-04-shell-frontend/04-fechamento-docs.md`](../specs/epic-04-shell-frontend/04-fechamento-docs.md) | Concluída |
 
 ## ADRs
 
@@ -76,6 +80,18 @@ arquivo quando o plano supersede uma decisão anterior.
 | [0026](adr/0026-rotas-frontend.md) | Mapa de rotas |
 | [0027](adr/0027-graficos-recharts-lazy.md) | Recharts lazy |
 
+## Performance
+
+- Baseline Lighthouse (Épico 4, sem gate de CI):
+  [`perf/baseline/`](perf/baseline/)
+
+## Frontend (operacional)
+
+- Índice: [`frontend/README.md`](frontend/README.md)
+- [Guia de uso com prints](frontend/guia-de-uso.md)
+- [Troubleshooting](frontend/troubleshooting.md)
+- Script de start da stack: [`../scripts/start-limen.sh`](../scripts/start-limen.sh)
+
 ## Progresso por épico
 
 | Épico | Tema | Status |
@@ -83,5 +99,5 @@ arquivo quando o plano supersede uma decisão anterior.
 | 1 | Fundação | Concluído |
 | 2 | Identidade e privacidade | Concluído |
 | 3 | Núcleo Caso + fila | Concluído |
-| 4 | Shell Frontend | Próximo |
+| 4 | Shell Frontend | Concluído |
 | 5–8 | Resiliência, modalidades, Alertas, CI/CD | Pendente |

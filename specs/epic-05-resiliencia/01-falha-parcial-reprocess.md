@@ -11,7 +11,7 @@ sobre store compartilhado entre API e worker (Compose).
 
 ## Status da entrega
 
-**Pendente** (T5.0–T5.1 ok; **T5.2 falha parcial**; falta T5.3–T5.4).
+**Pendente** (T5.0–T5.2 ok; **T5.3 reprocess**; falta T5.4 Alerta v2).
 
 ## Escopo
 
@@ -98,6 +98,6 @@ no teste)
 
 - [x] Store compartilhado API↔worker (Caso/outbox) validado no Compose.
 - [x] Falha parcial + Caso `done` cobertos por TDD.
-- [ ] Reprocess seletivo + refundição cobertos por TDD.
+- [x] Reprocess seletivo + refundição cobertos por TDD.
 - [ ] Alerta v2 append-only quando o nível muda.
 - [ ] Sem SSE; sem UI de DLQ.

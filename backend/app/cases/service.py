@@ -36,6 +36,12 @@ class IdempotencyConflictError(Exception):
     pass
 
 
+class NoFailedModalitiesError(Exception):
+    """Nenhuma modalidade `failed` elegível para reprocessamento."""
+
+    pass
+
+
 @dataclass
 class ArtifactRecord:
     id: uuid.UUID
@@ -265,6 +271,67 @@ class CaseService:
         if case is None:
             raise CaseNotFoundError()
         return _to_response(case)
+
+    def reprocess(
+        self,
+        case_id: uuid.UUID,
+        *,
+        modalities: list[str] | None = None,
+    ) -> CaseResponse:
+        """Reenfileira só modalidades `failed` (Artefatos no MinIO são reutilizados)."""
+        case = self._store.get(case_id)
+        if case is None:
+            raise CaseNotFoundError()
+
+        failed = [m for m in case.modalities if m.status == "failed"]
+        if modalities is not None:
+            wanted = set(modalities)
+            failed = [m for m in failed if m.modality in wanted]
+        if not failed:
+            raise NoFailedModalitiesError()
+
+        now = datetime.now(tz=UTC)
+        reset_names = {m.modality for m in failed}
+        updated_modalities = [
+            ModalityRecord(
+                id=m.id,
+                case_id=m.case_id,
+                modality=m.modality,
+                status="pending" if m.modality in reset_names else m.status,
+                artifact_id=m.artifact_id,
+                created_at=m.created_at,
+                updated_at=now if m.modality in reset_names else m.updated_at,
+            )
+            for m in case.modalities
+        ]
+        updated = CaseRecord(
+            id=case.id,
+            patient_id=case.patient_id,
+            status="processing",
+            risk_score=case.risk_score,
+            risk_level=case.risk_level,
+            idempotency_key=case.idempotency_key,
+            content_sha256=case.content_sha256,
+            created_at=case.created_at,
+            updated_at=now,
+            modalities=updated_modalities,
+            artifacts=case.artifacts,
+            alerts=case.alerts,
+        )
+        self._store.save(updated)
+
+        for modality in sorted(reset_names):
+            job = self._outbox.create_pending(
+                aggregate_type="case",
+                aggregate_id=case_id,
+                job_type="process_modality",
+                payload={"case_id": str(case_id), "modality": modality},
+            )
+            self._outbox.try_enqueue(job.id)
+
+        refreshed = self._store.get(case_id)
+        assert refreshed is not None
+        return _to_response(refreshed)
 
 
 _default_case_store = InMemoryCaseStore()

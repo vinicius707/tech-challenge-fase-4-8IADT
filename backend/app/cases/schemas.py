@@ -35,6 +35,12 @@ class AlertResponse(BaseModel):
     created_at: datetime
 
 
+class ReprocessRequest(BaseModel):
+    """Body opcional: filtra modalidades failed a reprocessar."""
+
+    modalities: list[str] | None = None
+
+
 class CaseResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import time
 import uuid
 from datetime import UTC, datetime
 
@@ -13,9 +14,14 @@ from app.cases.vitals_engine import (
     VitalsAnomalyEngine,
     fuse_done_modalities,
 )
+from app.outbox.retries import PermanentProcessingError, TransientProcessingError
+from app.outbox.timeouts import ModalityTimeoutError, run_with_modality_timeout
 
 ALERT_VERSION_V1 = 1
 FORCE_FAIL_ENV = "LIMEN_FORCE_FAIL_MODALITIES"
+FORCE_SLOW_ENV = "LIMEN_FORCE_SLOW_MODALITIES"
+FORCE_PERMANENT_ENV = "LIMEN_FORCE_PERMANENT_FAIL_MODALITIES"
+FORCE_TRANSIENT_ENV = "LIMEN_FORCE_TRANSIENT_FAIL_MODALITIES"
 TERMINAL_STATUSES = frozenset({"done", "failed", "skipped"})
 STUB_SUCCESS_RISK = ModalityRisk(score=0.10, level="BAIXO", anomalies=())
 ALERT_WORTHY_LEVELS = frozenset({"MEDIO", "ALTO"})
@@ -66,6 +72,22 @@ def _alerts_after_fusion(
 def _forced_fail_modalities() -> set[str]:
     raw = os.getenv(FORCE_FAIL_ENV, "")
     return {part.strip() for part in raw.split(",") if part.strip()}
+
+
+def _csv_env_modalities(env_name: str) -> set[str]:
+    raw = os.getenv(env_name, "")
+    return {part.strip() for part in raw.split(",") if part.strip()}
+
+
+def _maybe_inject_test_hooks(modality: str) -> None:
+    """Hooks só para TDD/demo — não usam rede."""
+    if modality in _csv_env_modalities(FORCE_TRANSIENT_ENV):
+        raise TransientProcessingError(f"falha transitória forçada: {modality}")
+    if modality in _csv_env_modalities(FORCE_PERMANENT_ENV):
+        raise PermanentProcessingError(f"falha permanente forçada: {modality}")
+    if modality in _csv_env_modalities(FORCE_SLOW_ENV):
+        delay = float(os.getenv("LIMEN_FORCE_SLOW_SECONDS", "5"))
+        time.sleep(delay)
 
 
 def _replace_modality_status(
@@ -255,31 +277,38 @@ def process_modality_for_case(
     )
     ctx.case_store.save(case)
 
-    force_fail = modality in _forced_fail_modalities()
-    if force_fail:
-        case = _replace_modality_status(case, modality, "failed", now=now)
-    elif modality == "vitals":
-        artifact = next((a for a in case.artifacts if a.modality == "vitals"), None)
-        if artifact is None:
-            return ctx.case_store.save(
-                _finalize_case(
-                    _replace_modality_status(case, modality, "failed", now=now),
-                    runtime=ctx,
-                    engine=analyzer,
-                    now=now,
+    def _work() -> CaseRecord:
+        _maybe_inject_test_hooks(modality)
+        force_fail = modality in _forced_fail_modalities()
+        current = case
+        if force_fail:
+            return _replace_modality_status(current, modality, "failed", now=now)
+        if modality == "vitals":
+            artifact = next(
+                (a for a in current.artifacts if a.modality == "vitals"), None
+            )
+            if artifact is None:
+                return _replace_modality_status(current, modality, "failed", now=now)
+            content = ctx.blob_store.get(artifact.bucket, artifact.object_key)
+            if content is None:
+                raise PermanentProcessingError(
+                    f"Artefato ausente: {artifact.bucket}/{artifact.object_key}"
                 )
-            )
-        content = ctx.blob_store.get(artifact.bucket, artifact.object_key)
-        if content is None:
-            raise FileNotFoundError(
-                f"Artefato ausente: {artifact.bucket}/{artifact.object_key}"
-            )
-        analyzer.analyze_csv(content)  # valida o CSV antes de marcar done
-        case = _replace_modality_status(case, modality, "done", now=now)
-    elif modality == "audio":
-        case = _replace_modality_status(case, modality, "done", now=now)
-    else:
+            analyzer.analyze_csv(content)
+            return _replace_modality_status(current, modality, "done", now=now)
+        if modality == "audio":
+            return _replace_modality_status(current, modality, "done", now=now)
+        return _replace_modality_status(current, modality, "failed", now=now)
+
+    try:
+        case = run_with_modality_timeout(modality, _work)
+    except ModalityTimeoutError:
         case = _replace_modality_status(case, modality, "failed", now=now)
+    except PermanentProcessingError:
+        case = _replace_modality_status(case, modality, "failed", now=now)
+    except TransientProcessingError:
+        # Deixa em `processing` para o RQ retentar (ADR 0015).
+        raise
 
     finalized = _finalize_case(case, runtime=ctx, engine=analyzer, now=now)
     return ctx.case_store.save(finalized)

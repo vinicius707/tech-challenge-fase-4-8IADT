@@ -11,7 +11,7 @@ de circuit breaker (Azure) — com `403` para papel `medico` nas rotas admin.
 
 ## Status da entrega
 
-**Pendente** (T5.5 filas; falta T5.6–T5.8).
+**Pendente** (T5.5–T5.6 ok; falta T5.7 DLQ + T5.8 CB stub).
 
 ## Escopo
 
@@ -103,7 +103,7 @@ Descarta a falha (marca descartada; não reprocessa). Auditoria.
 ## Critérios de pronto (DoD desta spec)
 
 - [x] Filas `default` + `video` no Compose/RQ.
-- [ ] Retries classificados + timeouts exercitados em TDD.
+- [x] Retries classificados + timeouts exercitados em TDD.
 - [ ] API DLQ list/redrive/discard + audit; `403` para `medico`.
 - [ ] CB Azure stub (sem Azure real).
 - [ ] DoD do épico: falha forçada → DLQ → redrive demonstrável.

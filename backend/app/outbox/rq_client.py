@@ -58,11 +58,14 @@ def enqueue_process_modality(
         payload={"case_id": case_id, "modality": modality},
     )
     queue = get_queue(qname, connection=connection)
+    from app.outbox.timeouts import modality_timeout_seconds
+
     job = queue.enqueue(
         process_modality,
         case_id,
         modality,
         outbox_job_id,
+        job_timeout=int(modality_timeout_seconds(modality)),
     )
     return str(job.id)
 

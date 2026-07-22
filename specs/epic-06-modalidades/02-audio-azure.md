@@ -13,7 +13,8 @@ Speech Azure F0 com **cache**, **fallback local** e **circuit breaker**
 
 ## Status da entrega
 
-**Pendente** (T6.7–T6.11 ok; falta T6.12 desta etapa E6.2).
+**Concluída em 21 de julho de 2026** (T6.7–T6.12: spec, fixtures, upload,
+analyzer/cache/Azure, badge/fusão e fechamento docs).
 
 Pré-requisito: E6.1 (vídeo) concluída nesta branch.
 
@@ -162,5 +163,5 @@ reforçar no pipeline do Caso).
 - [x] Analyzer local + cache + Azure injetável cobertos por TDD.
 - [x] Badge `provider` no `GET /cases/{id}`; áudio contribui ao Risco.
 - [x] Stub de `modality=audio` do Épico 5 substituído por processamento real.
-- [ ] Sem Azure real obrigatório no CI; sem UI polish (Épico 7); sem E6.3.
-      *(fechamento docs = T6.12)*
+- [x] Sem Azure real obrigatório no CI; sem UI polish (Épico 7); sem E6.3.
+- [x] README operacional + índice `docs/README.md` atualizados (T6.12).

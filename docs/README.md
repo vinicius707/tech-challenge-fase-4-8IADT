@@ -29,7 +29,7 @@ Contratos Given/When/Then escritos **antes** da implementação TDD.
 | 5 Resiliência | [`../specs/epic-05-resiliencia/01-falha-parcial-reprocess.md`](../specs/epic-05-resiliencia/01-falha-parcial-reprocess.md) | Concluída |
 | 5 Resiliência | [`../specs/epic-05-resiliencia/02-filas-dlq-retries.md`](../specs/epic-05-resiliencia/02-filas-dlq-retries.md) | Concluída |
 | 6 Modalidades | [`../specs/epic-06-modalidades/01-video-pose-yolo.md`](../specs/epic-06-modalidades/01-video-pose-yolo.md) | Concluída (E6.1) |
-| 6 Modalidades | [`../specs/epic-06-modalidades/02-audio-azure.md`](../specs/epic-06-modalidades/02-audio-azure.md) | Pendente (spec fina E6.2) |
+| 6 Modalidades | [`../specs/epic-06-modalidades/02-audio-azure.md`](../specs/epic-06-modalidades/02-audio-azure.md) | Concluída (E6.2) |
 | 6 Modalidades | [`../specs/epic-06-modalidades/03-prescricoes-seed.md`](../specs/epic-06-modalidades/03-prescricoes-seed.md) | Pendente (placeholder E6.3) |
 
 ## ADRs
@@ -106,5 +106,5 @@ arquivo quando o plano supersede uma decisão anterior.
 | 3 | Núcleo Caso + fila | Concluído |
 | 4 | Shell Frontend | Concluído |
 | 5 | Resiliência | Concluído |
-| 6 | Modalidades PDF | Em andamento (E6.1 ok; E6.2 áudio em andamento; falta E6.3) |
+| 6 | Modalidades PDF | Em andamento (E6.1/E6.2 ok; falta E6.3) |
 | 7–8 | Alertas polish, CI/CD | Pendente |

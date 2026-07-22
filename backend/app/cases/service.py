@@ -75,6 +75,7 @@ class ModalityRecord:
     artifact_id: uuid.UUID | None
     created_at: datetime
     updated_at: datetime
+    provider: str | None = None
 
 
 @dataclass
@@ -507,6 +508,7 @@ class CaseService:
                 artifact_id=m.artifact_id,
                 created_at=m.created_at,
                 updated_at=now if m.modality in reset_names else m.updated_at,
+                provider=None if m.modality in reset_names else m.provider,
             )
             for m in case.modalities
         ]

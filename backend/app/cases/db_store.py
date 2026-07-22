@@ -47,6 +47,7 @@ def _to_record(
                 artifact_id=m.artifact_id,
                 created_at=m.created_at,
                 updated_at=m.updated_at,
+                provider=m.provider,
             )
             for m in modalities
         ],
@@ -218,6 +219,7 @@ class SqlAlchemyCaseStore:
             row.case_id = case.id
             row.modality = mod.modality
             row.status = mod.status
+            row.provider = mod.provider
             row.artifact_id = mod.artifact_id
             row.updated_at = mod.updated_at
 

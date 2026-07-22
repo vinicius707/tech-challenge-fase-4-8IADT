@@ -30,7 +30,7 @@ feed e o restante do Épico 8 (CI/CD GHCR).
 ### Fundação (Épico 1)
 
 - FastAPI no backend.
-- PostgreSQL com migrações Alembic até `20260721_0013`.
+- PostgreSQL com migrações Alembic até `20260721_0014`.
 - Redis como broker da fila RQ.
 - MinIO S3-compatible; bucket `limen` criado de forma idempotente.
 - Docker Compose, smoke local e CI magra (pytest).

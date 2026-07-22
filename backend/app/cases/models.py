@@ -77,6 +77,7 @@ class CaseModality(Base):
     )
     modality: Mapped[str] = mapped_column(String(32), nullable=False)
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="pending")
+    provider: Mapped[str | None] = mapped_column(String(16), nullable=True)
     artifact_id: Mapped[uuid.UUID | None] = mapped_column(
         Uuid, ForeignKey("artifacts.id", ondelete="SET NULL"), nullable=True
     )

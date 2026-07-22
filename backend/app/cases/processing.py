@@ -25,7 +25,6 @@ FORCE_SLOW_ENV = "LIMEN_FORCE_SLOW_MODALITIES"
 FORCE_PERMANENT_ENV = "LIMEN_FORCE_PERMANENT_FAIL_MODALITIES"
 FORCE_TRANSIENT_ENV = "LIMEN_FORCE_TRANSIENT_FAIL_MODALITIES"
 TERMINAL_STATUSES = frozenset({"done", "failed", "skipped"})
-STUB_SUCCESS_RISK = ModalityRisk(score=0.10, level="BAIXO", anomalies=())
 ALERT_WORTHY_LEVELS = frozenset({"MEDIO", "ALTO"})
 
 
@@ -98,6 +97,8 @@ def _replace_modality_status(
     status: str,
     *,
     now: datetime,
+    provider: str | None = None,
+    set_provider: bool = False,
 ) -> CaseRecord:
     modalities = [
         ModalityRecord(
@@ -108,6 +109,11 @@ def _replace_modality_status(
             artifact_id=m.artifact_id,
             created_at=m.created_at,
             updated_at=now if m.modality == modality else m.updated_at,
+            provider=(
+                provider
+                if m.modality == modality and set_provider
+                else m.provider
+            ),
         )
         for m in case.modalities
     ]
@@ -155,7 +161,21 @@ def _risk_for_done_modality(
             )
         return engine.analyze_csv(content)
     if modality == "audio":
-        return STUB_SUCCESS_RISK
+        artifact = next((a for a in case.artifacts if a.modality == "audio"), None)
+        if artifact is None:
+            return None
+        content = runtime.blob_store.get(artifact.bucket, artifact.object_key)
+        if content is None:
+            return None
+        from app.azure.provider import analyze_audio
+        from app.cases.vitals_engine import risk_level_from_score
+
+        analysis = analyze_audio(content)
+        return ModalityRisk(
+            score=analysis.score,
+            level=risk_level_from_score(analysis.score),
+            anomalies=(),
+        )
     if modality == "video":
         artifact = next((a for a in case.artifacts if a.modality == "video"), None)
         if artifact is None:
@@ -280,6 +300,35 @@ def _copy_case_meta(
         video_content_sha256=case.video_content_sha256,
         audio_idempotency_key=case.audio_idempotency_key,
         audio_content_sha256=case.audio_content_sha256,
+    )
+
+
+def _process_audio_modality(
+    case: CaseRecord,
+    *,
+    runtime: CaseRuntime,
+    now: datetime,
+) -> CaseRecord:
+    from app.azure.provider import analyze_audio
+
+    artifact = next((a for a in case.artifacts if a.modality == "audio"), None)
+    if artifact is None:
+        return _replace_modality_status(case, "audio", "failed", now=now)
+
+    content = runtime.blob_store.get(artifact.bucket, artifact.object_key)
+    if content is None:
+        raise PermanentProcessingError(
+            f"Artefato ausente: {artifact.bucket}/{artifact.object_key}"
+        )
+
+    analysis = analyze_audio(content)
+    return _replace_modality_status(
+        case,
+        "audio",
+        "done",
+        now=now,
+        provider=analysis.provider,
+        set_provider=True,
     )
 
 
@@ -437,7 +486,7 @@ def process_modality_for_case(
             analyzer.analyze_csv(content)
             return _replace_modality_status(current, modality, "done", now=now)
         if modality == "audio":
-            return _replace_modality_status(current, modality, "done", now=now)
+            return _process_audio_modality(current, runtime=ctx, now=now)
         if modality == "video":
             return _process_video_modality(current, runtime=ctx, now=now)
         fail_reason = f"modalidade sem handler: {modality}"

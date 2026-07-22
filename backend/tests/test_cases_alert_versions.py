@@ -26,6 +26,9 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 VITALS_MEDIUM = (
     REPO_ROOT / "data" / "fixtures" / "vitals" / "vitals_medium.csv"
 ).read_bytes()
+AUDIO_SPEECH = (
+    REPO_ROOT / "data" / "fixtures" / "audio" / "audio_speech.wav"
+).read_bytes()
 
 
 @pytest.fixture(autouse=True)
@@ -47,13 +50,21 @@ def _seed_partial_medio_with_alert_v1(
     """vitals MEDIO (Alerta v1) + audio failed."""
     now = datetime.now(tz=UTC)
     case_id = uuid.uuid4()
-    artifact_id = uuid.uuid4()
-    object_key = f"cases/{case_id}/vitals/vitals_medium.csv"
+    vitals_artifact_id = uuid.uuid4()
+    audio_artifact_id = uuid.uuid4()
+    vitals_key = f"cases/{case_id}/vitals/vitals_medium.csv"
+    audio_key = f"cases/{case_id}/audio/audio_speech.wav"
     blob_store.put(
         bucket="limen",
-        object_key=object_key,
+        object_key=vitals_key,
         content=VITALS_MEDIUM,
         content_type="text/csv",
+    )
+    blob_store.put(
+        bucket="limen",
+        object_key=audio_key,
+        content=AUDIO_SPEECH,
+        content_type="audio/wav",
     )
     case_store.save(
         CaseRecord(
@@ -72,7 +83,7 @@ def _seed_partial_medio_with_alert_v1(
                     case_id=case_id,
                     modality="vitals",
                     status="pending",
-                    artifact_id=artifact_id,
+                    artifact_id=vitals_artifact_id,
                     created_at=now,
                     updated_at=now,
                 ),
@@ -81,22 +92,32 @@ def _seed_partial_medio_with_alert_v1(
                     case_id=case_id,
                     modality="audio",
                     status="pending",
-                    artifact_id=None,
+                    artifact_id=audio_artifact_id,
                     created_at=now,
                     updated_at=now,
                 ),
             ],
             artifacts=[
                 ArtifactRecord(
-                    id=artifact_id,
+                    id=vitals_artifact_id,
                     case_id=case_id,
                     modality="vitals",
                     bucket="limen",
-                    object_key=object_key,
+                    object_key=vitals_key,
                     content_sha256="x",
                     content_type="text/csv",
                     created_at=now,
-                )
+                ),
+                ArtifactRecord(
+                    id=audio_artifact_id,
+                    case_id=case_id,
+                    modality="audio",
+                    bucket="limen",
+                    object_key=audio_key,
+                    content_sha256="x",
+                    content_type="audio/wav",
+                    created_at=now,
+                ),
             ],
         )
     )

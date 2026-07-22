@@ -43,6 +43,9 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 VITALS_MEDIUM = (
     REPO_ROOT / "data" / "fixtures" / "vitals" / "vitals_medium.csv"
 ).read_bytes()
+AUDIO_SPEECH = (
+    REPO_ROOT / "data" / "fixtures" / "audio" / "audio_speech.wav"
+).read_bytes()
 
 
 @pytest.fixture
@@ -153,13 +156,21 @@ def _seed_partial_case(
     """vitals done (MEDIO) + audio failed — Artefato de vitais permanece no blob store."""
     now = datetime.now(tz=UTC)
     case_id = uuid.uuid4()
-    artifact_id = uuid.uuid4()
-    object_key = f"cases/{case_id}/vitals/vitals_medium.csv"
+    vitals_artifact_id = uuid.uuid4()
+    audio_artifact_id = uuid.uuid4()
+    vitals_key = f"cases/{case_id}/vitals/vitals_medium.csv"
+    audio_key = f"cases/{case_id}/audio/audio_speech.wav"
     blob_store.put(
         bucket="limen",
-        object_key=object_key,
+        object_key=vitals_key,
         content=VITALS_MEDIUM,
         content_type="text/csv",
+    )
+    blob_store.put(
+        bucket="limen",
+        object_key=audio_key,
+        content=AUDIO_SPEECH,
+        content_type="audio/wav",
     )
     case_store.save(
         CaseRecord(
@@ -178,7 +189,7 @@ def _seed_partial_case(
                     case_id=case_id,
                     modality="vitals",
                     status="pending",
-                    artifact_id=artifact_id,
+                    artifact_id=vitals_artifact_id,
                     created_at=now,
                     updated_at=now,
                 ),
@@ -187,22 +198,32 @@ def _seed_partial_case(
                     case_id=case_id,
                     modality="audio",
                     status="pending",
-                    artifact_id=None,
+                    artifact_id=audio_artifact_id,
                     created_at=now,
                     updated_at=now,
                 ),
             ],
             artifacts=[
                 ArtifactRecord(
-                    id=artifact_id,
+                    id=vitals_artifact_id,
                     case_id=case_id,
                     modality="vitals",
                     bucket="limen",
-                    object_key=object_key,
+                    object_key=vitals_key,
                     content_sha256="x",
                     content_type="text/csv",
                     created_at=now,
-                )
+                ),
+                ArtifactRecord(
+                    id=audio_artifact_id,
+                    case_id=case_id,
+                    modality="audio",
+                    bucket="limen",
+                    object_key=audio_key,
+                    content_sha256="x",
+                    content_type="audio/wav",
+                    created_at=now,
+                ),
             ],
         )
     )
@@ -220,8 +241,8 @@ def _seed_partial_case(
         "vitals": "done",
         "audio": "failed",
     }
-    # Artefato ainda disponível (não foi reenviado / apagado).
-    assert blob_store.get("limen", object_key) == VITALS_MEDIUM
+    # Artefato de vitais ainda disponível (não foi reenviado / apagado).
+    assert blob_store.get("limen", vitals_key) == VITALS_MEDIUM
     return case_id
 
 
@@ -328,8 +349,8 @@ def test_reprocess_enqueues_only_failed_modalities_and_refunds_risk(
     # Artefato de vitais intacto (reprocess não reenvia blob).
     case = case_store.get(case_id)
     assert case is not None
-    art = case.artifacts[0]
-    assert blob_store.get(art.bucket, art.object_key) == VITALS_MEDIUM
+    vitals_art = next(a for a in case.artifacts if a.modality == "vitals")
+    assert blob_store.get(vitals_art.bucket, vitals_art.object_key) == VITALS_MEDIUM
 
     completion_mod.configure_completion_store(outbox_store)
     runtime_mod.configure_case_runtime(case_store, blob_store)
@@ -343,9 +364,9 @@ def test_reprocess_enqueues_only_failed_modalities_and_refunds_risk(
         "vitals": "done",
         "audio": "done",
     }
-    # vitals MEDIO (0.55) + stub audio BAIXO (0.10) → média 0.325 → BAIXO
+    # vitals MEDIO (0.55) + áudio local BAIXO (~0.16) → média ~0.355 → BAIXO
     assert refunded.risk_level == "BAIXO"
-    assert refunded.risk_score == pytest.approx(0.325)
+    assert refunded.risk_score == pytest.approx(0.35505)
 
 
 def test_reprocess_body_filters_failed_modalities(

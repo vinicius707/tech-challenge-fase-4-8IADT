@@ -11,29 +11,28 @@ Glossário de domínio: [`CONTEXT.md`](CONTEXT.md). Decisão de arquitetura:
 
 ## Estado atual
 
-Os **Épicos 1–5** estão concluídos (Fundação, Identidade, Núcleo Caso + fila,
-Shell Frontend e Resiliência). As etapas **E6.1 (vídeo)** e **E6.2 (áudio)** do
-Épico 6 também estão entregues.
+Os **Épicos 1–6** estão concluídos (Fundação, Identidade, Núcleo Caso + fila,
+Shell Frontend, Resiliência e Modalidades PDF: vídeo, áudio e prescrições).
 
 A entrega atual inclui autenticação JWT, Paciente com Rótulo Sensível, Caso com
-modalidades `vitals`, `video` e `audio` (Artefatos no MinIO, outbox → filas RQ
-`default` / `video` → Risco fundido e Alerta v1 se ≥ MEDIO), Provedor de Áudio
-(`azure` / `local` / `cache`) com CB e fallback, falha parcial / reprocess,
-workers `worker` + `worker-video` e reconciler no Compose, e o shell Next.js
-(login, Pacientes, Novo Caso e detalhe com polling).
+modalidades `vitals`, `video`, `audio` e `prescriptions` (Artefatos no MinIO,
+outbox → filas RQ `default` / `video` → Risco fundido e Alerta v1 se ≥ MEDIO),
+Provedor de Áudio (`azure` / `local` / `cache`) com CB e fallback, regras de
+Prescrição + desvio longitudinal, seed demo multimodal, falha parcial /
+reprocess, workers `worker` + `worker-video` e reconciler no Compose, e o shell
+Next.js (login, Pacientes, Novo Caso e detalhe com polling).
 
 Ainda não fazem parte da implementação: chamada Azure Speech real obrigatória
-no CI (`AZURE_ENABLED=false` por padrão), prescrições / seed multimodal (E6.3),
-UI polish de upload (Épico 7), Alertas SSE / feed e o restante do Épico 8
-(CI/CD GHCR).
+no CI (`AZURE_ENABLED=false` por padrão), UI polish de upload / Justificativa
+rica / SSE (Épico 7), seed/notebooks finais e CI/CD GHCR (Épico 8).
 
 ## O que já foi entregue
 
 ### Fundação (Épico 1)
 
 - FastAPI no backend.
-- PostgreSQL com migrações Alembic até `20260721_0014` (inclui `provider` na
-  modalidade e idempotência de áudio).
+- PostgreSQL com migrações Alembic até `20260721_0015` (inclui `provider`,
+  idempotência de áudio e de prescriptions).
 - Redis como broker da fila RQ.
 - MinIO S3-compatible; bucket `limen` criado de forma idempotente.
 - Docker Compose, smoke local e CI magra (pytest).
@@ -107,6 +106,20 @@ UI polish de upload (Épico 7), Alertas SSE / feed e o restante do Épico 8
 - CI/demo: `AZURE_ENABLED=false` (sem Azure real obrigatório).
 - Spec:
   [`02-audio-azure.md`](specs/epic-06-modalidades/02-audio-azure.md).
+
+### Modalidades — Prescrições + seed (Épico 6 / E6.3)
+
+- Fixtures CSV `normal` / `medium` / `high` + catálogo sintético:
+  [`data/fixtures/prescriptions/`](data/fixtures/prescriptions/).
+- `POST /cases/{id}/modalities/prescriptions` (multipart + `Idempotency-Key`) →
+  MinIO + job na fila RQ `default`.
+- Regras determinísticas (dose / intervalo / medicamento inesperado) e desvio
+  longitudinal vs. histórico do Paciente (ADR 0010).
+- Contribui ao Risco (fusão; falha parcial intacta); timeout padrão 30s.
+- Seed demo multimodal (vitals+vídeo+áudio+prescriptions):
+  [`scripts/seed_multimodal_demo.py`](scripts/seed_multimodal_demo.py).
+- Spec:
+  [`03-prescricoes-seed.md`](specs/epic-06-modalidades/03-prescricoes-seed.md).
 
 ## Executar localmente
 
@@ -241,6 +254,28 @@ curl -s -X POST "http://localhost:8000/cases/$CASE_ID/modalities/audio" \
 O job vai para a fila `default`. Após o worker, o `GET /cases/{id}` expõe
 `provider` na modalidade `audio` (`local` com `AZURE_ENABLED=false`).
 
+### Anexar modalidade prescriptions ao Caso
+
+```bash
+curl -s -X POST "http://localhost:8000/cases/$CASE_ID/modalities/prescriptions" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Idempotency-Key: demo-rx-1" \
+  -F "file=@data/fixtures/prescriptions/prescriptions_normal.csv;type=text/csv" | jq
+```
+
+O job vai para a fila `default`. Fixtures alternativas: `prescriptions_medium.csv`
+e `prescriptions_high.csv`.
+
+### Seed demo multimodal (in-memory)
+
+```bash
+cd backend && uv run python ../scripts/seed_multimodal_demo.py
+```
+
+Cria (ou reutiliza) um Caso com as quatro modalidades via `Idempotency-Key`
+fixas. Smoke sem Compose; na stack real, use os curls acima com as mesmas chaves
+documentadas no script.
+
 Rotas públicas nesta etapa: `GET /health`, `POST /auth/login`,
 `POST /auth/refresh`. Demais rotas exigem Bearer access token.
 
@@ -300,6 +335,7 @@ Trocar a chave sem recriptografar torna rótulos existentes ilegíveis.
 | `LIMEN_TIMEOUT_VITALS_SECONDS` | Timeout job vitais (padrão `30`) |
 | `LIMEN_TIMEOUT_AUDIO_SECONDS` | Timeout job áudio (padrão `90`) |
 | `LIMEN_TIMEOUT_VIDEO_SECONDS` | Timeout job vídeo (padrão `180`) |
+| `LIMEN_TIMEOUT_PRESCRIPTIONS_SECONDS` | Timeout job prescriptions (padrão `30`) |
 | `LIMEN_RETRY_MAX_ATTEMPTS` | Máx. tentativas para erro transitório (padrão `3`) |
 | `LIMEN_RETRY_BASE_DELAY_SECONDS` | Base do backoff exponencial (padrão `1`) |
 | `AZURE_ENABLED` | Habilita caminho Azure Speech (padrão `false`; CI/demo usa local/cache) |
@@ -357,6 +393,6 @@ e frontend entram no Épico 8 (ADR [0028](docs/adr/0028-cicd-actions-ghcr.md)).
 | [`specs/epic-03-caso-fila/`](specs/epic-03-caso-fila/) | Vitais, outbox/RQ, Caso → Risco/Alerta |
 | [`specs/epic-04-shell-frontend/`](specs/epic-04-shell-frontend/) | Shell Next (scaffold → login → Pacientes) |
 | [`specs/epic-05-resiliencia/`](specs/epic-05-resiliencia/) | Falha parcial, filas, DLQ/retries |
-| [`specs/epic-06-modalidades/`](specs/epic-06-modalidades/) | Vídeo Pose/YOLO (E6.1); áudio Azure F0 + fallback (E6.2); placeholder E6.3 |
+| [`specs/epic-06-modalidades/`](specs/epic-06-modalidades/) | Vídeo (E6.1); áudio Azure F0 (E6.2); prescriptions + seed (E6.3) |
 | [`frontend/`](frontend/) | App Next.js (Épico 4) |
 | [`.cursor/plans/arquitetura_multimodal_fase_4_a1c92623.plan.md`](.cursor/plans/arquitetura_multimodal_fase_4_a1c92623.plan.md) | Plano incremental dos épicos |

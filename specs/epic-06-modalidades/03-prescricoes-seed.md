@@ -14,7 +14,7 @@ anteriores (ADR 0010), contribuição ao Risco na fila RQ `default`
 
 ## Status da entrega
 
-**Pendente** (T6.13–T6.18 ok; falta T6.19–T6.20 desta etapa E6.3).
+**Pendente** (T6.13–T6.19 ok; falta T6.20 desta etapa E6.3).
 
 Pré-requisito: E6.2 (áudio) concluída nesta branch.
 
@@ -87,7 +87,7 @@ de codar.
 data/fixtures/prescriptions/           # CSVs + README + manifest
 data/fixtures/prescriptions/README.md
 # opcional: scripts/prepare_prescription_fixtures.py
-# opcional: scripts/seed_multimodal_demo.py
+scripts/seed_multimodal_demo.py        # seed demo (in-memory / Idempotency-Key fixas)
 ```
 
 ## Contratos HTTP (mínimos)
@@ -163,6 +163,7 @@ pode ficar `done`.
 - [x] Upload → Artefato MinIO → job na fila `default`.
 - [x] Engine de regras + desvio longitudinal cobertos por TDD.
 - [x] Modalidade contribui ao Risco; falha parcial intacta.
-- [ ] Seed demo multimodal documentado e coberto por smoke/TDD.
+- [x] Seed demo multimodal documentado e coberto por smoke/TDD.
 - [ ] Sem UI de prescrições (Épico 7); sem farmácia real; sem Épico 8.
+      *(fechamento docs README/índice = T6.20)*
 - [ ] README operacional + índice `docs/README.md` atualizados.

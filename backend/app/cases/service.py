@@ -350,6 +350,12 @@ class CaseService:
             raise CaseNotFoundError()
         return _to_response(case)
 
+    def get_by_idempotency_key(self, key: str) -> CaseResponse | None:
+        case = self._store.get_by_idempotency_key(key)
+        if case is None:
+            return None
+        return _to_response(case)
+
     def attach_video(
         self,
         case_id: uuid.UUID,

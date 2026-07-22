@@ -26,6 +26,8 @@ Contratos Given/When/Then escritos **antes** da implementação TDD.
 | 4 Shell Frontend | [`../specs/epic-04-shell-frontend/02-pacientes-caso-ui.md`](../specs/epic-04-shell-frontend/02-pacientes-caso-ui.md) | Concluída |
 | 4 Shell Frontend | [`../specs/epic-04-shell-frontend/03-lighthouse-baseline.md`](../specs/epic-04-shell-frontend/03-lighthouse-baseline.md) | Concluída |
 | 4 Shell Frontend | [`../specs/epic-04-shell-frontend/04-fechamento-docs.md`](../specs/epic-04-shell-frontend/04-fechamento-docs.md) | Concluída |
+| 5 Resiliência | [`../specs/epic-05-resiliencia/01-falha-parcial-reprocess.md`](../specs/epic-05-resiliencia/01-falha-parcial-reprocess.md) | Concluída |
+| 5 Resiliência | [`../specs/epic-05-resiliencia/02-filas-dlq-retries.md`](../specs/epic-05-resiliencia/02-filas-dlq-retries.md) | Pendente |
 
 ## ADRs
 
@@ -100,4 +102,5 @@ arquivo quando o plano supersede uma decisão anterior.
 | 2 | Identidade e privacidade | Concluído |
 | 3 | Núcleo Caso + fila | Concluído |
 | 4 | Shell Frontend | Concluído |
-| 5–8 | Resiliência, modalidades, Alertas, CI/CD | Pendente |
+| 5 | Resiliência | Parcial (falha parcial/reprocess; falta filas/DLQ) |
+| 6–8 | Modalidades, Alertas polish, CI/CD | Pendente |

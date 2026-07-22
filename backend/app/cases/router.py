@@ -15,11 +15,12 @@ from fastapi import (
 )
 
 from app.auth.deps import AccessTokenClaims, get_current_access_claims
-from app.cases.schemas import CaseResponse
+from app.cases.schemas import CaseResponse, ReprocessRequest
 from app.cases.service import (
     CaseNotFoundError,
     CaseService,
     IdempotencyConflictError,
+    NoFailedModalitiesError,
     PatientNotFoundError,
     get_case_service,
 )
@@ -108,4 +109,36 @@ def get_case(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Caso não encontrado",
+        ) from exc
+
+
+@cases_router.post(
+    "/{case_id}/reprocess",
+    response_model=CaseResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+    summary="Reprocessa modalidades failed (seletivo)",
+    responses={
+        401: {"description": "Não autenticado"},
+        404: {"description": "Caso não encontrado"},
+        409: {"description": "Nenhuma modalidade failed elegível"},
+    },
+)
+def reprocess_case(
+    case_id: UUID,
+    _claims: Annotated[AccessTokenClaims, Depends(get_current_access_claims)],
+    service: Annotated[CaseService, Depends(get_case_service)],
+    body: ReprocessRequest | None = None,
+) -> CaseResponse:
+    modalities = body.modalities if body is not None else None
+    try:
+        return service.reprocess(case_id, modalities=modalities)
+    except CaseNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Caso não encontrado",
+        ) from exc
+    except NoFailedModalitiesError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Nenhuma modalidade failed elegível para reprocessamento",
         ) from exc

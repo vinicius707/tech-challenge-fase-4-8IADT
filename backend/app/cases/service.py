@@ -36,6 +36,12 @@ class IdempotencyConflictError(Exception):
     pass
 
 
+class NoFailedModalitiesError(Exception):
+    """Nenhuma modalidade `failed` elegível para reprocessamento."""
+
+    pass
+
+
 @dataclass
 class ArtifactRecord:
     id: uuid.UUID
@@ -266,10 +272,72 @@ class CaseService:
             raise CaseNotFoundError()
         return _to_response(case)
 
+    def reprocess(
+        self,
+        case_id: uuid.UUID,
+        *,
+        modalities: list[str] | None = None,
+    ) -> CaseResponse:
+        """Reenfileira só modalidades `failed` (Artefatos no MinIO são reutilizados)."""
+        case = self._store.get(case_id)
+        if case is None:
+            raise CaseNotFoundError()
+
+        failed = [m for m in case.modalities if m.status == "failed"]
+        if modalities is not None:
+            wanted = set(modalities)
+            failed = [m for m in failed if m.modality in wanted]
+        if not failed:
+            raise NoFailedModalitiesError()
+
+        now = datetime.now(tz=UTC)
+        reset_names = {m.modality for m in failed}
+        updated_modalities = [
+            ModalityRecord(
+                id=m.id,
+                case_id=m.case_id,
+                modality=m.modality,
+                status="pending" if m.modality in reset_names else m.status,
+                artifact_id=m.artifact_id,
+                created_at=m.created_at,
+                updated_at=now if m.modality in reset_names else m.updated_at,
+            )
+            for m in case.modalities
+        ]
+        updated = CaseRecord(
+            id=case.id,
+            patient_id=case.patient_id,
+            status="processing",
+            risk_score=case.risk_score,
+            risk_level=case.risk_level,
+            idempotency_key=case.idempotency_key,
+            content_sha256=case.content_sha256,
+            created_at=case.created_at,
+            updated_at=now,
+            modalities=updated_modalities,
+            artifacts=case.artifacts,
+            alerts=case.alerts,
+        )
+        self._store.save(updated)
+
+        for modality in sorted(reset_names):
+            job = self._outbox.create_pending(
+                aggregate_type="case",
+                aggregate_id=case_id,
+                job_type="process_modality",
+                payload={"case_id": str(case_id), "modality": modality},
+            )
+            self._outbox.try_enqueue(job.id)
+
+        refreshed = self._store.get(case_id)
+        assert refreshed is not None
+        return _to_response(refreshed)
+
 
 _default_case_store = InMemoryCaseStore()
 _default_blob_store: ArtifactBlobStore = InMemoryArtifactBlobStore()
 _default_outbox_dispatcher: OutboxDispatcher | None = None
+_shared_outbox_dispatcher: OutboxDispatcher | None = None
 
 
 def _default_dispatcher() -> OutboxDispatcher:
@@ -278,8 +346,7 @@ def _default_dispatcher() -> OutboxDispatcher:
         from app.outbox.rq_client import RqJobEnqueuer
         from app.outbox.service import InMemoryOutboxStore
 
-        # Em processo único de API (testes/dev sem Postgres outbox), usa memória.
-        # Compose/runtime com SQLAlchemy outbox entra quando o Caso persistir no PG.
+        # Testes/dev sem Compose: memória. Compose usa `_shared_dispatcher`.
         _default_outbox_dispatcher = OutboxDispatcher(
             store=InMemoryOutboxStore(),
             enqueuer=RqJobEnqueuer(),
@@ -287,18 +354,38 @@ def _default_dispatcher() -> OutboxDispatcher:
     return _default_outbox_dispatcher
 
 
+def _shared_dispatcher() -> OutboxDispatcher:
+    """Outbox no Postgres compartilhado com o worker (Compose)."""
+    global _shared_outbox_dispatcher
+    if _shared_outbox_dispatcher is None:
+        from app.outbox.db_store import SqlAlchemyOutboxStore
+        from app.outbox.rq_client import RqJobEnqueuer
+
+        _shared_outbox_dispatcher = OutboxDispatcher(
+            store=SqlAlchemyOutboxStore(),
+            enqueuer=RqJobEnqueuer(),
+        )
+    return _shared_outbox_dispatcher
+
+
 def get_case_service() -> CaseService:
+    from app.cases.runtime import uses_shared_postgres_store
+    from app.patients.db_store import SqlAlchemyPatientStore
     from app.patients.service import _default_store as default_patient_store
 
-    blob: ArtifactBlobStore
-    if os.getenv("MINIO_ENDPOINT"):
-        blob = MinioArtifactBlobStore()
-    else:
-        blob = _default_blob_store
+    if uses_shared_postgres_store():
+        from app.cases.db_store import SqlAlchemyCaseStore
+
+        return CaseService(
+            store=SqlAlchemyCaseStore(),
+            patient_store=SqlAlchemyPatientStore(),
+            blob_store=MinioArtifactBlobStore(),
+            outbox_dispatcher=_shared_dispatcher(),
+        )
 
     return CaseService(
         store=_default_case_store,
         patient_store=default_patient_store,
-        blob_store=blob,
+        blob_store=_default_blob_store,
         outbox_dispatcher=_default_dispatcher(),
     )

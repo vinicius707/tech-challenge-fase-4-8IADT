@@ -228,7 +228,17 @@ Trocar a chave sem recriptografar torna rótulos existentes ilegíveis.
 | Variável | Função |
 | -------- | ------ |
 | `REDIS_URL` | Broker RQ |
-| `RQ_QUEUE_NAME` | Nome da fila (padrão `default`) |
+| `RQ_QUEUE_NAME` | Fila do worker `default` (padrão `default`) |
+| `RQ_VIDEO_QUEUE_NAME` | Fila do worker `worker-video` (padrão `video`) |
+| `LIMEN_TIMEOUT_VITALS_SECONDS` | Timeout job vitais (padrão `30`) |
+| `LIMEN_TIMEOUT_AUDIO_SECONDS` | Timeout job áudio (padrão `90`) |
+| `LIMEN_TIMEOUT_VIDEO_SECONDS` | Timeout job vídeo (padrão `180`) |
+| `LIMEN_RETRY_MAX_ATTEMPTS` | Máx. tentativas para erro transitório (padrão `3`) |
+| `LIMEN_RETRY_BASE_DELAY_SECONDS` | Base do backoff exponencial (padrão `1`) |
+| `AZURE_ENABLED` | Habilita caminho Azure (padrão `false`; real = Épico 6) |
+| `LIMEN_AZURE_CB_FAILURE_THRESHOLD` | Falhas consecutivas para abrir o CB (padrão `3`) |
+| `LIMEN_AZURE_CB_OPEN_SECONDS` | Segundos com CB aberto forçando `local` (padrão `300`) |
+| `LIMEN_AZURE_CB_FORCE_OPEN` | Força CB aberto no stub (`true`/`1`) |
 | `OUTBOX_RECONCILE_INTERVAL_SECONDS` | Intervalo do reconciler (padrão `5`) |
 
 Contrato: [`specs/epic-03-caso-fila/02-outbox-rq.md`](specs/epic-03-caso-fila/02-outbox-rq.md).

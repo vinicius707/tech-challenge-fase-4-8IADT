@@ -76,3 +76,14 @@ def get_current_access_claims(
             detail="Não autenticado",
         )
     return claims
+
+
+def require_admin(
+    claims: Annotated[AccessTokenClaims, Depends(get_current_access_claims)],
+) -> AccessTokenClaims:
+    if claims.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Acesso negado",
+        )
+    return claims

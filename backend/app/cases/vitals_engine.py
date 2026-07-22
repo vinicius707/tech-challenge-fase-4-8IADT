@@ -31,7 +31,20 @@ def risk_level_from_score(score: float) -> str:
 
 def fuse_vitals_only(vitals: ModalityRisk) -> ModalityRisk:
     """Com uma única modalidade, a Fusion devolve o risco parcial (peso 1.0)."""
-    return vitals
+    return fuse_done_modalities([vitals])
+
+
+def fuse_done_modalities(risks: list[ModalityRisk]) -> ModalityRisk:
+    """Fusão com pesos iguais renormalizados só sobre modalidades `done`."""
+    if not risks:
+        return ModalityRisk(score=0.0, level="BAIXO", anomalies=())
+    score = sum(r.score for r in risks) / len(risks)
+    anomalies = tuple(a for r in risks for a in r.anomalies)
+    return ModalityRisk(
+        score=score,
+        level=risk_level_from_score(score),
+        anomalies=anomalies,
+    )
 
 
 class VitalsAnomalyEngine:

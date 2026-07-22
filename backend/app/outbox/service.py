@@ -58,17 +58,19 @@ class InMemoryOutboxStore:
 
 @dataclass
 class RecordingJobEnqueuer:
-    """Fake de RQ: registra jobs na fila nomeada (padrão `default`)."""
+    """Fake de RQ: registra jobs na fila resolvida por modalidade/job_type."""
 
     queue_name: str = "default"
     jobs: list[dict[str, Any]] = field(default_factory=list)
 
     def enqueue(self, *, job_type: str, payload: dict[str, Any]) -> str:
+        from app.outbox.rq_client import resolve_queue
+
         job_id = str(uuid.uuid4())
         self.jobs.append(
             {
                 "rq_job_id": job_id,
-                "queue": self.queue_name,
+                "queue": resolve_queue(job_type=job_type, payload=payload),
                 "job_type": job_type,
                 "payload": payload,
             }

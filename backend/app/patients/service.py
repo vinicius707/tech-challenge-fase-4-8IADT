@@ -188,7 +188,18 @@ _default_audit_store = InMemoryAuditStore()
 
 
 def get_patient_service() -> PatientService:
+    from app.cases.runtime import uses_shared_postgres_store
     from app.cases.service import _default_case_store
+
+    if uses_shared_postgres_store():
+        from app.cases.db_store import SqlAlchemyCaseStore
+        from app.patients.db_store import SqlAlchemyPatientStore
+
+        return PatientService(
+            store=SqlAlchemyPatientStore(),
+            audit_store=_default_audit_store,
+            case_store=SqlAlchemyCaseStore(),
+        )
 
     return PatientService(
         store=_default_store,

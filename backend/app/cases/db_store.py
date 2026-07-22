@@ -153,6 +153,15 @@ class SqlAlchemyCaseStore:
                 return None
             return self._load(session, row.id)
 
+    def list_by_patient(self, patient_id: uuid.UUID) -> list[CaseRecord]:
+        with self._session_factory() as session:
+            rows = session.scalars(
+                select(Case)
+                .where(Case.patient_id == patient_id)
+                .order_by(Case.created_at.asc())
+            ).all()
+            return [self._load(session, row.id) for row in rows]
+
     def delete_by_patient(self, patient_id: uuid.UUID) -> int:
         with self._session_factory() as session:
             rows = session.scalars(

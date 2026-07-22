@@ -128,6 +128,8 @@ class CaseStore(Protocol):
 
     def get_by_prescriptions_idempotency_key(self, key: str) -> CaseRecord | None: ...
 
+    def list_by_patient(self, patient_id: uuid.UUID) -> list[CaseRecord]: ...
+
     def delete_by_patient(self, patient_id: uuid.UUID) -> int: ...
 
 
@@ -179,6 +181,13 @@ class InMemoryCaseStore:
         if case_id is None:
             return None
         return self._by_id.get(case_id)
+
+    def list_by_patient(self, patient_id: uuid.UUID) -> list[CaseRecord]:
+        return [
+            record
+            for record in self._by_id.values()
+            if record.patient_id == patient_id
+        ]
 
     def delete_by_patient(self, patient_id: uuid.UUID) -> int:
         to_remove = [

@@ -194,6 +194,21 @@ def _risk_for_done_modality(
         if kind == "scene":
             return SceneDetectionEngine().analyze_avi(content).risk
         return None
+    if modality == "prescriptions":
+        artifact = next(
+            (a for a in case.artifacts if a.modality == "prescriptions"), None
+        )
+        if artifact is None:
+            return None
+        content = runtime.blob_store.get(artifact.bucket, artifact.object_key)
+        if content is None:
+            return None
+        from app.cases.prescriptions_engine import PrescriptionsAnomalyEngine
+
+        history = _prescription_history_blobs(
+            case, runtime=runtime
+        )
+        return PrescriptionsAnomalyEngine().analyze_csv(content, history=history)
     return None
 
 
@@ -340,6 +355,57 @@ def _process_audio_modality(
         provider=analysis.provider,
         set_provider=True,
     )
+
+
+def _prescription_history_blobs(
+    case: CaseRecord,
+    *,
+    runtime: CaseRuntime,
+) -> tuple[bytes, ...]:
+    """CSVs de prescriptions `done` de Casos anteriores do mesmo Paciente."""
+    prior: list[bytes] = []
+    for other in runtime.case_store.list_by_patient(case.patient_id):
+        if other.id == case.id:
+            continue
+        rx_mod = next(
+            (m for m in other.modalities if m.modality == "prescriptions"), None
+        )
+        if rx_mod is None or rx_mod.status != "done":
+            continue
+        artifact = next(
+            (a for a in other.artifacts if a.modality == "prescriptions"), None
+        )
+        if artifact is None:
+            continue
+        content = runtime.blob_store.get(artifact.bucket, artifact.object_key)
+        if content is not None:
+            prior.append(content)
+    return tuple(prior)
+
+
+def _process_prescriptions_modality(
+    case: CaseRecord,
+    *,
+    runtime: CaseRuntime,
+    now: datetime,
+) -> CaseRecord:
+    from app.cases.prescriptions_engine import PrescriptionsAnomalyEngine
+
+    artifact = next(
+        (a for a in case.artifacts if a.modality == "prescriptions"), None
+    )
+    if artifact is None:
+        return _replace_modality_status(case, "prescriptions", "failed", now=now)
+
+    content = runtime.blob_store.get(artifact.bucket, artifact.object_key)
+    if content is None:
+        raise PermanentProcessingError(
+            f"Artefato ausente: {artifact.bucket}/{artifact.object_key}"
+        )
+
+    history = _prescription_history_blobs(case, runtime=runtime)
+    PrescriptionsAnomalyEngine().analyze_csv(content, history=history)
+    return _replace_modality_status(case, "prescriptions", "done", now=now)
 
 
 def _process_video_modality(
@@ -501,6 +567,8 @@ def process_modality_for_case(
             return _process_audio_modality(current, runtime=ctx, now=now)
         if modality == "video":
             return _process_video_modality(current, runtime=ctx, now=now)
+        if modality == "prescriptions":
+            return _process_prescriptions_modality(current, runtime=ctx, now=now)
         fail_reason = f"modalidade sem handler: {modality}"
         return _replace_modality_status(current, modality, "failed", now=now)
 

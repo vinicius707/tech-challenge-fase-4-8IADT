@@ -219,7 +219,8 @@ Contrato: [`specs/epic-03-caso-fila/02-outbox-rq.md`](specs/epic-03-caso-fila/02
 | `FRONTEND_PORT` | Porta publicada da UI (padrão `3000`) |
 | `BACKEND_URL` | Origem FastAPI para o rewrite `/api` do Next |
 
-Detalhes: [`frontend/README.md`](frontend/README.md).
+Detalhes: [`frontend/README.md`](frontend/README.md). Login em `/login` (sessão
+Zustand; proxy `/api/auth/*`).
 
 ## Testes do backend
 

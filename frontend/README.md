@@ -24,7 +24,7 @@ Health via proxy: <http://localhost:3000/api/health>
 | ------- | ------ |
 | `npm run dev` | Dev server (Turbopack) |
 | `npm run build` / `npm start` | Produção |
-| `npm test` | Contrato do rewrite `/api` |
+| `npm test` | Vitest (proxy + auth/sessão) |
 | `npm run lint` | ESLint |
 
 ## Variáveis

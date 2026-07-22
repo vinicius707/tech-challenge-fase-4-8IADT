@@ -12,6 +12,7 @@ class ModalityResponse(BaseModel):
     modality: str
     status: str
     artifact_id: uuid.UUID | None = None
+    provider: str | None = None
 
 
 class ArtifactResponse(BaseModel):

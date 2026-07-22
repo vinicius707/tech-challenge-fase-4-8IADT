@@ -188,6 +188,7 @@ def _to_response(case: CaseRecord) -> CaseResponse:
                 modality=m.modality,
                 status=m.status,
                 artifact_id=m.artifact_id,
+                provider=m.provider,
             )
             for m in case.modalities
         ],

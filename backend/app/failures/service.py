@@ -166,6 +166,8 @@ class FailureService:
             modalities=updated_modalities,
             artifacts=case.artifacts,
             alerts=case.alerts,
+            video_idempotency_key=case.video_idempotency_key,
+            video_content_sha256=case.video_content_sha256,
         )
         self._case_store.save(updated_case)
 

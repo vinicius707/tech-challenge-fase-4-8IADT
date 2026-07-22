@@ -32,6 +32,10 @@ class Case(Base):
         String(128), unique=True, nullable=True
     )
     content_sha256: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    video_idempotency_key: Mapped[str | None] = mapped_column(
+        String(128), unique=True, nullable=True
+    )
+    video_content_sha256: Mapped[str | None] = mapped_column(String(64), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

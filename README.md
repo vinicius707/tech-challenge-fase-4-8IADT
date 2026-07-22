@@ -11,23 +11,26 @@ Glossário de domínio: [`CONTEXT.md`](CONTEXT.md). Decisão de arquitetura:
 
 ## Estado atual
 
-Os **Épicos 1–4** estão concluídos (Fundação, Identidade, Núcleo Caso + fila e
-Shell Frontend).
+Os **Épicos 1–5** estão concluídos (Fundação, Identidade, Núcleo Caso + fila,
+Shell Frontend e Resiliência). A etapa **E6.1 (vídeo)** do Épico 6 também está
+entregue.
 
 A entrega atual inclui autenticação JWT, Paciente com Rótulo Sensível, Caso com
-modalidade `vitals` (Artefato no MinIO, outbox → RQ → Risco e Alerta v1 se ≥
-MEDIO), worker e reconciler no Compose, e o shell Next.js (login, Pacientes,
-Novo Caso e detalhe com polling).
+modalidades `vitals` e `video` (Artefatos no MinIO, outbox → filas RQ `default` /
+`video` → Risco fundido e Alerta v1 se ≥ MEDIO), falha parcial / reprocess,
+workers `worker` + `worker-video` e reconciler no Compose, e o shell Next.js
+(login, Pacientes, Novo Caso e detalhe com polling).
 
-Ainda não fazem parte da implementação: modalidades além de vitais, Azure,
-Alertas SSE / feed, DLQ admin e o restante dos épicos 5–8.
+Ainda não fazem parte da implementação: áudio Azure real (E6.2), prescrições /
+seed multimodal (E6.3), UI polish de upload de vídeo (Épico 7), Alertas SSE /
+feed e o restante do Épico 8 (CI/CD GHCR).
 
 ## O que já foi entregue
 
 ### Fundação (Épico 1)
 
 - FastAPI no backend.
-- PostgreSQL com migrações Alembic até `20260721_0010`.
+- PostgreSQL com migrações Alembic até `20260721_0012`.
 - Redis como broker da fila RQ.
 - MinIO S3-compatible; bucket `limen` criado de forma idempotente.
 - Docker Compose, smoke local e CI magra (pytest).
@@ -66,6 +69,28 @@ Alertas SSE / feed, DLQ admin e o restante dos épicos 5–8.
 - Script de start: [`scripts/start-limen.sh`](scripts/start-limen.sh).
 - Specs: [`specs/epic-04-shell-frontend/`](specs/epic-04-shell-frontend/).
 
+### Resiliência (Épico 5)
+
+- Falha parcial: Caso pode fechar `done` com modalidades `failed`; fusão só
+  sobre `done`.
+- `POST /cases/{id}/reprocess` seletivo; Alertas versionados append-only.
+- Filas RQ `default` + `video` (`worker-video`); retries transitórios e
+  circuit breaker Azure (stub).
+- Specs: [`specs/epic-05-resiliencia/`](specs/epic-05-resiliencia/).
+
+### Modalidades — Vídeo (Épico 6 / E6.1)
+
+- Fixtures AVI sintéticas (`physio` / `surgery_light`) + regeneração:
+  [`data/fixtures/video/`](data/fixtures/video/).
+- `POST /cases/{id}/modalities/video` (multipart + `Idempotency-Key`) → MinIO +
+  job na fila `video`.
+- Análise Postural (Pose) e Detecção em Cena (YOLO COCO + heurísticas);
+  backends `synthetic` padrão (`LIMEN_POSE_BACKEND` / `LIMEN_YOLO_BACKEND`).
+- Frames anotados como Artefatos `video_frame`; vídeo contribui ao Risco
+  (fusão com vitais; falha parcial intacta).
+- Spec:
+  [`01-video-pose-yolo.md`](specs/epic-06-modalidades/01-video-pose-yolo.md).
+
 ## Executar localmente
 
 Pré-requisitos: Docker Compose v2; portas 3000, 5432, 6379, 8000, 9000 e 9001
@@ -92,7 +117,8 @@ docker compose up --build --wait
 
 O Compose aguarda PostgreSQL, Redis e MinIO, cria o bucket `limen`, aplica
 `alembic upgrade head`, faz o seed dos Operadores (se `SEED_*` estiver no `.env`)
-e sobe o backend, o worker RQ, o reconciler de outbox e o frontend Next.
+e sobe o backend, os workers RQ (`default` e `video`), o reconciler de outbox e
+o frontend Next.
 
 Endpoints locais:
 
@@ -174,6 +200,18 @@ curl -s "http://localhost:8000/cases/$CASE_ID" \
   -H "Authorization: Bearer $TOKEN" | jq
 ```
 
+### Anexar modalidade vídeo ao Caso
+
+```bash
+curl -s -X POST "http://localhost:8000/cases/$CASE_ID/modalities/video" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Idempotency-Key: demo-video-1" \
+  -F "file=@data/fixtures/video/video_physio.avi;type=video/x-msvideo" | jq
+```
+
+O job vai para a fila `video` (`worker-video`). Fixture alternativa de cena:
+`data/fixtures/video/video_surgery_light.avi`.
+
 Rotas públicas nesta etapa: `GET /health`, `POST /auth/login`,
 `POST /auth/refresh`. Demais rotas exigem Bearer access token.
 
@@ -235,10 +273,12 @@ Trocar a chave sem recriptografar torna rótulos existentes ilegíveis.
 | `LIMEN_TIMEOUT_VIDEO_SECONDS` | Timeout job vídeo (padrão `180`) |
 | `LIMEN_RETRY_MAX_ATTEMPTS` | Máx. tentativas para erro transitório (padrão `3`) |
 | `LIMEN_RETRY_BASE_DELAY_SECONDS` | Base do backoff exponencial (padrão `1`) |
-| `AZURE_ENABLED` | Habilita caminho Azure (padrão `false`; real = Épico 6) |
+| `AZURE_ENABLED` | Habilita caminho Azure (padrão `false`; real = E6.2) |
 | `LIMEN_AZURE_CB_FAILURE_THRESHOLD` | Falhas consecutivas para abrir o CB (padrão `3`) |
 | `LIMEN_AZURE_CB_OPEN_SECONDS` | Segundos com CB aberto forçando `local` (padrão `300`) |
 | `LIMEN_AZURE_CB_FORCE_OPEN` | Força CB aberto no stub (`true`/`1`) |
+| `LIMEN_POSE_BACKEND` | Análise Postural: `synthetic` (padrão) ou `mediapipe` |
+| `LIMEN_YOLO_BACKEND` | Detecção em Cena: `synthetic` (padrão) ou `ultralytics` |
 | `OUTBOX_RECONCILE_INTERVAL_SECONDS` | Intervalo do reconciler (padrão `5`) |
 
 Contrato: [`specs/epic-03-caso-fila/02-outbox-rq.md`](specs/epic-03-caso-fila/02-outbox-rq.md).
@@ -287,5 +327,7 @@ e frontend entram no Épico 8 (ADR [0028](docs/adr/0028-cicd-actions-ghcr.md)).
 | [`specs/epic-02-identity/`](specs/epic-02-identity/) | Contratos auth e Paciente |
 | [`specs/epic-03-caso-fila/`](specs/epic-03-caso-fila/) | Vitais, outbox/RQ, Caso → Risco/Alerta |
 | [`specs/epic-04-shell-frontend/`](specs/epic-04-shell-frontend/) | Shell Next (scaffold → login → Pacientes) |
+| [`specs/epic-05-resiliencia/`](specs/epic-05-resiliencia/) | Falha parcial, filas, DLQ/retries |
+| [`specs/epic-06-modalidades/`](specs/epic-06-modalidades/) | Vídeo Pose/YOLO (E6.1); placeholders áudio/prescrições |
 | [`frontend/`](frontend/) | App Next.js (Épico 4) |
 | [`.cursor/plans/arquitetura_multimodal_fase_4_a1c92623.plan.md`](.cursor/plans/arquitetura_multimodal_fase_4_a1c92623.plan.md) | Plano incremental dos épicos |

@@ -11,7 +11,8 @@ sobre store compartilhado entre API e worker (Compose).
 
 ## Status da entrega
 
-**Pendente** (T5.0–T5.2 ok; **T5.3 reprocess**; falta T5.4 Alerta v2).
+**Concluída em 21 de julho de 2026** (T5.0–T5.4: specs, store compartilhado,
+falha parcial, reprocess seletivo, Alerta v2). Filas/DLQ ficam na spec `02`.
 
 ## Escopo
 
@@ -99,5 +100,5 @@ no teste)
 - [x] Store compartilhado API↔worker (Caso/outbox) validado no Compose.
 - [x] Falha parcial + Caso `done` cobertos por TDD.
 - [x] Reprocess seletivo + refundição cobertos por TDD.
-- [ ] Alerta v2 append-only quando o nível muda.
-- [ ] Sem SSE; sem UI de DLQ.
+- [x] Alerta v2 append-only quando o nível muda.
+- [x] Sem SSE; sem UI de DLQ.

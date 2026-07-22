@@ -1,4 +1,4 @@
-"""Pipeline assíncrono: modalidades → Fusion → Risco → Alerta v1 (falha parcial)."""
+"""Pipeline assíncrono: modalidades → Fusion → Risco → Alertas versionados."""
 
 from __future__ import annotations
 
@@ -18,6 +18,7 @@ ALERT_VERSION_V1 = 1
 FORCE_FAIL_ENV = "LIMEN_FORCE_FAIL_MODALITIES"
 TERMINAL_STATUSES = frozenset({"done", "failed", "skipped"})
 STUB_SUCCESS_RISK = ModalityRisk(score=0.10, level="BAIXO", anomalies=())
+ALERT_WORTHY_LEVELS = frozenset({"MEDIO", "ALTO"})
 
 
 def _alerts_after_fusion(
@@ -26,20 +27,36 @@ def _alerts_after_fusion(
     *,
     now: datetime,
 ) -> list[AlertRecord]:
-    """Emite Alerta v1 se ≥ MEDIO; dedupe por (case_id, level, version)."""
+    """Append-only: v1 se ≥ MEDIO; nova versão se o risk_level mudar após reprocess."""
     alerts = list(case.alerts)
-    if risk_level not in {"MEDIO", "ALTO"}:
+    previous_level = case.risk_level
+
+    if not alerts:
+        if risk_level not in ALERT_WORTHY_LEVELS:
+            return alerts
+        alerts.append(
+            AlertRecord(
+                id=uuid.uuid4(),
+                case_id=case.id,
+                level=risk_level,
+                version=ALERT_VERSION_V1,
+                created_at=now,
+            )
+        )
         return alerts
-    if any(
-        a.level == risk_level and a.version == ALERT_VERSION_V1 for a in alerts
-    ):
+
+    if previous_level == risk_level:
+        return alerts
+
+    next_version = max(a.version for a in alerts) + 1
+    if any(a.level == risk_level and a.version == next_version for a in alerts):
         return alerts
     alerts.append(
         AlertRecord(
             id=uuid.uuid4(),
             case_id=case.id,
             level=risk_level,
-            version=ALERT_VERSION_V1,
+            version=next_version,
             created_at=now,
         )
     )

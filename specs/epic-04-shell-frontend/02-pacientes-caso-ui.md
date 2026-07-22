@@ -11,7 +11,8 @@ usando TanStack Query (polling/skeletons) sobre a API do Épico 3.
 
 ## Status da entrega
 
-**Spec aprovada (T4.0).** Implementação: **T4.4–T4.6**.
+**Parcial — T4.4:** listagem e detalhe de Pacientes (Query). Novo Caso e
+detalhe de Caso: **T4.5–T4.6**.
 
 ## Escopo
 
@@ -116,8 +117,8 @@ Caso; paginação avançada além do mínimo útil.
 
 ## Critérios de pronto (DoD desta spec / T4.4–T4.6)
 
-- [ ] Rotas de Pacientes, Novo Caso e detalhe de Caso implementadas.
+- [ ] Rotas de Pacientes, Novo Caso e detalhe de Caso implementadas. *(T4.4: `/pacientes` + `/pacientes/[id]`)*
 - [ ] Query + polling/skeletons no detalhe enquanto não terminal.
 - [ ] Risco/Alerta somente leitura conforme API do Épico 3.
-- [ ] Cenários 1–5 cobertos por testes automatizados (e/ou e2e leve).
+- [ ] Cenários 1–5 cobertos por testes automatizados (e/ou e2e leve). *(T4.4: helpers lista/rótulo)*
 - [ ] Fluxo visual Paciente → Caso → Risco demonstrável em local.

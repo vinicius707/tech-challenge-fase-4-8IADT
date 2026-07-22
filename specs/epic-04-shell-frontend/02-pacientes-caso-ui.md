@@ -11,8 +11,8 @@ usando TanStack Query (polling/skeletons) sobre a API do Épico 3.
 
 ## Status da entrega
 
-**Parcial — T4.4–T4.5:** listagem/detalhe de Pacientes + Novo Caso vitais
-(upload CSV + `Idempotency-Key`). Detalhe de Caso + polling: **T4.6**.
+**Concluída em 21 de julho de 2026** (T4.4–T4.6): Pacientes, Novo Caso vitais e
+detalhe de Caso com polling/skeletons + Risco/Alerta read-only.
 
 ## Escopo
 
@@ -117,8 +117,8 @@ Caso; paginação avançada além do mínimo útil.
 
 ## Critérios de pronto (DoD desta spec / T4.4–T4.6)
 
-- [ ] Rotas de Pacientes, Novo Caso e detalhe de Caso implementadas. *(T4.4–T4.5: `/pacientes`, `/pacientes/[id]`, `/pacientes/[id]/novo-caso`; detalhe `/casos/[id]` = T4.6)*
-- [ ] Query + polling/skeletons no detalhe enquanto não terminal.
-- [ ] Risco/Alerta somente leitura conforme API do Épico 3.
-- [ ] Cenários 1–5 cobertos por testes automatizados (e/ou e2e leve). *(T4.4–T4.5: helpers lista/rótulo + create Caso/Idempotency-Key; Cenário 2)*
-- [ ] Fluxo visual Paciente → Caso → Risco demonstrável em local.
+- [x] Rotas de Pacientes, Novo Caso e detalhe de Caso implementadas. *(T4.4–T4.6)*
+- [x] Query + polling/skeletons no detalhe enquanto não terminal. *(T4.6; intervalo 2s, timeout de UX 120s)*
+- [x] Risco/Alerta somente leitura conforme API do Épico 3. *(T4.6)*
+- [x] Cenários 1–5 cobertos por testes automatizados (e/ou e2e leve). *(helpers + create + parse detalhe/polling; auth via AuthGate)*
+- [x] Fluxo visual Paciente → Caso → Risco demonstrável em local.

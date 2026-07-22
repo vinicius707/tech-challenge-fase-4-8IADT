@@ -5,7 +5,23 @@ Next.js App Router + Tailwind CSS + shadcn/ui. Proxy `/api/*` → FastAPI
 
 > Não é um dispositivo médico.
 
-## Local (fora do Compose)
+## Documentação
+
+| Doc | Conteúdo |
+| --- | -------- |
+| [Guia de uso + prints](../docs/frontend/guia-de-uso.md) | Fluxo login → Paciente → Caso |
+| [Troubleshooting](../docs/frontend/troubleshooting.md) | Diagnóstico Compose/UI/API |
+| [Baseline Lighthouse](../docs/perf/baseline/) | Scores versionados |
+
+## Subir tudo (recomendado)
+
+Na raiz do repositório:
+
+```bash
+./scripts/start-limen.sh
+```
+
+## Local (fora do Compose, só UI)
 
 Pré-requisito: backend em `http://localhost:8000` (ou ajuste `BACKEND_URL`).
 

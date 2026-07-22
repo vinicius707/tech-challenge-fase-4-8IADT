@@ -12,7 +12,8 @@ landmarks acessíveis e layout responsivo.
 ## Status da entrega
 
 **Parcial — T4.0–T4.3:** specs + scaffold + proxy + auth + shell landmarks
-responsivo. Pacientes/Caso UI: **T4.4+** (spec `02`).
+responsivo. Pacientes/Caso UI e Lighthouse: specs `02`/`03` (concluídas).
+Fechamento docs/guia: ver [`docs/frontend/`](../../docs/frontend/).
 
 ## Escopo
 

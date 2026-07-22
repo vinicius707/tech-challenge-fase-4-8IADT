@@ -25,6 +25,7 @@ Contratos Given/When/Then escritos **antes** da implementação TDD.
 | 4 Shell Frontend | [`../specs/epic-04-shell-frontend/01-scaffold-auth.md`](../specs/epic-04-shell-frontend/01-scaffold-auth.md) | Concluída |
 | 4 Shell Frontend | [`../specs/epic-04-shell-frontend/02-pacientes-caso-ui.md`](../specs/epic-04-shell-frontend/02-pacientes-caso-ui.md) | Concluída |
 | 4 Shell Frontend | [`../specs/epic-04-shell-frontend/03-lighthouse-baseline.md`](../specs/epic-04-shell-frontend/03-lighthouse-baseline.md) | Concluída |
+| 4 Shell Frontend | [`../specs/epic-04-shell-frontend/04-fechamento-docs.md`](../specs/epic-04-shell-frontend/04-fechamento-docs.md) | Concluída |
 
 ## ADRs
 
@@ -83,6 +84,13 @@ arquivo quando o plano supersede uma decisão anterior.
 
 - Baseline Lighthouse (Épico 4, sem gate de CI):
   [`perf/baseline/`](perf/baseline/)
+
+## Frontend (operacional)
+
+- Índice: [`frontend/README.md`](frontend/README.md)
+- [Guia de uso com prints](frontend/guia-de-uso.md)
+- [Troubleshooting](frontend/troubleshooting.md)
+- Script de start da stack: [`../scripts/start-limen.sh`](../scripts/start-limen.sh)
 
 ## Progresso por épico
 

@@ -3,7 +3,8 @@ FROM node:22-alpine
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci
+# `npm ci` falha no Alpine quando optional deps (emnapi) divergem do lock do macOS.
+RUN npm install --no-audit --no-fund
 
 COPY . .
 

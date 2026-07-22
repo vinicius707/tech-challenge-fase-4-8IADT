@@ -11,15 +11,16 @@ Glossário de domínio: [`CONTEXT.md`](CONTEXT.md). Decisão de arquitetura:
 
 ## Estado atual
 
-Os **Épicos 1–3** estão concluídos (Fundação, Identidade e Núcleo Caso + fila).
+Os **Épicos 1–4** estão concluídos (Fundação, Identidade, Núcleo Caso + fila e
+Shell Frontend).
 
 A entrega atual inclui autenticação JWT, Paciente com Rótulo Sensível, Caso com
 modalidade `vitals` (Artefato no MinIO, outbox → RQ → Risco e Alerta v1 se ≥
-MEDIO), worker e reconciler no Compose.
+MEDIO), worker e reconciler no Compose, e o shell Next.js (login, Pacientes,
+Novo Caso e detalhe com polling).
 
-Ainda não fazem parte da implementação: login/shell completo do frontend
-(Épico 4 em andamento), modalidades além de vitais, Azure, Alertas SSE / feed,
-DLQ admin e o restante dos épicos 5–8.
+Ainda não fazem parte da implementação: modalidades além de vitais, Azure,
+Alertas SSE / feed, DLQ admin e o restante dos épicos 5–8.
 
 ## O que já foi entregue
 
@@ -60,12 +61,29 @@ DLQ admin e o restante dos épicos 5–8.
 - Login (Zustand), shell landmarks, Pacientes, Novo Caso vitais e detalhe de
   Caso com polling/Risco/Alertas.
 - Baseline Lighthouse (sem gate): [`docs/perf/baseline/`](docs/perf/baseline/).
+- Guia de uso + prints + troubleshooting:
+  [`docs/frontend/`](docs/frontend/).
+- Script de start: [`scripts/start-limen.sh`](scripts/start-limen.sh).
 - Specs: [`specs/epic-04-shell-frontend/`](specs/epic-04-shell-frontend/).
 
 ## Executar localmente
 
 Pré-requisitos: Docker Compose v2; portas 3000, 5432, 6379, 8000, 9000 e 9001
 livres (ou remapeadas no `.env`).
+
+### Forma recomendada (script)
+
+```bash
+./scripts/start-limen.sh
+```
+
+O script cria `.env` se necessário, sobe o Compose com `--build --wait`, valida
+API + UI e imprime as URLs. Variantes: `--smoke`, `--down`, `--reset`.
+
+Guia visual da UI: [`docs/frontend/guia-de-uso.md`](docs/frontend/guia-de-uso.md).  
+Problemas comuns: [`docs/frontend/troubleshooting.md`](docs/frontend/troubleshooting.md).
+
+### Forma manual
 
 ```bash
 cp .env.example .env

@@ -14,7 +14,7 @@ anteriores (ADR 0010), contribuição ao Risco na fila RQ `default`
 
 ## Status da entrega
 
-**Pendente** (T6.13–T6.16 ok; falta T6.17–T6.20 desta etapa E6.3).
+**Pendente** (T6.13–T6.17 ok; falta T6.18–T6.20 desta etapa E6.3).
 
 Pré-requisito: E6.2 (áudio) concluída nesta branch.
 
@@ -161,9 +161,9 @@ pode ficar `done`.
 - [x] Spec SDD aprovada e versionada.
 - [x] Fixtures CSV + README de schema/regeneração.
 - [x] Upload → Artefato MinIO → job na fila `default`.
-- [ ] Engine de regras + desvio longitudinal cobertos por TDD.
-      *(regras locais = T6.16; desvio longitudinal = T6.17)*
+- [x] Engine de regras + desvio longitudinal cobertos por TDD.
 - [ ] Modalidade contribui ao Risco; falha parcial intacta.
+      *(wiring worker + fusão E2E = T6.18)*
 - [ ] Seed demo multimodal documentado e coberto por smoke/TDD.
 - [ ] Sem UI de prescrições (Épico 7); sem farmácia real; sem Épico 8.
 - [ ] README operacional + índice `docs/README.md` atualizados.

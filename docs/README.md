@@ -7,8 +7,16 @@ Limen (FIAP 8IADT — Fase 4).
 
 - Glossário: [`../CONTEXT.md`](../CONTEXT.md)
 - README operacional: [`../README.md`](../README.md)
+- **Arquitetura (diagramas Mermaid):** [`architecture.md`](architecture.md)
 - Plano incremental:
   [`../.cursor/plans/arquitetura_multimodal_fase_4_a1c92623.plan.md`](../.cursor/plans/arquitetura_multimodal_fase_4_a1c92623.plan.md)
+
+## Arquitetura
+
+Diagramas canônicos da stack pós-Épico 6 (Compose, Caso multimodal, filas,
+fusão de Risco, Provedor de Áudio, Prescrições e mapa de épicos):
+
+→ [`architecture.md`](architecture.md)
 
 ## Specs (SDD)
 

@@ -209,7 +209,10 @@ Specs finas criadas no início de cada etapa.
 
 ## Arquitetura (âncora)
 
-Stack e diagramas canônicos permanecem: FastAPI + RQ + Postgres + Redis + MinIO + Next; Azure F0; outbox; falha parcial; etc. (ADRs 0001–0028).
+Stack e diagramas canônicos: FastAPI + RQ + Postgres + Redis + MinIO + Next;
+Azure F0; outbox; falha parcial; modalidades PDF (Épicos 1–6 concluídos).
+
+**Diagramas atualizados (Mermaid):** [`docs/architecture.md`](../../docs/architecture.md).
 
 ```mermaid
 flowchart LR
@@ -224,6 +227,6 @@ flowchart LR
 
 ## Próximo passo de execução
 
-Os **Épicos 1–3** estão concluídos.
-Próximo: **Épico 4 — Shell Frontend** (auth UI, Pacientes/Caso vitais, baseline
-Lighthouse).
+Os **Épicos 1–6** estão concluídos.
+Próximo: **Épico 7 — Alertas + polish UI** (Justificativa, SSE, a11y AA,
+Lighthouse gate).

@@ -14,7 +14,8 @@ Risco do Caso.
 
 ## Status da entrega
 
-**Pendente** (T6.0–T6.5 ok; falta T6.6 desta etapa E6.1).
+**Concluída em 21 de julho de 2026** (T6.0–T6.6: specs, fixtures, upload,
+Pose, Detecção em Cena, worker/fusão e fechamento docs).
 
 Etapas posteriores do Épico 6 (specs próprias no início de cada uma):
 
@@ -135,5 +136,5 @@ Risco fundido quando o Caso fechar.
 - [x] Frames anotados no MinIO; modalidade contribui ao Risco.
       *(frames Pose e scene; contribuição ao Risco via fusão)*
 - [x] Stub de `modality=video` do Épico 5 substituído por processamento real.
-- [ ] Sem áudio Azure real; sem UI polish de upload (Épico 7).
-      *(docs/fechamento índice = T6.6)*
+- [x] Sem áudio Azure real; sem UI polish de upload (Épico 7).
+- [x] README operacional + índice `docs/README.md` atualizados (T6.6).

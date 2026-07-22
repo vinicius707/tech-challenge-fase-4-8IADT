@@ -1,0 +1,5 @@
+timestamp,medication,dose_mg,interval_hours,label
+0000,metformin,500.00,12.00,normal
+0012,metformin,500.00,12.00,normal
+0024,amlodipine,5.00,24.00,normal
+0048,losartan,50.00,24.00,normal

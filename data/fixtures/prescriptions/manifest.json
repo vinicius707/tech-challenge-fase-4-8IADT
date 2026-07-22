@@ -1,0 +1,51 @@
+{
+  "version": "2026-07-21.1",
+  "seed": 20260721,
+  "fixtures": [
+    {
+      "file": "prescriptions_normal.csv",
+      "scenario": "normal",
+      "expected_risk_hint": "BAIXO",
+      "row_count": 4,
+      "sha256": "53b74290bb30ab8102e36a29a75f291bab9cceb106e2293645a7f742e01861b1",
+      "notes": "Cenário normal sintético (seed=20260721) — sem PHI nem decisão terapêutica."
+    },
+    {
+      "file": "prescriptions_medium.csv",
+      "scenario": "medium",
+      "expected_risk_hint": "MEDIO",
+      "row_count": 4,
+      "sha256": "61efe84d9207df77d243ffa76c00b661a53b50f911123414babbf4e6170273ad",
+      "notes": "Cenário medium sintético (seed=20260721) — sem PHI nem decisão terapêutica."
+    },
+    {
+      "file": "prescriptions_high.csv",
+      "scenario": "high",
+      "expected_risk_hint": "ALTO",
+      "row_count": 4,
+      "sha256": "40bba682668c036494eb677b534f3ef861924579dd5c03492d9ca9d9caf1848d",
+      "notes": "Cenário high sintético (seed=20260721) — sem PHI nem decisão terapêutica."
+    }
+  ],
+  "catalog": {
+    "metformin": {
+      "dose_mg_min": 500.0,
+      "dose_mg_max": 2000.0,
+      "interval_hours": 12.0
+    },
+    "amlodipine": {
+      "dose_mg_min": 5.0,
+      "dose_mg_max": 10.0,
+      "interval_hours": 24.0
+    },
+    "losartan": {
+      "dose_mg_min": 25.0,
+      "dose_mg_max": 100.0,
+      "interval_hours": 24.0
+    }
+  },
+  "reference_sources": {
+    "synthetic_catalog": "Catálogo sintético Limen — faixas demo (ADR 0010); não é formulário hospitalar.",
+    "public_formularies": "Formulários / bulas genéricas públicas — só calibração; brutos fora do Git"
+  }
+}

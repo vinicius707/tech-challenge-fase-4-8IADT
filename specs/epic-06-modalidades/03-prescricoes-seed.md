@@ -14,7 +14,7 @@ anteriores (ADR 0010), contribuição ao Risco na fila RQ `default`
 
 ## Status da entrega
 
-**Pendente** (T6.13: spec SDD versionada; implementação T6.14–T6.20 desta etapa E6.3).
+**Pendente** (T6.13–T6.14 ok; falta T6.15–T6.20 desta etapa E6.3).
 
 Pré-requisito: E6.2 (áudio) concluída nesta branch.
 
@@ -159,7 +159,7 @@ pode ficar `done`.
 ## Critérios de pronto (DoD desta etapa E6.3)
 
 - [x] Spec SDD aprovada e versionada.
-- [ ] Fixtures CSV + README de schema/regeneração.
+- [x] Fixtures CSV + README de schema/regeneração.
 - [ ] Upload → Artefato MinIO → job na fila `default`.
 - [ ] Engine de regras + desvio longitudinal cobertos por TDD.
 - [ ] Modalidade contribui ao Risco; falha parcial intacta.

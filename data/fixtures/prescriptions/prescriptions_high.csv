@@ -1,0 +1,5 @@
+timestamp,medication,dose_mg,interval_hours,label
+0000,metformin,500.00,12.00,normal
+0012,xyz_unknown_med,999.00,6.00,anomaly
+0024,amlodipine,40.00,4.00,anomaly
+0048,losartan,200.00,6.00,anomaly

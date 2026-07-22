@@ -1,0 +1,36 @@
+{
+  "version": "2026-07-21.1",
+  "seed": 20260721,
+  "fixtures": [
+    {
+      "file": "video_physio.avi",
+      "scenario": "physio",
+      "analysis": "pose",
+      "width": 64,
+      "height": 48,
+      "frames": 12,
+      "fps": 4,
+      "container": "avi",
+      "pixel_format": "bgr24",
+      "sha256": "d08fefaaeb2450888e418f773fd14912f88253ed0a202b2fe6b4b5533f1bafac",
+      "notes": "Silhueta sintética para Análise Postural (proxy de yoga/fisio)."
+    },
+    {
+      "file": "video_surgery_light.avi",
+      "scenario": "surgery_light",
+      "analysis": "scene",
+      "width": 64,
+      "height": 48,
+      "frames": 12,
+      "fps": 4,
+      "container": "avi",
+      "pixel_format": "bgr24",
+      "sha256": "1859400287d3aa6f9b2f9b8cf1b52d74648d3de15a1cd89985eee2ac54d6bfb2",
+      "notes": "Cena sintética para Detecção em Cena (proxy stock CC); sem claim clínico."
+    }
+  ],
+  "reference_sources": {
+    "physio": "https://github.com/seonokkim/3dyoga90",
+    "surgery_light": "https://creativecommons.org/publicdomain/zero/1.0/ (stock CC genérico — URL concreta no README)"
+  }
+}

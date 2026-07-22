@@ -24,9 +24,12 @@ def redis_url() -> str:
 
 
 def resolve_queue(*, job_type: str, payload: dict[str, Any]) -> str:
-    """Roteia jobs: modalidade `video` → fila `video`; demais → `default`."""
-    if job_type == "process_video_stub":
-        return video_queue_name()
+    """Roteia jobs: modalidade `video` → fila `video`; demais → `default`.
+
+    `job_type` fica na assinatura do dispatcher; o roteamento usa
+    `payload["modality"]` (`process_modality` é o único tipo em produção).
+    """
+    _ = job_type
     modality = str(payload.get("modality") or "")
     if modality == "video":
         return video_queue_name()

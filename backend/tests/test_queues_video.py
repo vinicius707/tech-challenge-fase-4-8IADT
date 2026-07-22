@@ -68,7 +68,7 @@ def test_vitals_enqueue_stays_on_default_queue() -> None:
     assert enqueuer.jobs[0]["payload"]["modality"] == "vitals"
 
 
-def test_video_stub_enqueue_uses_video_queue() -> None:
+def test_video_enqueue_uses_video_queue() -> None:
     enqueuer = RecordingJobEnqueuer()
     dispatcher = OutboxDispatcher(store=InMemoryOutboxStore(), enqueuer=enqueuer)
     case_id = uuid.uuid4()
@@ -85,7 +85,7 @@ def test_video_stub_enqueue_uses_video_queue() -> None:
     assert enqueuer.jobs[0]["payload"]["modality"] == "video"
 
 
-def test_video_stub_job_marks_outbox_processed() -> None:
+def test_video_job_marks_outbox_processed() -> None:
     store = InMemoryOutboxStore()
     dispatcher = OutboxDispatcher(store=store, enqueuer=RecordingJobEnqueuer())
     case_id = uuid.uuid4()

@@ -7,7 +7,8 @@ precoce de risco clínico.
 > clínicas reais.
 
 Glossário de domínio: [`CONTEXT.md`](CONTEXT.md). Decisão de arquitetura:
-[`docs/`](docs/README.md).
+[`docs/`](docs/README.md). Diagramas da stack:
+[`docs/architecture.md`](docs/architecture.md).
 
 ## Estado atual
 
@@ -388,6 +389,7 @@ e frontend entram no Épico 8 (ADR [0028](docs/adr/0028-cicd-actions-ghcr.md)).
 | --------- | -------- |
 | [`CONTEXT.md`](CONTEXT.md) | Linguagem ubíqua (Paciente, Caso, Risco, …) |
 | [`docs/README.md`](docs/README.md) | Índice de ADRs e specs |
+| [`docs/architecture.md`](docs/architecture.md) | Diagramas Mermaid da arquitetura (Compose, filas, fusão, …) |
 | [`specs/epic-01-foundation/`](specs/epic-01-foundation/) | Contrato Compose/health |
 | [`specs/epic-02-identity/`](specs/epic-02-identity/) | Contratos auth e Paciente |
 | [`specs/epic-03-caso-fila/`](specs/epic-03-caso-fila/) | Vitais, outbox/RQ, Caso → Risco/Alerta |

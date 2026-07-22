@@ -14,7 +14,7 @@ class TransientProcessingError(Exception):
 
 
 class PermanentProcessingError(Exception):
-    """Erro definitivo — modalidade `failed` (DLQ após esgotar política no T5.7)."""
+    """Erro definitivo — modalidade `failed` + registro na DLQ (T5.7)."""
 
 
 def classify_error(exc: BaseException) -> ErrorKind:

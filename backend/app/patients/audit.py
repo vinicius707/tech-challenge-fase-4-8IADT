@@ -6,6 +6,8 @@ from datetime import UTC, datetime
 from typing import Protocol
 
 REVEAL_SENSITIVE_LABEL = "reveal_sensitive_label"
+DLQ_REDRIVE = "dlq_redrive"
+DLQ_DISCARD = "dlq_discard"
 
 
 @dataclass(frozen=True)

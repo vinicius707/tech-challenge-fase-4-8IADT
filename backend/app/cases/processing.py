@@ -14,6 +14,7 @@ from app.cases.vitals_engine import (
     VitalsAnomalyEngine,
     fuse_done_modalities,
 )
+from app.failures.service import record_processing_failure
 from app.outbox.retries import PermanentProcessingError, TransientProcessingError
 from app.outbox.timeouts import ModalityTimeoutError, run_with_modality_timeout
 
@@ -277,17 +278,22 @@ def process_modality_for_case(
     )
     ctx.case_store.save(case)
 
+    fail_reason: str | None = None
+
     def _work() -> CaseRecord:
+        nonlocal fail_reason
         _maybe_inject_test_hooks(modality)
         force_fail = modality in _forced_fail_modalities()
         current = case
         if force_fail:
+            fail_reason = f"falha forçada: {modality}"
             return _replace_modality_status(current, modality, "failed", now=now)
         if modality == "vitals":
             artifact = next(
                 (a for a in current.artifacts if a.modality == "vitals"), None
             )
             if artifact is None:
+                fail_reason = "artefato de vitais ausente"
                 return _replace_modality_status(current, modality, "failed", now=now)
             content = ctx.blob_store.get(artifact.bucket, artifact.object_key)
             if content is None:
@@ -298,17 +304,29 @@ def process_modality_for_case(
             return _replace_modality_status(current, modality, "done", now=now)
         if modality == "audio":
             return _replace_modality_status(current, modality, "done", now=now)
+        fail_reason = f"modalidade sem handler: {modality}"
         return _replace_modality_status(current, modality, "failed", now=now)
 
     try:
         case = run_with_modality_timeout(modality, _work)
-    except ModalityTimeoutError:
+    except ModalityTimeoutError as exc:
+        fail_reason = str(exc) or f"timeout: {modality}"
         case = _replace_modality_status(case, modality, "failed", now=now)
-    except PermanentProcessingError:
+    except PermanentProcessingError as exc:
+        fail_reason = str(exc) or f"erro permanente: {modality}"
         case = _replace_modality_status(case, modality, "failed", now=now)
     except TransientProcessingError:
         # Deixa em `processing` para o RQ retentar (ADR 0015).
         raise
+
+    if fail_reason is not None or any(
+        m.modality == modality and m.status == "failed" for m in case.modalities
+    ):
+        record_processing_failure(
+            case=case,
+            modality=modality,
+            error_summary=fail_reason or f"falha de processamento: {modality}",
+        )
 
     finalized = _finalize_case(case, runtime=ctx, engine=analyzer, now=now)
     return ctx.case_store.save(finalized)

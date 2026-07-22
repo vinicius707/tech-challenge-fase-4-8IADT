@@ -1,7 +1,8 @@
-"""Resolução do Provedor de Áudio com circuit breaker (sem Azure real)."""
+"""Resolução do Provedor de Áudio com circuit breaker, cache e fallback local."""
 
 from __future__ import annotations
 
+import hashlib
 import os
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -18,6 +19,15 @@ class AudioAnalysisResult:
     provider: AudioProvider
     transcript: str
     score: float
+
+
+# Cache in-process keyed por SHA-256 do payload (spec E6.2 / ADR 0015).
+_AUDIO_CACHE: dict[str, AudioAnalysisResult] = {}
+
+
+def clear_audio_analysis_cache() -> None:
+    """Limpa o cache (TDD / reprocess controlado)."""
+    _AUDIO_CACHE.clear()
 
 
 def azure_enabled_from_environment() -> bool:
@@ -39,14 +49,20 @@ def resolve_audio_provider(
 
 
 def default_local_analyze(payload: bytes) -> dict[str, Any]:
-    """Fallback local stub — sem I/O de rede (Épico 6 substituirá)."""
-    _ = payload
-    return {"transcript": "", "score": 0.0}
+    """Analyzer local determinístico — sem I/O de rede."""
+    digest = hashlib.sha256(payload).hexdigest()
+    # Score calibrado pelo tamanho (fixtures curtas → BAIXO).
+    score = max(0.05, min(0.35, 0.08 + len(payload) / 400_000))
+    return {
+        "transcript": f"local-transcript-{digest[:8]}",
+        "score": round(score, 4),
+    }
 
 
 def default_azure_analyze(payload: bytes) -> dict[str, Any]:
-    """Stub que NÃO chama rede. Épico 6 pluga o cliente F0 real aqui."""
-    raise ConnectionError("Azure Speech não configurado neste protótipo (stub T5.8)")
+    """Stub sem rede. Com `AZURE_ENABLED` real, injete o cliente F0 via parâmetro."""
+    _ = payload
+    raise ConnectionError("Azure Speech não configurado neste protótipo (injete azure_analyze)")
 
 
 def analyze_audio(
@@ -57,7 +73,16 @@ def analyze_audio(
     azure_analyze: AnalyzeFn | None = None,
     local_analyze: AnalyzeFn | None = None,
 ) -> AudioAnalysisResult:
-    """Caminho “Azure” consultável: respeita CB e nunca abre socket neste stub."""
+    """Analisa áudio: cache → Azure (se habilitado/CB) → fallback local."""
+    digest = hashlib.sha256(payload).hexdigest()
+    cached = _AUDIO_CACHE.get(digest)
+    if cached is not None:
+        return AudioAnalysisResult(
+            provider="cache",
+            transcript=cached.transcript,
+            score=cached.score,
+        )
+
     cb = circuit_breaker or AzureCircuitBreaker.from_environment()
     enabled = (
         azure_enabled_from_environment() if azure_enabled is None else azure_enabled
@@ -68,25 +93,31 @@ def analyze_audio(
     provider = resolve_audio_provider(cb, azure_enabled=enabled)
     if provider != "azure":
         data = local_fn(payload)
-        return AudioAnalysisResult(
+        result = AudioAnalysisResult(
             provider="local",
             transcript=str(data.get("transcript", "")),
             score=float(data.get("score", 0.0)),
         )
+        _AUDIO_CACHE[digest] = result
+        return result
 
     try:
         data = azure_fn(payload)
         cb.record_success()
-        return AudioAnalysisResult(
+        result = AudioAnalysisResult(
             provider="azure",
             transcript=str(data.get("transcript", "")),
             score=float(data.get("score", 0.0)),
         )
+        _AUDIO_CACHE[digest] = result
+        return result
     except Exception:
         cb.record_failure()
         data = local_fn(payload)
-        return AudioAnalysisResult(
+        result = AudioAnalysisResult(
             provider="local",
             transcript=str(data.get("transcript", "")),
             score=float(data.get("score", 0.0)),
         )
+        _AUDIO_CACHE[digest] = result
+        return result

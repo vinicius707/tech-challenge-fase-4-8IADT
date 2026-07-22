@@ -36,6 +36,16 @@ class Case(Base):
         String(128), unique=True, nullable=True
     )
     video_content_sha256: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    audio_idempotency_key: Mapped[str | None] = mapped_column(
+        String(128), unique=True, nullable=True
+    )
+    audio_content_sha256: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    prescriptions_idempotency_key: Mapped[str | None] = mapped_column(
+        String(128), unique=True, nullable=True
+    )
+    prescriptions_content_sha256: Mapped[str | None] = mapped_column(
+        String(64), nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -73,6 +83,7 @@ class CaseModality(Base):
     )
     modality: Mapped[str] = mapped_column(String(32), nullable=False)
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="pending")
+    provider: Mapped[str | None] = mapped_column(String(16), nullable=True)
     artifact_id: Mapped[uuid.UUID | None] = mapped_column(
         Uuid, ForeignKey("artifacts.id", ondelete="SET NULL"), nullable=True
     )

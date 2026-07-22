@@ -36,6 +36,10 @@ def _to_record(
         updated_at=case_row.updated_at,
         video_idempotency_key=case_row.video_idempotency_key,
         video_content_sha256=case_row.video_content_sha256,
+        audio_idempotency_key=case_row.audio_idempotency_key,
+        audio_content_sha256=case_row.audio_content_sha256,
+        prescriptions_idempotency_key=case_row.prescriptions_idempotency_key,
+        prescriptions_content_sha256=case_row.prescriptions_content_sha256,
         modalities=[
             ModalityRecord(
                 id=m.id,
@@ -45,6 +49,7 @@ def _to_record(
                 artifact_id=m.artifact_id,
                 created_at=m.created_at,
                 updated_at=m.updated_at,
+                provider=m.provider,
             )
             for m in modalities
         ],
@@ -92,6 +97,10 @@ class SqlAlchemyCaseStore:
             row.content_sha256 = case.content_sha256
             row.video_idempotency_key = case.video_idempotency_key
             row.video_content_sha256 = case.video_content_sha256
+            row.audio_idempotency_key = case.audio_idempotency_key
+            row.audio_content_sha256 = case.audio_content_sha256
+            row.prescriptions_idempotency_key = case.prescriptions_idempotency_key
+            row.prescriptions_content_sha256 = case.prescriptions_content_sha256
             row.updated_at = case.updated_at or datetime.now(tz=UTC)
 
             self._sync_artifacts(session, case)
@@ -125,6 +134,33 @@ class SqlAlchemyCaseStore:
             if row is None:
                 return None
             return self._load(session, row.id)
+
+    def get_by_audio_idempotency_key(self, key: str) -> CaseRecord | None:
+        with self._session_factory() as session:
+            row = session.scalars(
+                select(Case).where(Case.audio_idempotency_key == key)
+            ).first()
+            if row is None:
+                return None
+            return self._load(session, row.id)
+
+    def get_by_prescriptions_idempotency_key(self, key: str) -> CaseRecord | None:
+        with self._session_factory() as session:
+            row = session.scalars(
+                select(Case).where(Case.prescriptions_idempotency_key == key)
+            ).first()
+            if row is None:
+                return None
+            return self._load(session, row.id)
+
+    def list_by_patient(self, patient_id: uuid.UUID) -> list[CaseRecord]:
+        with self._session_factory() as session:
+            rows = session.scalars(
+                select(Case)
+                .where(Case.patient_id == patient_id)
+                .order_by(Case.created_at.asc())
+            ).all()
+            return [self._load(session, row.id) for row in rows]
 
     def delete_by_patient(self, patient_id: uuid.UUID) -> int:
         with self._session_factory() as session:
@@ -205,6 +241,7 @@ class SqlAlchemyCaseStore:
             row.case_id = case.id
             row.modality = mod.modality
             row.status = mod.status
+            row.provider = mod.provider
             row.artifact_id = mod.artifact_id
             row.updated_at = mod.updated_at
 

@@ -17,11 +17,13 @@ from fastapi import (
 from app.auth.deps import AccessTokenClaims, get_current_access_claims
 from app.cases.schemas import CaseResponse, ReprocessRequest
 from app.cases.service import (
+    AudioModalityExistsError,
     CaseNotFoundError,
     CaseService,
     IdempotencyConflictError,
     NoFailedModalitiesError,
     PatientNotFoundError,
+    PrescriptionsModalityExistsError,
     VideoModalityExistsError,
     get_case_service,
 )
@@ -165,6 +167,134 @@ async def attach_video_modality(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Caso já possui modalidade video",
+        ) from exc
+    except ArtifactStorageError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Armazenamento de Artefatos indisponível",
+        ) from exc
+
+    if not created:
+        response.status_code = status.HTTP_200_OK
+    return case
+
+
+@cases_router.post(
+    "/{case_id}/modalities/audio",
+    response_model=CaseResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Anexa modalidade audio ao Caso (idempotente)",
+    responses={
+        200: {"description": "Replay idempotente"},
+        400: {"description": "Idempotency-Key ausente"},
+        401: {"description": "Não autenticado"},
+        404: {"description": "Caso não encontrado"},
+        409: {"description": "Conflito de idempotência ou áudio já anexado"},
+        503: {"description": "Object store (MinIO) indisponível"},
+    },
+)
+async def attach_audio_modality(
+    case_id: UUID,
+    response: Response,
+    _claims: Annotated[AccessTokenClaims, Depends(get_current_access_claims)],
+    service: Annotated[CaseService, Depends(get_case_service)],
+    file: Annotated[UploadFile, File(description="Clip de áudio ≤60s")],
+    idempotency_key: Annotated[str | None, Header(alias="Idempotency-Key")] = None,
+) -> CaseResponse:
+    if not idempotency_key or not idempotency_key.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Header Idempotency-Key é obrigatório",
+        )
+    content = await file.read()
+    content_type = file.content_type or "audio/wav"
+    filename = file.filename or "audio.wav"
+    try:
+        case, created = service.attach_audio(
+            case_id,
+            idempotency_key=idempotency_key.strip(),
+            content=content,
+            content_type=content_type,
+            filename=filename,
+        )
+    except CaseNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Caso não encontrado",
+        ) from exc
+    except IdempotencyConflictError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Idempotency-Key já usada com conteúdo diferente",
+        ) from exc
+    except AudioModalityExistsError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Caso já possui modalidade audio",
+        ) from exc
+    except ArtifactStorageError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Armazenamento de Artefatos indisponível",
+        ) from exc
+
+    if not created:
+        response.status_code = status.HTTP_200_OK
+    return case
+
+
+@cases_router.post(
+    "/{case_id}/modalities/prescriptions",
+    response_model=CaseResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Anexa modalidade prescriptions ao Caso (idempotente)",
+    responses={
+        200: {"description": "Replay idempotente"},
+        400: {"description": "Idempotency-Key ausente"},
+        401: {"description": "Não autenticado"},
+        404: {"description": "Caso não encontrado"},
+        409: {"description": "Conflito de idempotência ou prescriptions já anexado"},
+        503: {"description": "Object store (MinIO) indisponível"},
+    },
+)
+async def attach_prescriptions_modality(
+    case_id: UUID,
+    response: Response,
+    _claims: Annotated[AccessTokenClaims, Depends(get_current_access_claims)],
+    service: Annotated[CaseService, Depends(get_case_service)],
+    file: Annotated[UploadFile, File(description="CSV de prescrições sintéticas")],
+    idempotency_key: Annotated[str | None, Header(alias="Idempotency-Key")] = None,
+) -> CaseResponse:
+    if not idempotency_key or not idempotency_key.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Header Idempotency-Key é obrigatório",
+        )
+    content = await file.read()
+    content_type = file.content_type or "text/csv"
+    filename = file.filename or "prescriptions.csv"
+    try:
+        case, created = service.attach_prescriptions(
+            case_id,
+            idempotency_key=idempotency_key.strip(),
+            content=content,
+            content_type=content_type,
+            filename=filename,
+        )
+    except CaseNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Caso não encontrado",
+        ) from exc
+    except IdempotencyConflictError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Idempotency-Key já usada com conteúdo diferente",
+        ) from exc
+    except PrescriptionsModalityExistsError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Caso já possui modalidade prescriptions",
         ) from exc
     except ArtifactStorageError as exc:
         raise HTTPException(

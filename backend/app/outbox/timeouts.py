@@ -14,6 +14,7 @@ DEFAULT_TIMEOUTS_SECONDS: dict[str, float] = {
     "vitals": 30.0,
     "audio": 90.0,
     "video": 180.0,
+    "prescriptions": 30.0,
 }
 
 

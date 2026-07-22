@@ -1,0 +1,21 @@
+{
+  "version": "2026-07-21.1",
+  "seed": 20260721,
+  "fixtures": [
+    {
+      "file": "audio_speech.wav",
+      "scenario": "speech",
+      "sample_rate_hz": 8000,
+      "channels": 1,
+      "bits": 16,
+      "duration_seconds": 2.0,
+      "format": "wav_pcm_s16le",
+      "sha256": "5b161a0f7c29b9db73681ae94c146105c5b2f6c87c7cb5187102d47da3c2773a",
+      "notes": "Tom sintético ≤60s — proxy de utterance/Medical Speech; sem PHI nem diagnóstico."
+    }
+  ],
+  "reference_sources": {
+    "speech": "https://research.google.com/audioset/ (referência; brutos fora do Git)",
+    "medical_speech_cc": "Gravação própria / material CC ≤60s — URL concreta no README"
+  }
+}

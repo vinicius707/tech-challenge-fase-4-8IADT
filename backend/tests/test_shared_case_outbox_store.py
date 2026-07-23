@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.cases import runtime as runtime_mod
@@ -30,13 +30,20 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 VITALS_CSV = (REPO_ROOT / "data" / "fixtures" / "vitals" / "vitals_normal.csv").read_bytes()
 
 
-@pytest.fixture
-def session_factory() -> sessionmaker[Session]:
+def _make_session_factory(*, foreign_keys: bool) -> sessionmaker[Session]:
     """SQLite em memória simula o Postgres compartilhado API↔worker."""
     engine = create_engine(
         "sqlite+pysqlite:///:memory:",
         connect_args={"check_same_thread": False},
     )
+    if foreign_keys:
+
+        @event.listens_for(engine, "connect")
+        def _enable_sqlite_fk(dbapi_connection, _connection_record) -> None:  # noqa: ANN001
+            cursor = dbapi_connection.cursor()
+            cursor.execute("PRAGMA foreign_keys=ON")
+            cursor.close()
+
     from app.cases.models import Alert, Artifact, Case, CaseModality
     from app.outbox.models import OutboxJob
     from app.patients.models import Patient
@@ -53,6 +60,17 @@ def session_factory() -> sessionmaker[Session]:
         ],
     )
     return sessionmaker(bind=engine, autoflush=False, autocommit=False)
+
+
+@pytest.fixture
+def session_factory() -> sessionmaker[Session]:
+    return _make_session_factory(foreign_keys=False)
+
+
+@pytest.fixture
+def session_factory_fk() -> sessionmaker[Session]:
+    """Como Postgres: FKs ativas (SQLite default não as aplica)."""
+    return _make_session_factory(foreign_keys=True)
 
 
 @pytest.fixture(autouse=True)
@@ -134,6 +152,22 @@ def test_case_saved_by_api_store_is_visible_to_worker_store(
     assert loaded.status == "pending"
     assert loaded.modalities[0].status == "pending"
     assert len(loaded.artifacts) == 1
+
+
+def test_save_new_case_with_artifacts_honors_foreign_keys(
+    session_factory_fk: sessionmaker[Session],
+) -> None:
+    """Regressão CI smoke: INSERT de artifacts/modalities após cases (FK escalar)."""
+    patient = _seed_patient(session_factory_fk)
+    store = SqlAlchemyCaseStore(session_factory=session_factory_fk)
+    case = _pending_case(patient.id)
+
+    saved = store.save(case)
+
+    assert saved.id == case.id
+    assert len(saved.artifacts) == 1
+    assert len(saved.modalities) == 1
+    assert saved.modalities[0].artifact_id == saved.artifacts[0].id
 
 
 def test_worker_case_update_is_visible_to_api_store(

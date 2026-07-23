@@ -190,3 +190,7 @@ jobs:
 
       - name: Smoke Compose + Caso vitais
         run: ./scripts/smoke-caso-vitais.sh
+
+      - name: Logs backend (diagnóstico em falha)
+        if: failure()
+        run: docker compose logs backend --tail=200 || true

@@ -124,6 +124,51 @@ describe("cases api helpers", () => {
     expect(detail.alerts).toHaveLength(1);
     expect(detail.alerts[0].level).toBe("MEDIO");
     expect(detail.alerts[0].version).toBe(1);
+    expect(detail.justification).toBeNull();
+  });
+
+  it("parseia Justificativa template do Caso", () => {
+    const detail = parseCaseDetail({
+      id: "22222222-2222-2222-2222-222222222222",
+      patient_id: "11111111-1111-1111-1111-111111111111",
+      status: "done",
+      risk_score: 0.55,
+      risk_level: "MEDIO",
+      modalities: [
+        { modality: "vitals", status: "done", artifact_id: "a1" },
+        { modality: "audio", status: "failed", artifact_id: null },
+      ],
+      alerts: [],
+      justification: {
+        narrative:
+          "Risco MEDIO (score 0.55). Contribuições: vitals: MEDIO (0.55). Modalidades indisponíveis: audio (failed).",
+        modalities: [
+          {
+            modality: "vitals",
+            status: "done",
+            weight: 1.0,
+            partial_score: 0.55,
+            partial_level: "MEDIO",
+            top_anomalies: ["heart_rate"],
+          },
+          {
+            modality: "audio",
+            status: "failed",
+            weight: null,
+            partial_score: null,
+            partial_level: null,
+            top_anomalies: [],
+          },
+        ],
+      },
+    });
+    expect(detail.justification).not.toBeNull();
+    expect(detail.justification?.narrative).toMatch(/Risco MEDIO/);
+    expect(detail.justification?.modalities).toHaveLength(2);
+    expect(detail.justification?.modalities[0].topAnomalies).toEqual([
+      "heart_rate",
+    ]);
+    expect(detail.justification?.modalities[1].weight).toBeNull();
   });
 
   it("BAIXO chega sem Alertas listados", () => {

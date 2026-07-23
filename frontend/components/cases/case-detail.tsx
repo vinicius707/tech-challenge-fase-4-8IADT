@@ -141,6 +141,40 @@ export function CaseDetailView({ caseId }: CaseDetailViewProps) {
         </p>
       ) : null}
 
+      {detail.status === "done" && detail.justification ? (
+        <section
+          aria-labelledby="justification-heading"
+          className="flex flex-col gap-2"
+        >
+          <h2 id="justification-heading" className="text-sm font-medium">
+            Justificativa
+          </h2>
+          <p className="text-sm">{detail.justification.narrative}</p>
+          <ul className="list-inside list-disc text-sm text-muted-foreground">
+            {detail.justification.modalities.map((entry) => (
+              <li key={entry.modality}>
+                {entry.status === "done" ? (
+                  <>
+                    {entry.modality}: {entry.partialLevel ?? "—"} (
+                    {entry.partialScore === null
+                      ? "—"
+                      : entry.partialScore.toFixed(2)}
+                    )
+                    {entry.topAnomalies.length > 0
+                      ? ` — ${entry.topAnomalies.join(", ")}`
+                      : ""}
+                  </>
+                ) : (
+                  <>
+                    {entry.modality}: indisponível ({entry.status})
+                  </>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       {detail.status === "done" ? (
         <section aria-labelledby="alerts-heading" className="flex flex-col gap-2">
           <h2 id="alerts-heading" className="text-sm font-medium">

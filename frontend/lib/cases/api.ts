@@ -29,6 +29,20 @@ export type CaseAlert = {
   createdAt: string;
 };
 
+export type CaseJustificationModality = {
+  modality: string;
+  status: string;
+  weight: number | null;
+  partialScore: number | null;
+  partialLevel: string | null;
+  topAnomalies: string[];
+};
+
+export type CaseJustification = {
+  narrative: string;
+  modalities: CaseJustificationModality[];
+};
+
 export type CaseDetail = {
   id: string;
   patientId: string;
@@ -37,6 +51,7 @@ export type CaseDetail = {
   riskLevel: string | null;
   modalities: CaseModality[];
   alerts: CaseAlert[];
+  justification: CaseJustification | null;
 };
 
 type CreatedCaseApi = {
@@ -59,6 +74,20 @@ type CaseAlertApi = {
   created_at: string;
 };
 
+type CaseJustificationModalityApi = {
+  modality: string;
+  status: string;
+  weight: number | null;
+  partial_score: number | null;
+  partial_level: string | null;
+  top_anomalies: string[];
+};
+
+type CaseJustificationApi = {
+  narrative: string;
+  modalities: CaseJustificationModalityApi[];
+};
+
 type CaseDetailApi = {
   id: string;
   patient_id: string;
@@ -67,6 +96,7 @@ type CaseDetailApi = {
   risk_level: string | null;
   modalities?: CaseModalityApi[];
   alerts?: CaseAlertApi[];
+  justification?: CaseJustificationApi | null;
 };
 
 export function parseCreatedCase(body: CreatedCaseApi): CreatedCase {
@@ -78,6 +108,7 @@ export function parseCreatedCase(body: CreatedCaseApi): CreatedCase {
 }
 
 export function parseCaseDetail(body: CaseDetailApi): CaseDetail {
+  const justificationRaw = body.justification ?? null;
   return {
     id: body.id,
     patientId: body.patient_id,
@@ -96,6 +127,19 @@ export function parseCaseDetail(body: CaseDetailApi): CaseDetail {
       version: a.version,
       createdAt: a.created_at,
     })),
+    justification: justificationRaw
+      ? {
+          narrative: justificationRaw.narrative,
+          modalities: justificationRaw.modalities.map((m) => ({
+            modality: m.modality,
+            status: m.status,
+            weight: m.weight,
+            partialScore: m.partial_score,
+            partialLevel: m.partial_level,
+            topAnomalies: m.top_anomalies ?? [],
+          })),
+        }
+      : null,
   };
 }
 

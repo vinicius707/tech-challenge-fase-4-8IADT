@@ -44,6 +44,11 @@ Contratos Given/When/Then escritos **antes** da implementação TDD.
 | 7 Alertas + polish | [`../specs/epic-07-alertas-polish/03-lighthouse-gate.md`](../specs/epic-07-alertas-polish/03-lighthouse-gate.md) | Concluída (E7.3) |
 | 8 CI/CD e entrega | [`../specs/epic-08-cicd-entrega/01-ghcr-smoke-vitais.md`](../specs/epic-08-cicd-entrega/01-ghcr-smoke-vitais.md) | Concluída (E8.1) |
 | 8 CI/CD e entrega | [`../specs/epic-08-cicd-entrega/02-seed-notebooks-relatorio.md`](../specs/epic-08-cicd-entrega/02-seed-notebooks-relatorio.md) | Concluída (E8.2) |
+| 9 Vitais ML | [`../specs/epic-09-vitais-ml/00-baseline-atual.md`](../specs/epic-09-vitais-ml/00-baseline-atual.md) | Baseline (só docs) |
+| 9 Vitais ML | [`../specs/epic-09-vitais-ml/01-etl-datasets-vitais.md`](../specs/epic-09-vitais-ml/01-etl-datasets-vitais.md) | Spec (E9.1) — pendente impl. |
+| 9 Vitais ML | [`../specs/epic-09-vitais-ml/02-isolation-forest-runtime.md`](../specs/epic-09-vitais-ml/02-isolation-forest-runtime.md) | Spec (E9.2) — pendente impl. |
+| 9 Vitais ML | [`../specs/epic-09-vitais-ml/03-autoencoder-notebook.md`](../specs/epic-09-vitais-ml/03-autoencoder-notebook.md) | Spec (E9.3) — pendente impl. |
+| 9 Vitais ML | [`../specs/epic-09-vitais-ml/04-comparacao-relatorio-roteiro.md`](../specs/epic-09-vitais-ml/04-comparacao-relatorio-roteiro.md) | Spec (E9.4) — pendente impl. |
 
 ## ADRs
 
@@ -79,8 +84,9 @@ arquivo quando o plano supersede uma decisão anterior.
 | [0002](adr/0002-fila-redis-worker.md) | Fila Redis + RQ |
 | [0003](adr/0003-painel-dlq-redrive.md) | Painel DLQ / redrive |
 | [0007](adr/0007-escopo-video-fisio-cirurgia-leve.md) | Escopo de vídeo |
-| [0008](adr/0008-vitais-sinteticos.md) | Vitais sintéticos |
+| [0008](adr/0008-vitais-sinteticos.md) | Vitais sintéticos (emenda Épico 9 → ADR 0029) |
 | [0010](adr/0010-prescricoes-regras-historico.md) | Prescrições |
+| [0029](adr/0029-vitais-ml-hibrido.md) | Vitais ML: IF runtime + AE PyTorch evidência |
 | [0013](adr/0013-falha-parcial-reprocessamento.md) | Falha parcial |
 | [0014](adr/0014-alertas-versionados.md) | Alertas versionados |
 | [0015](adr/0015-retry-circuit-breaker-azure.md) | Retry / CB Azure |
@@ -124,6 +130,7 @@ arquivo quando o plano supersede uma decisão anterior.
 | 6 | Modalidades PDF | Concluído (E6.1 vídeo; E6.2 áudio; E6.3 prescrições + seed) |
 | 7 | Alertas + polish UI | Concluído (E7.1–E7.3) |
 | 8 | CI/CD e entrega | Concluído (E8.1–E8.2) |
+| 9 | Vitais ML (portfólio) | Specs + ADR 0029; **impl. não iniciada** — rodar baseline atual |
 
 ## Entrega acadêmica (E8.2)
 

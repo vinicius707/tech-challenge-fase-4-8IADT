@@ -20,6 +20,11 @@ Alertas versionados, Justificativa template, SSE, UI a11y + tema, Lighthouse
 gate, publish GHCR em `main`, smoke Caso vitais, seed multimodal Compose,
 notebooks, relatório e roteiro de vídeo.
 
+**Épico 9 (Vitais ML)** — ADR + specs SDD versionadas; **implementação ainda
+não iniciada**. Rode o baseline atual para comparar depois:
+[`specs/epic-09-vitais-ml/00-baseline-atual.md`](specs/epic-09-vitais-ml/00-baseline-atual.md)
+· [`docs/adr/0029-vitais-ml-hibrido.md`](docs/adr/0029-vitais-ml-hibrido.md).
+
 Fora do gate de CI (opcional / futuro): chamada Azure Speech real obrigatória
 (`AZURE_ENABLED=false` no CI/demo).
 

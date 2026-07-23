@@ -9,6 +9,6 @@ export type NavItem = {
 export const primaryNavItems: NavItem[] = [
   { href: "/", label: "Início", enabled: true },
   { href: "/pacientes", label: "Pacientes", enabled: true },
-  { href: "/alertas", label: "Alertas", enabled: false },
+  { href: "/alertas", label: "Alertas", enabled: true },
   { href: "/admin/falhas", label: "Admin", enabled: false },
 ];

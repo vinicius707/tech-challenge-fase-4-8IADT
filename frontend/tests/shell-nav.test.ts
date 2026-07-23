@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { primaryNavItems } from "@/lib/shell/nav";
 
 describe("shell navigation", () => {
-  it("inclui Pacientes ativo e placeholders desabilitados fora do épico", () => {
+  it("inclui Pacientes e Alertas ativos; Admin permanece placeholder", () => {
     const byHref = Object.fromEntries(
       primaryNavItems.map((item) => [item.href, item]),
     );
@@ -14,7 +14,7 @@ describe("shell navigation", () => {
     expect(byHref["/pacientes"].label).toBe("Pacientes");
     expect(byHref["/pacientes"].enabled).toBe(true);
 
-    expect(byHref["/alertas"].enabled).toBe(false);
+    expect(byHref["/alertas"].enabled).toBe(true);
     expect(byHref["/admin/falhas"].enabled).toBe(false);
   });
 

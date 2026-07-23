@@ -5,7 +5,9 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { LogoutButton } from "@/components/auth/logout-button";
+import { AlertsStreamBridge } from "@/components/alerts/alerts-stream-bridge";
 import { AlertsStreamIndicator } from "@/components/alerts/alerts-stream-indicator";
+import { AlertsToast } from "@/components/alerts/alerts-toast";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { primaryNavItems } from "@/lib/shell/nav";
@@ -24,6 +26,8 @@ export function AppShell({ children }: AppShellProps) {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      <AlertsStreamBridge />
+      <AlertsToast />
       <header className="border-b border-border">
         <div className="mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-3">
           <Button

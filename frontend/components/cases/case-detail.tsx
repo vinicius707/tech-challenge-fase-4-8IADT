@@ -183,10 +183,16 @@ export function CaseDetailView({ caseId }: CaseDetailViewProps) {
           {detail.alerts.length === 0 ? (
             <p className="text-sm text-muted-foreground">Nenhum Alerta.</p>
           ) : (
-            <ul className="list-inside list-disc text-sm">
+            <ul className="flex flex-col gap-1">
               {detail.alerts.map((alert) => (
                 <li key={alert.id}>
-                  {alert.level} (v{alert.version})
+                  <a
+                    href={`#alerta-${alert.id}`}
+                    id={`alerta-${alert.id}`}
+                    className="block rounded-md px-2 py-1.5 text-sm outline-none hover:bg-muted/60 focus-visible:ring-3 focus-visible:ring-ring/50"
+                  >
+                    {alert.level} (v{alert.version})
+                  </a>
                 </li>
               ))}
             </ul>

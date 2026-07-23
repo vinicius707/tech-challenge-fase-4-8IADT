@@ -28,7 +28,8 @@ Lighthouse no CI, publish GHCR em `main` e smoke Compose de Caso vitais
 
 Ainda não fazem parte da implementação: notebooks/relatório/roteiro finais
 (Épico 8 / E8.2); chamada Azure Speech real obrigatória no CI
-(`AZURE_ENABLED=false`).
+(`AZURE_ENABLED=false`). Seed multimodal Compose:
+`./scripts/seed-multimodal-demo.sh` (após `./scripts/start-limen.sh`).
 
 ## O que já foi entregue
 
@@ -122,7 +123,10 @@ Ainda não fazem parte da implementação: notebooks/relatório/roteiro finais
   longitudinal vs. histórico do Paciente (ADR 0010).
 - Contribui ao Risco (fusão; falha parcial intacta); timeout padrão 30s.
 - Seed demo multimodal (vitals+vídeo+áudio+prescriptions):
-  [`scripts/seed_multimodal_demo.py`](scripts/seed_multimodal_demo.py).
+  [`scripts/seed-multimodal-demo.sh`](scripts/seed-multimodal-demo.sh) (HTTP /
+  Compose) ou
+  [`scripts/seed_multimodal_demo.py`](scripts/seed_multimodal_demo.py)
+  (`--memory` / `--http`).
 - Spec:
   [`03-prescricoes-seed.md`](specs/epic-06-modalidades/03-prescricoes-seed.md).
 
@@ -347,15 +351,27 @@ curl -s -X POST "http://localhost:8000/cases/$CASE_ID/modalities/prescriptions" 
 O job vai para a fila `default`. Fixtures alternativas: `prescriptions_medium.csv`
 e `prescriptions_high.csv`.
 
-### Seed demo multimodal (in-memory)
+### Seed demo multimodal (Épico 8 / E8.2)
+
+Ordem da demo humana: **up → seed → UI**.
 
 ```bash
-cd backend && uv run python ../scripts/seed_multimodal_demo.py
+./scripts/start-limen.sh                 # Compose + Operadores seed
+./scripts/seed-multimodal-demo.sh        # HTTP: Caso com 4 modalidades
+# UI: http://localhost:3000  (login medico / medico_dev_only)
 ```
 
-Cria (ou reutiliza) um Caso com as quatro modalidades via `Idempotency-Key`
-fixas. Smoke sem Compose; na stack real, use os curls acima com as mesmas chaves
-documentadas no script.
+O seed HTTP usa as `Idempotency-Key` fixas (`limen-demo-multimodal-*-v1`),
+anexa `vitals` + `video` + `audio` + `prescriptions` e é **idempotente**
+(reexecutar não duplica o Caso). Espera `AZURE_ENABLED=false`.
+
+Alternativa in-memory (sem Compose, só contrato/TDD):
+
+```bash
+cd backend && uv run python ../scripts/seed_multimodal_demo.py --memory
+```
+
+Não substitui o smoke de Caso vitais (`./scripts/smoke-caso-vitais.sh`).
 
 Rotas públicas nesta etapa: `GET /health`, `POST /auth/login`,
 `POST /auth/refresh`. Demais rotas exigem Bearer access token.

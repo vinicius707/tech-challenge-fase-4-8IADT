@@ -1,7 +1,8 @@
 """Seed demo multimodal — Paciente + Caso com vitals/vídeo/áudio/prescriptions.
 
-Determinístico via `Idempotency-Key` fixas (Épico 6 / T6.19). Sem UI; sem
-Azure real. Seed completo de entrega / notebooks = Épico 8.
+Determinístico via `Idempotency-Key` fixas (Épico 6 / T6.19; Épico 8 / T8.5).
+In-memory para TDD; HTTP Compose em `multimodal_seed_http` /
+`scripts/seed-multimodal-demo.sh`.
 """
 
 from __future__ import annotations

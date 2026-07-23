@@ -453,5 +453,6 @@ Publish GHCR e smoke Compose de Caso vitais ficam no Épico 8
 | [`specs/epic-05-resiliencia/`](specs/epic-05-resiliencia/) | Falha parcial, filas, DLQ/retries |
 | [`specs/epic-06-modalidades/`](specs/epic-06-modalidades/) | Vídeo (E6.1); áudio Azure F0 (E6.2); prescriptions + seed (E6.3) |
 | [`specs/epic-07-alertas-polish/`](specs/epic-07-alertas-polish/) | Justificativa + SSE (E7.1); a11y/DLQ (E7.2); Lighthouse gate (E7.3) — concluído |
+| [`specs/epic-08-cicd-entrega/`](specs/epic-08-cicd-entrega/) | GHCR + smoke vitais (E8.1); seed/notebooks/relatório (E8.2) — spec |
 | [`frontend/`](frontend/) | App Next.js (Épico 4 + Épico 7) |
 | [`.cursor/plans/arquitetura_multimodal_fase_4_a1c92623.plan.md`](.cursor/plans/arquitetura_multimodal_fase_4_a1c92623.plan.md) | Plano incremental dos épicos |

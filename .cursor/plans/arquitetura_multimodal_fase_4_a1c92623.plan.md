@@ -228,4 +228,6 @@ flowchart LR
 ## Próximo passo de execução
 
 Os **Épicos 1–7** estão concluídos (E7.1–E7.3).
-Próximo: **Épico 8** — publish GHCR, smoke Compose + Caso vitais, seed/notebooks/relatório.
+**Épico 8** em andamento: specs E8.1/E8.2 em
+[`specs/epic-08-cicd-entrega/`](../../specs/epic-08-cicd-entrega/) (T8.0).
+Próximo: implementação E8.1 (smoke vitais + publish GHCR).

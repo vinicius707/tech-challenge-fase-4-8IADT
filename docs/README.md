@@ -42,6 +42,8 @@ Contratos Given/When/Then escritos **antes** da implementação TDD.
 | 7 Alertas + polish | [`../specs/epic-07-alertas-polish/01-justificativa-sse.md`](../specs/epic-07-alertas-polish/01-justificativa-sse.md) | Concluída (E7.1) |
 | 7 Alertas + polish | [`../specs/epic-07-alertas-polish/02-telas-a11y-dlq.md`](../specs/epic-07-alertas-polish/02-telas-a11y-dlq.md) | Concluída (E7.2) |
 | 7 Alertas + polish | [`../specs/epic-07-alertas-polish/03-lighthouse-gate.md`](../specs/epic-07-alertas-polish/03-lighthouse-gate.md) | Concluída (E7.3) |
+| 8 CI/CD e entrega | [`../specs/epic-08-cicd-entrega/01-ghcr-smoke-vitais.md`](../specs/epic-08-cicd-entrega/01-ghcr-smoke-vitais.md) | Spec (E8.1) |
+| 8 CI/CD e entrega | [`../specs/epic-08-cicd-entrega/02-seed-notebooks-relatorio.md`](../specs/epic-08-cicd-entrega/02-seed-notebooks-relatorio.md) | Spec (E8.2) |
 
 ## ADRs
 

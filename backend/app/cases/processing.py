@@ -8,6 +8,7 @@ import time
 import uuid
 from datetime import UTC, datetime
 
+from app.alerts.hub import publish_alert_event
 from app.cases.justification import build_justification
 from app.cases.runtime import CaseRuntime, get_case_runtime
 from app.cases.service import AlertRecord, ArtifactRecord, CaseRecord, ModalityRecord
@@ -29,6 +30,20 @@ TERMINAL_STATUSES = frozenset({"done", "failed", "skipped"})
 ALERT_WORTHY_LEVELS = frozenset({"MEDIO", "ALTO"})
 
 
+def _emit_alert_sse(alert: AlertRecord, *, created: bool) -> None:
+    event = "alert.created" if created else "alert.updated"
+    publish_alert_event(
+        event,
+        {
+            "alert_id": str(alert.id),
+            "case_id": str(alert.case_id),
+            "level": alert.level,
+            "version": alert.version,
+            "created_at": alert.created_at.isoformat(),
+        },
+    )
+
+
 def _alerts_after_fusion(
     case: CaseRecord,
     risk_level: str,
@@ -42,15 +57,15 @@ def _alerts_after_fusion(
     if not alerts:
         if risk_level not in ALERT_WORTHY_LEVELS:
             return alerts
-        alerts.append(
-            AlertRecord(
-                id=uuid.uuid4(),
-                case_id=case.id,
-                level=risk_level,
-                version=ALERT_VERSION_V1,
-                created_at=now,
-            )
+        alert = AlertRecord(
+            id=uuid.uuid4(),
+            case_id=case.id,
+            level=risk_level,
+            version=ALERT_VERSION_V1,
+            created_at=now,
         )
+        alerts.append(alert)
+        _emit_alert_sse(alert, created=True)
         return alerts
 
     if previous_level == risk_level:
@@ -59,15 +74,15 @@ def _alerts_after_fusion(
     next_version = max(a.version for a in alerts) + 1
     if any(a.level == risk_level and a.version == next_version for a in alerts):
         return alerts
-    alerts.append(
-        AlertRecord(
-            id=uuid.uuid4(),
-            case_id=case.id,
-            level=risk_level,
-            version=next_version,
-            created_at=now,
-        )
+    alert = AlertRecord(
+        id=uuid.uuid4(),
+        case_id=case.id,
+        level=risk_level,
+        version=next_version,
+        created_at=now,
     )
+    alerts.append(alert)
+    _emit_alert_sse(alert, created=False)
     return alerts
 
 

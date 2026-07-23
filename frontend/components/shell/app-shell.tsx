@@ -10,7 +10,7 @@ import { AlertsStreamIndicator } from "@/components/alerts/alerts-stream-indicat
 import { AlertsToast } from "@/components/alerts/alerts-toast";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
-import { primaryNavItems } from "@/lib/shell/nav";
+import { primaryNavItems, isNavItemVisible } from "@/lib/shell/nav";
 import { useSessionStore } from "@/lib/auth/session";
 import { cn } from "@/lib/utils";
 
@@ -67,6 +67,7 @@ export function AppShell({ children }: AppShellProps) {
         >
           <ul className="flex flex-col gap-1">
             {primaryNavItems.map((item) => {
+              const visible = isNavItemVisible(item, role);
               const active =
                 item.href === "/"
                   ? pathname === "/"
@@ -83,6 +84,9 @@ export function AppShell({ children }: AppShellProps) {
                     </span>
                   </li>
                 );
+              }
+              if (!visible) {
+                return null;
               }
               return (
                 <li key={item.href}>

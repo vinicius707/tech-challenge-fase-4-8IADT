@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { primaryNavItems } from "@/lib/shell/nav";
+import { isNavItemVisible, primaryNavItems } from "@/lib/shell/nav";
 
 describe("shell navigation", () => {
-  it("inclui Pacientes e Alertas ativos; Admin permanece placeholder", () => {
+  it("inclui Pacientes, Alertas e Falhas (admin) ativos", () => {
     const byHref = Object.fromEntries(
       primaryNavItems.map((item) => [item.href, item]),
     );
@@ -15,7 +15,9 @@ describe("shell navigation", () => {
     expect(byHref["/pacientes"].enabled).toBe(true);
 
     expect(byHref["/alertas"].enabled).toBe(true);
-    expect(byHref["/admin/falhas"].enabled).toBe(false);
+    expect(byHref["/admin/falhas"].enabled).toBe(true);
+    expect(isNavItemVisible(byHref["/admin/falhas"], "admin")).toBe(true);
+    expect(isNavItemVisible(byHref["/admin/falhas"], "medico")).toBe(false);
   });
 
   it("expõe landmarks esperados pelo shell", () => {

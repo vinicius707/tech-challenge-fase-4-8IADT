@@ -4,6 +4,7 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import (
+    JSON,
     DateTime,
     Float,
     ForeignKey,
@@ -28,6 +29,7 @@ class Case(Base):
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="pending")
     risk_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     risk_level: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    justification: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     idempotency_key: Mapped[str | None] = mapped_column(
         String(128), unique=True, nullable=True
     )

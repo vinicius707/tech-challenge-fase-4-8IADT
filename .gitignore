@@ -9,3 +9,6 @@ data/raw/
 data/downloads/
 
 .ipynb_checkpoints/
+
+# Saída local do Lighthouse em modo check (não versionar)
+docs/perf/check/

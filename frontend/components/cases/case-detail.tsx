@@ -2,20 +2,30 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { ModalityUploadForm } from "@/components/cases/modality-upload-form";
+import { LazyModalityScoresChart } from "@/components/charts/lazy";
 import { buttonVariants } from "@/components/ui/button";
 import {
   CASE_POLL_INTERVAL_MS,
   CASE_POLL_TIMEOUT_MS,
   fetchCase,
   shouldPollCase,
+  type AttachableModality,
 } from "@/lib/cases/api";
+import { buildModalityScorePoints } from "@/lib/charts/series";
 import { cn } from "@/lib/utils";
 
 type CaseDetailViewProps = {
   caseId: string;
 };
+
+const ATTACHABLE_MODALITIES: AttachableModality[] = [
+  "video",
+  "audio",
+  "prescriptions",
+];
 
 function CaseSkeleton() {
   return (
@@ -34,6 +44,7 @@ function CaseSkeleton() {
 }
 
 export function CaseDetailView({ caseId }: CaseDetailViewProps) {
+  const queryClient = useQueryClient();
   const [pollTimedOut, setPollTimedOut] = useState(false);
 
   useEffect(() => {
@@ -74,6 +85,8 @@ export function CaseDetailView({ caseId }: CaseDetailViewProps) {
   const polling = shouldPollCase(detail.status);
   const showProcessing = polling && !pollTimedOut;
   const vitals = detail.modalities.find((m) => m.modality === "vitals");
+  const present = new Set(detail.modalities.map((m) => m.modality));
+  const missingUploads = ATTACHABLE_MODALITIES.filter((m) => !present.has(m));
 
   if (showProcessing) {
     return (
@@ -141,6 +154,73 @@ export function CaseDetailView({ caseId }: CaseDetailViewProps) {
         </p>
       ) : null}
 
+      {missingUploads.length > 0 ? (
+        <section
+          aria-labelledby="modality-uploads-heading"
+          className="flex flex-col gap-3"
+        >
+          <h2 id="modality-uploads-heading" className="text-sm font-medium">
+            Anexar modalidades
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            Envie video, áudio ou prescriptions com rótulos e erros associados
+            ao controle (teclado: Tab / Enter).
+          </p>
+          {missingUploads.map((modality) => (
+            <ModalityUploadForm
+              key={modality}
+              caseId={caseId}
+              modality={modality}
+              onAttached={(updated) => {
+                queryClient.setQueryData(["cases", caseId], updated);
+              }}
+            />
+          ))}
+        </section>
+      ) : null}
+
+      {detail.status === "done" && detail.justification ? (
+        <section
+          aria-labelledby="justification-heading"
+          className="flex flex-col gap-2"
+        >
+          <h2 id="justification-heading" className="text-sm font-medium">
+            Justificativa
+          </h2>
+          <p className="text-sm">{detail.justification.narrative}</p>
+          <ul className="list-inside list-disc text-sm text-muted-foreground">
+            {detail.justification.modalities.map((entry) => (
+              <li key={entry.modality}>
+                {entry.status === "done" ? (
+                  <>
+                    {entry.modality}: {entry.partialLevel ?? "—"} (
+                    {entry.partialScore === null
+                      ? "—"
+                      : entry.partialScore.toFixed(2)}
+                    )
+                    {entry.topAnomalies.length > 0
+                      ? ` — ${entry.topAnomalies.join(", ")}`
+                      : ""}
+                  </>
+                ) : (
+                  <>
+                    {entry.modality}: indisponível ({entry.status})
+                  </>
+                )}
+              </li>
+            ))}
+          </ul>
+          <div className="pt-2">
+            <h3 className="mb-2 text-sm font-medium">
+              Scores parciais por modalidade
+            </h3>
+            <LazyModalityScoresChart
+              points={buildModalityScorePoints(detail.justification.modalities)}
+            />
+          </div>
+        </section>
+      ) : null}
+
       {detail.status === "done" ? (
         <section aria-labelledby="alerts-heading" className="flex flex-col gap-2">
           <h2 id="alerts-heading" className="text-sm font-medium">
@@ -149,10 +229,16 @@ export function CaseDetailView({ caseId }: CaseDetailViewProps) {
           {detail.alerts.length === 0 ? (
             <p className="text-sm text-muted-foreground">Nenhum Alerta.</p>
           ) : (
-            <ul className="list-inside list-disc text-sm">
+            <ul className="flex flex-col gap-1">
               {detail.alerts.map((alert) => (
                 <li key={alert.id}>
-                  {alert.level} (v{alert.version})
+                  <a
+                    href={`#alerta-${alert.id}`}
+                    id={`alerta-${alert.id}`}
+                    className="block rounded-md px-2 py-1.5 text-sm outline-none hover:bg-muted/60 focus-visible:ring-3 focus-visible:ring-ring/50"
+                  >
+                    {alert.level} (v{alert.version})
+                  </a>
                 </li>
               ))}
             </ul>

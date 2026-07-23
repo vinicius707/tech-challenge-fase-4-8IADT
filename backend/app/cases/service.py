@@ -13,6 +13,7 @@ from app.cases.schemas import (
     AlertResponse,
     ArtifactResponse,
     CaseResponse,
+    JustificationResponse,
     ModalityResponse,
 )
 from app.cases.storage import (
@@ -113,6 +114,7 @@ class CaseRecord:
     audio_content_sha256: str | None = None
     prescriptions_idempotency_key: str | None = None
     prescriptions_content_sha256: str | None = None
+    justification: dict | None = None
 
 
 class CaseStore(Protocol):
@@ -211,6 +213,9 @@ class InMemoryCaseStore:
 
 
 def _to_response(case: CaseRecord) -> CaseResponse:
+    justification = None
+    if case.justification is not None:
+        justification = JustificationResponse.model_validate(case.justification)
     return CaseResponse(
         id=case.id,
         patient_id=case.patient_id,
@@ -247,6 +252,7 @@ def _to_response(case: CaseRecord) -> CaseResponse:
             )
             for a in case.alerts
         ],
+        justification=justification,
         created_at=case.created_at,
         updated_at=case.updated_at,
     )
@@ -428,6 +434,7 @@ class CaseService:
             audio_content_sha256=case.audio_content_sha256,
             prescriptions_idempotency_key=case.prescriptions_idempotency_key,
             prescriptions_content_sha256=case.prescriptions_content_sha256,
+            justification=case.justification,
         )
         self._store.save(updated)
 
@@ -512,6 +519,7 @@ class CaseService:
             audio_content_sha256=digest,
             prescriptions_idempotency_key=case.prescriptions_idempotency_key,
             prescriptions_content_sha256=case.prescriptions_content_sha256,
+            justification=case.justification,
         )
         self._store.save(updated)
 
@@ -598,6 +606,7 @@ class CaseService:
             audio_content_sha256=case.audio_content_sha256,
             prescriptions_idempotency_key=idempotency_key,
             prescriptions_content_sha256=digest,
+            justification=case.justification,
         )
         self._store.save(updated)
 
@@ -662,6 +671,7 @@ class CaseService:
             audio_content_sha256=case.audio_content_sha256,
             prescriptions_idempotency_key=case.prescriptions_idempotency_key,
             prescriptions_content_sha256=case.prescriptions_content_sha256,
+            justification=case.justification,
         )
         self._store.save(updated)
 

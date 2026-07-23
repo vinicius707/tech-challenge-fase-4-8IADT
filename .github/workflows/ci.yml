@@ -40,3 +40,66 @@ jobs:
 
       - name: Testes
         run: uv run pytest
+
+  lighthouse:
+    name: Lighthouse gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.19"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Setup Chrome
+        id: chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
+      - name: Instalar dependências do frontend
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build de produção
+        working-directory: frontend
+        run: npm run build
+
+      - name: Subir servidor de produção
+        working-directory: frontend
+        run: |
+          npm start -- -H 127.0.0.1 -p 3000 &
+          echo $! > /tmp/limen-frontend.pid
+          for i in $(seq 1 90); do
+            if curl -sf http://127.0.0.1:3000/login >/dev/null; then
+              echo "Frontend pronto"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Frontend não respondeu em /login" >&2
+          exit 1
+
+      - name: Lighthouse check (absoluto + regressão)
+        working-directory: frontend
+        env:
+          LIMEN_BASE_URL: http://127.0.0.1:3000
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+          # Mediana de 3 runs — reduz flake de Perf no limite do piso absoluto.
+          LIMEN_LH_RUNS: "3"
+        run: npm run lighthouse:check
+
+      - name: Upload relatórios Lighthouse
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-check
+          path: docs/perf/check/
+          if-no-files-found: warn
+          retention-days: 14

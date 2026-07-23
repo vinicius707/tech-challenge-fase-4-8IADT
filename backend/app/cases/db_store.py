@@ -30,6 +30,7 @@ def _to_record(
         status=case_row.status,
         risk_score=case_row.risk_score,
         risk_level=case_row.risk_level,
+        justification=case_row.justification,
         idempotency_key=case_row.idempotency_key,
         content_sha256=case_row.content_sha256,
         created_at=case_row.created_at,
@@ -93,6 +94,7 @@ class SqlAlchemyCaseStore:
             row.status = case.status
             row.risk_score = case.risk_score
             row.risk_level = case.risk_level
+            row.justification = case.justification
             row.idempotency_key = case.idempotency_key
             row.content_sha256 = case.content_sha256
             row.video_idempotency_key = case.video_idempotency_key

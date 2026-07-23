@@ -20,6 +20,8 @@ describe("lighthouse baseline (T4.7)", () => {
     expect(readme).toMatch(/commit|SHA|sha/i);
     expect(readme).toMatch(/login/i);
     expect(readme).toMatch(/pacientes/i);
+    expect(readme).toMatch(/tolerância|tolerancia|regression|regressão/i);
+    expect(readme).toMatch(/lighthouse:check|--check/);
   });
 
   it("persiste relatórios JSON das rotas mínimas", () => {
@@ -31,11 +33,12 @@ describe("lighthouse baseline (T4.7)", () => {
     ).toBe(true);
   });
 
-  it("CI não adiciona gate de Lighthouse", () => {
+  it("CI roda gate Lighthouse sem gravar baseline", () => {
     const ci = readFileSync(
       path.join(repoRoot, ".github", "workflows", "ci.yml"),
       "utf8",
     );
-    expect(ci.toLowerCase()).not.toMatch(/lighthouse/);
+    expect(ci).toMatch(/lighthouse:check/);
+    expect(ci).toMatch(/docs\/perf\/check/);
   });
 });

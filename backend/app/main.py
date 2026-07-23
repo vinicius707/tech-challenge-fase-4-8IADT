@@ -4,6 +4,7 @@ from typing import Annotated
 from fastapi import Depends, FastAPI
 from fastapi.responses import JSONResponse
 
+from app.alerts.router import router as alerts_router
 from app.auth.router import router as auth_router
 from app.auth.seed import seed_operators
 from app.auth.service import get_operator_store
@@ -29,6 +30,7 @@ app.include_router(auth_router)
 app.include_router(patients_router)
 app.include_router(patients_cases_router)
 app.include_router(cases_router)
+app.include_router(alerts_router)
 app.include_router(failures_router)
 
 

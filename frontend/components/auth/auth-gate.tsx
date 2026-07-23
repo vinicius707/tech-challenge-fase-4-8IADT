@@ -30,6 +30,12 @@ export function AuthGate({ children, mode }: AuthGateProps) {
     if (target) router.replace(target);
   }, [hasHydrated, isAuthenticated, mode, router]);
 
+  // Login: renderiza SSR imediatamente (LCP). Redireciona só após hydrate.
+  if (mode === "login") {
+    if (hasHydrated && isAuthenticated) return null;
+    return <>{children}</>;
+  }
+
   if (!hasHydrated) {
     return (
       <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">
@@ -38,8 +44,7 @@ export function AuthGate({ children, mode }: AuthGateProps) {
     );
   }
 
-  if (mode === "app" && !isAuthenticated) return null;
-  if (mode === "login" && isAuthenticated) return null;
+  if (!isAuthenticated) return null;
 
   return <>{children}</>;
 }

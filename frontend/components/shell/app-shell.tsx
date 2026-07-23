@@ -5,8 +5,12 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { LogoutButton } from "@/components/auth/logout-button";
+import { AlertsStreamBridge } from "@/components/alerts/alerts-stream-bridge";
+import { AlertsStreamIndicator } from "@/components/alerts/alerts-stream-indicator";
+import { AlertsToast } from "@/components/alerts/alerts-toast";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
-import { primaryNavItems } from "@/lib/shell/nav";
+import { primaryNavItems, isNavItemVisible } from "@/lib/shell/nav";
 import { useSessionStore } from "@/lib/auth/session";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +26,8 @@ export function AppShell({ children }: AppShellProps) {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      <AlertsStreamBridge />
+      <AlertsToast />
       <header className="border-b border-border">
         <div className="mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-3">
           <Button
@@ -37,6 +43,8 @@ export function AppShell({ children }: AppShellProps) {
           </Button>
           <p className="text-lg font-semibold tracking-tight">Limen</p>
           <div className="ml-auto flex min-w-0 items-center gap-3">
+            <AlertsStreamIndicator />
+            <ThemeToggle />
             <p className="truncate text-sm text-muted-foreground">
               <span className="font-medium text-foreground">{username}</span>
               {role ? (
@@ -59,6 +67,7 @@ export function AppShell({ children }: AppShellProps) {
         >
           <ul className="flex flex-col gap-1">
             {primaryNavItems.map((item) => {
+              const visible = isNavItemVisible(item, role);
               const active =
                 item.href === "/"
                   ? pathname === "/"
@@ -75,6 +84,9 @@ export function AppShell({ children }: AppShellProps) {
                     </span>
                   </li>
                 );
+              }
+              if (!visible) {
+                return null;
               }
               return (
                 <li key={item.href}>

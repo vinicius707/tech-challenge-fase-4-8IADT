@@ -8,6 +8,8 @@ import time
 import uuid
 from datetime import UTC, datetime
 
+from app.alerts.hub import publish_alert_event
+from app.cases.justification import build_justification
 from app.cases.runtime import CaseRuntime, get_case_runtime
 from app.cases.service import AlertRecord, ArtifactRecord, CaseRecord, ModalityRecord
 from app.cases.vitals_engine import (
@@ -28,6 +30,20 @@ TERMINAL_STATUSES = frozenset({"done", "failed", "skipped"})
 ALERT_WORTHY_LEVELS = frozenset({"MEDIO", "ALTO"})
 
 
+def _emit_alert_sse(alert: AlertRecord, *, created: bool) -> None:
+    event = "alert.created" if created else "alert.updated"
+    publish_alert_event(
+        event,
+        {
+            "alert_id": str(alert.id),
+            "case_id": str(alert.case_id),
+            "level": alert.level,
+            "version": alert.version,
+            "created_at": alert.created_at.isoformat(),
+        },
+    )
+
+
 def _alerts_after_fusion(
     case: CaseRecord,
     risk_level: str,
@@ -41,15 +57,15 @@ def _alerts_after_fusion(
     if not alerts:
         if risk_level not in ALERT_WORTHY_LEVELS:
             return alerts
-        alerts.append(
-            AlertRecord(
-                id=uuid.uuid4(),
-                case_id=case.id,
-                level=risk_level,
-                version=ALERT_VERSION_V1,
-                created_at=now,
-            )
+        alert = AlertRecord(
+            id=uuid.uuid4(),
+            case_id=case.id,
+            level=risk_level,
+            version=ALERT_VERSION_V1,
+            created_at=now,
         )
+        alerts.append(alert)
+        _emit_alert_sse(alert, created=True)
         return alerts
 
     if previous_level == risk_level:
@@ -58,15 +74,15 @@ def _alerts_after_fusion(
     next_version = max(a.version for a in alerts) + 1
     if any(a.level == risk_level and a.version == next_version for a in alerts):
         return alerts
-    alerts.append(
-        AlertRecord(
-            id=uuid.uuid4(),
-            case_id=case.id,
-            level=risk_level,
-            version=next_version,
-            created_at=now,
-        )
+    alert = AlertRecord(
+        id=uuid.uuid4(),
+        case_id=case.id,
+        level=risk_level,
+        version=next_version,
+        created_at=now,
     )
+    alerts.append(alert)
+    _emit_alert_sse(alert, created=False)
     return alerts
 
 
@@ -136,6 +152,7 @@ def _replace_modality_status(
         audio_content_sha256=case.audio_content_sha256,
         prescriptions_idempotency_key=case.prescriptions_idempotency_key,
         prescriptions_content_sha256=case.prescriptions_content_sha256,
+        justification=case.justification,
     )
 
 
@@ -240,6 +257,7 @@ def _finalize_case(
             audio_content_sha256=case.audio_content_sha256,
             prescriptions_idempotency_key=case.prescriptions_idempotency_key,
             prescriptions_content_sha256=case.prescriptions_content_sha256,
+            justification=case.justification,
         )
 
     done_names = [m.modality for m in case.modalities if m.status == "done"]
@@ -263,16 +281,25 @@ def _finalize_case(
             audio_content_sha256=case.audio_content_sha256,
             prescriptions_idempotency_key=case.prescriptions_idempotency_key,
             prescriptions_content_sha256=case.prescriptions_content_sha256,
+            justification=None,
         )
 
     risks: list[ModalityRisk] = []
+    risks_by_modality: dict[str, ModalityRisk] = {}
     for name in done_names:
         risk = _risk_for_done_modality(
             case, name, runtime=runtime, engine=engine
         )
         if risk is not None:
             risks.append(risk)
+            risks_by_modality[name] = risk
     fused = fuse_done_modalities(risks)
+    justification = build_justification(
+        modalities=case.modalities,
+        risks_by_modality=risks_by_modality,
+        fused_score=fused.score,
+        fused_level=fused.level,
+    )
     return CaseRecord(
         id=case.id,
         patient_id=case.patient_id,
@@ -292,6 +319,7 @@ def _finalize_case(
         audio_content_sha256=case.audio_content_sha256,
         prescriptions_idempotency_key=case.prescriptions_idempotency_key,
         prescriptions_content_sha256=case.prescriptions_content_sha256,
+        justification=justification,
     )
 
 
@@ -305,6 +333,8 @@ def _copy_case_meta(
     modalities: list[ModalityRecord] | None = None,
     artifacts: list[ArtifactRecord] | None = None,
     alerts: list[AlertRecord] | None = None,
+    justification: dict | None = None,
+    set_justification: bool = False,
 ) -> CaseRecord:
     return CaseRecord(
         id=case.id,
@@ -325,6 +355,9 @@ def _copy_case_meta(
         audio_content_sha256=case.audio_content_sha256,
         prescriptions_idempotency_key=case.prescriptions_idempotency_key,
         prescriptions_content_sha256=case.prescriptions_content_sha256,
+        justification=(
+            justification if set_justification else case.justification
+        ),
     )
 
 
@@ -536,6 +569,7 @@ def process_modality_for_case(
         audio_content_sha256=case.audio_content_sha256,
         prescriptions_idempotency_key=case.prescriptions_idempotency_key,
         prescriptions_content_sha256=case.prescriptions_content_sha256,
+        justification=case.justification,
     )
     ctx.case_store.save(case)
 

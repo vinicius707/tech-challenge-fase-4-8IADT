@@ -29,6 +29,20 @@ export type CaseAlert = {
   createdAt: string;
 };
 
+export type CaseJustificationModality = {
+  modality: string;
+  status: string;
+  weight: number | null;
+  partialScore: number | null;
+  partialLevel: string | null;
+  topAnomalies: string[];
+};
+
+export type CaseJustification = {
+  narrative: string;
+  modalities: CaseJustificationModality[];
+};
+
 export type CaseDetail = {
   id: string;
   patientId: string;
@@ -37,6 +51,7 @@ export type CaseDetail = {
   riskLevel: string | null;
   modalities: CaseModality[];
   alerts: CaseAlert[];
+  justification: CaseJustification | null;
 };
 
 type CreatedCaseApi = {
@@ -59,6 +74,20 @@ type CaseAlertApi = {
   created_at: string;
 };
 
+type CaseJustificationModalityApi = {
+  modality: string;
+  status: string;
+  weight: number | null;
+  partial_score: number | null;
+  partial_level: string | null;
+  top_anomalies: string[];
+};
+
+type CaseJustificationApi = {
+  narrative: string;
+  modalities: CaseJustificationModalityApi[];
+};
+
 type CaseDetailApi = {
   id: string;
   patient_id: string;
@@ -67,6 +96,7 @@ type CaseDetailApi = {
   risk_level: string | null;
   modalities?: CaseModalityApi[];
   alerts?: CaseAlertApi[];
+  justification?: CaseJustificationApi | null;
 };
 
 export function parseCreatedCase(body: CreatedCaseApi): CreatedCase {
@@ -78,6 +108,7 @@ export function parseCreatedCase(body: CreatedCaseApi): CreatedCase {
 }
 
 export function parseCaseDetail(body: CaseDetailApi): CaseDetail {
+  const justificationRaw = body.justification ?? null;
   return {
     id: body.id,
     patientId: body.patient_id,
@@ -96,6 +127,19 @@ export function parseCaseDetail(body: CaseDetailApi): CaseDetail {
       version: a.version,
       createdAt: a.created_at,
     })),
+    justification: justificationRaw
+      ? {
+          narrative: justificationRaw.narrative,
+          modalities: justificationRaw.modalities.map((m) => ({
+            modality: m.modality,
+            status: m.status,
+            weight: m.weight,
+            partialScore: m.partial_score,
+            partialLevel: m.partial_level,
+            topAnomalies: m.top_anomalies ?? [],
+          })),
+        }
+      : null,
   };
 }
 
@@ -154,6 +198,57 @@ export async function fetchCase(caseId: string): Promise<CaseDetail> {
   if (!response.ok) {
     throw new Error(`Falha ao obter Caso (${response.status})`);
   }
+  const body = (await response.json()) as CaseDetailApi;
+  return parseCaseDetail(body);
+}
+
+export type AttachableModality = "video" | "audio" | "prescriptions";
+
+export function modalityUploadPath(
+  caseId: string,
+  modality: AttachableModality,
+): string {
+  return `/api/cases/${caseId}/modalities/${modality}`;
+}
+
+export function messageForAttachModalityError(status: number): string {
+  if (status === 400) {
+    return "Header Idempotency-Key é obrigatório.";
+  }
+  if (status === 401) {
+    return "Sessão expirada. Faça login novamente.";
+  }
+  if (status === 404) {
+    return "Caso não encontrado.";
+  }
+  if (status === 409) {
+    return "Modalidade já anexada ou conflito de idempotência.";
+  }
+  if (status === 503) {
+    return "Armazenamento indisponível. Tente novamente.";
+  }
+  return `Falha ao anexar modalidade (${status}).`;
+}
+
+export async function attachCaseModality(
+  caseId: string,
+  modality: AttachableModality,
+  file: File,
+  idempotencyKey: string,
+): Promise<CaseDetail> {
+  const form = new FormData();
+  form.append("file", file);
+
+  const response = await apiFetch(modalityUploadPath(caseId, modality), {
+    method: "POST",
+    headers: { "Idempotency-Key": idempotencyKey },
+    body: form,
+  });
+
+  if (!response.ok) {
+    throw new Error(messageForAttachModalityError(response.status));
+  }
+
   const body = (await response.json()) as CaseDetailApi;
   return parseCaseDetail(body);
 }

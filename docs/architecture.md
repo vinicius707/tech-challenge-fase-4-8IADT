@@ -219,14 +219,13 @@ flowchart LR
   style E4 fill:#d4edda
   style E5 fill:#d4edda
   style E6 fill:#d4edda
-  style E7 fill:#fff3cd
+  style E7 fill:#d4edda
   style E8 fill:#fff3cd
 ```
 
 | Épico | Status |
 | ----- | ------ |
-| 1–6 | Concluídos |
-| 7 Alertas + polish UI | Pendente |
+| 1–7 | Concluídos |
 | 8 CI/CD e entrega | Pendente |
 
 ---

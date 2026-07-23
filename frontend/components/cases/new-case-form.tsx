@@ -9,6 +9,10 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  uploadFieldDescribedBy,
+  uploadFieldIds,
+} from "@/lib/a11y/upload-field";
+import {
   createCaseWithVitals,
   createIdempotencyKey,
 } from "@/lib/cases/api";
@@ -20,6 +24,7 @@ type NewCaseFormProps = {
 
 export function NewCaseForm({ patientId }: NewCaseFormProps) {
   const router = useRouter();
+  const ids = uploadFieldIds("vitals");
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,6 +51,11 @@ export function NewCaseForm({ patientId }: NewCaseFormProps) {
     createMutation.mutate(file);
   }
 
+  const describedBy = uploadFieldDescribedBy({
+    hintId: ids.hintId,
+    errorId: error ? ids.errorId : null,
+  });
+
   return (
     <div className="flex max-w-md flex-col gap-4">
       <div className="flex flex-col gap-1">
@@ -58,12 +68,17 @@ export function NewCaseForm({ patientId }: NewCaseFormProps) {
 
       <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="vitals-csv">Arquivo CSV de vitais</Label>
+          <Label htmlFor={ids.inputId}>Arquivo CSV de vitais</Label>
+          <p id={ids.hintId} className="text-xs text-muted-foreground">
+            Aceita .csv. O fluxo é operável só com teclado (Tab / Enter).
+          </p>
           <Input
-            id="vitals-csv"
+            id={ids.inputId}
             name="file"
             type="file"
             accept=".csv,text/csv"
+            aria-invalid={error ? true : undefined}
+            aria-describedby={describedBy}
             onChange={(event) => {
               const next = event.target.files?.[0] ?? null;
               setFile(next);
@@ -71,13 +86,16 @@ export function NewCaseForm({ patientId }: NewCaseFormProps) {
             }}
             required
           />
+          {error ? (
+            <p
+              id={ids.errorId}
+              role="alert"
+              className="text-sm text-destructive"
+            >
+              {error}
+            </p>
+          ) : null}
         </div>
-
-        {error ? (
-          <p role="alert" className="text-sm text-destructive">
-            {error}
-          </p>
-        ) : null}
 
         <div className="flex flex-wrap gap-2">
           <Button type="submit" disabled={createMutation.isPending}>

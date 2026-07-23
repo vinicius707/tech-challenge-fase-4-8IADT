@@ -191,6 +191,23 @@ jobs:
       - name: Smoke Compose + Caso vitais
         run: ./scripts/smoke-caso-vitais.sh
 
-      - name: Logs backend (diagnóstico em falha)
+      - name: Logs Compose (diagnóstico em falha)
         if: failure()
-        run: docker compose logs backend --tail=200 || true
+        run: |
+          docker compose logs backend worker outbox-reconciler --tail=200 || true
+          docker compose exec -T redis redis-cli LLEN rq:queue:default || true
+          docker compose exec -T backend python - <<'PY' || true
+          from sqlalchemy import create_engine, text
+          import os
+          url = os.environ["POSTGRES_URL"].replace("postgresql://", "postgresql+psycopg://", 1)
+          eng = create_engine(url)
+          with eng.connect() as conn:
+              rows = conn.execute(text(
+                  "select status, count(*) from outbox_jobs group by status order by status"
+              )).all()
+              print("outbox_jobs by status:", rows)
+              cases = conn.execute(text(
+                  "select id, status from cases order by created_at desc limit 5"
+              )).all()
+              print("recent cases:", cases)
+          PY

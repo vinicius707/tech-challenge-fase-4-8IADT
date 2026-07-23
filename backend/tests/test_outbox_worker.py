@@ -125,3 +125,7 @@ def test_compose_defines_worker_and_reconciler_on_default_queue() -> None:
     assert "rq worker" in compose_text or '"rq", "worker"' in compose_text
     assert "app.outbox.reconciler" in compose_text
     assert "RQ_QUEUE_NAME" in compose_text
+    # Smoke CI espera worker realmente registrado no Redis antes do --wait.
+    worker_block = compose_text.split("\n  worker-video:")[0]
+    assert "rq:workers" in worker_block
+    assert "healthcheck:" in worker_block

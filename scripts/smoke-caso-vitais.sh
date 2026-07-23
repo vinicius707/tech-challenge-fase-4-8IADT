@@ -51,8 +51,10 @@ fi
 WAIT_TIMEOUT="${SMOKE_WAIT_TIMEOUT_SECONDS:-300}"
 
 if [ "$SKIP_UP" -eq 0 ]; then
-  printf 'Subindo stack (build + wait, timeout %ss)...\n' "$WAIT_TIMEOUT"
-  docker compose up -d --build --wait --wait-timeout "$WAIT_TIMEOUT"
+  # Só serviços do caminho vitais (API + outbox + worker). Frontend não é necessário.
+  printf 'Subindo stack smoke vitais (build + wait, timeout %ss)...\n' "$WAIT_TIMEOUT"
+  docker compose up -d --build --wait --wait-timeout "$WAIT_TIMEOUT" \
+    postgres redis minio minio-bootstrap backend worker outbox-reconciler
 fi
 
 printf 'Rodando smoke Caso vitais (HTTP)...\n'

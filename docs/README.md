@@ -40,7 +40,7 @@ Contratos Given/When/Then escritos **antes** da implementação TDD.
 | 6 Modalidades | [`../specs/epic-06-modalidades/02-audio-azure.md`](../specs/epic-06-modalidades/02-audio-azure.md) | Concluída (E6.2) |
 | 6 Modalidades | [`../specs/epic-06-modalidades/03-prescricoes-seed.md`](../specs/epic-06-modalidades/03-prescricoes-seed.md) | Concluída (E6.3) |
 | 7 Alertas + polish | [`../specs/epic-07-alertas-polish/01-justificativa-sse.md`](../specs/epic-07-alertas-polish/01-justificativa-sse.md) | Concluída (E7.1) |
-| 7 Alertas + polish | [`../specs/epic-07-alertas-polish/02-telas-a11y-dlq.md`](../specs/epic-07-alertas-polish/02-telas-a11y-dlq.md) | Pendente (E7.2) |
+| 7 Alertas + polish | [`../specs/epic-07-alertas-polish/02-telas-a11y-dlq.md`](../specs/epic-07-alertas-polish/02-telas-a11y-dlq.md) | Concluída (E7.2) |
 | 7 Alertas + polish | [`../specs/epic-07-alertas-polish/03-lighthouse-gate.md`](../specs/epic-07-alertas-polish/03-lighthouse-gate.md) | Pendente (E7.3) |
 
 ## ADRs
@@ -118,4 +118,4 @@ arquivo quando o plano supersede uma decisão anterior.
 | 4 | Shell Frontend | Concluído |
 | 5 | Resiliência | Concluído |
 | 6 | Modalidades PDF | Concluído (E6.1 vídeo; E6.2 áudio; E6.3 prescrições + seed) |
-| 7–8 | Alertas polish, CI/CD | Pendente |
+| 7–8 | Alertas polish (E7.1–E7.2 ok; E7.3), CI/CD | Em andamento |

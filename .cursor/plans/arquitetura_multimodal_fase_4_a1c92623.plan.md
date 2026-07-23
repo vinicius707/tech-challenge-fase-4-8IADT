@@ -227,5 +227,5 @@ flowchart LR
 
 ## Próximo passo de execução
 
-Os **Épicos 1–6** estão concluídos; **E7.1** (Justificativa + SSE) também.
-Próximo: **E7.2** — telas estrela, a11y AA, dark mode e DLQ UI.
+Os **Épicos 1–6** estão concluídos; **E7.1** e **E7.2** também.
+Próximo: **E7.3** — gate Lighthouse por regressão vs baseline.

@@ -12,20 +12,21 @@ Glossário de domínio: [`CONTEXT.md`](CONTEXT.md). Decisão de arquitetura:
 
 ## Estado atual
 
-Os **Épicos 1–6** estão concluídos. No Épico 7, a etapa **E7.1** (Justificativa
-template + SSE de Alertas) também está entregue.
+Os **Épicos 1–6** estão concluídos. No Épico 7, as etapas **E7.1** (Justificativa
+template + SSE) e **E7.2** (telas estrela, a11y AA, dark/light, DLQ UI) também
+estão entregues.
 
-A entrega atual inclui autenticação JWT, Paciente com Rótulo Sensível, Caso com
-modalidades `vitals`, `video`, `audio` e `prescriptions` (Artefatos no MinIO,
-outbox → filas RQ `default` / `video` → Risco fundido e Alerta versionado se ≥
-MEDIO), Justificativa template no `GET /cases/{id}` e na UI `/casos/[id]`, feed
-SSE `GET /alerts/stream` (Bearer; cliente `fetch` + reconexão), Provedor de
-Áudio com CB/fallback, regras de Prescrição + seed multimodal, falha parcial /
-reprocess, workers Compose e shell Next.js.
+A entrega atual inclui autenticação JWT, Paciente com Rótulo Sensível (reveal +
+SR), Caso com modalidades `vitals`, `video`, `audio` e `prescriptions` (Artefatos
+no MinIO, outbox → filas RQ `default` / `video` → Risco fundido e Alerta
+versionado se ≥ MEDIO), Justificativa template, feed SSE de Alertas com toast
+`aria-live="polite"`, Recharts lazy em Caso/Paciente, painel admin de Falhas,
+Provedor de Áudio com CB/fallback, regras de Prescrição + seed multimodal, falha
+parcial / reprocess, workers Compose e shell Next.js (tema dark/light).
 
-Ainda não fazem parte da implementação: polish a11y/dark/DLQ UI (E7.2), gate
-Lighthouse (E7.3), chamada Azure Speech real obrigatória no CI
-(`AZURE_ENABLED=false`), seed/notebooks finais e CI/CD GHCR (Épico 8).
+Ainda não fazem parte da implementação: gate Lighthouse (E7.3), chamada Azure
+Speech real obrigatória no CI (`AZURE_ENABLED=false`), seed/notebooks finais e
+CI/CD GHCR (Épico 8).
 
 ## O que já foi entregue
 
@@ -127,14 +128,25 @@ Lighthouse (E7.3), chamada Azure Speech real obrigatória no CI
 - Justificativa template determinística (sem LLM) no `GET /cases/{id}`:
   contribuições por modalidade `done`, pesos iguais, modalidades
   `failed`/`skipped` como indisponíveis; snapshot JSON persistido na fusão.
-- UI mínima em `/casos/[id]` (narrativa + lista de contribuições).
+- UI em `/casos/[id]` (narrativa + lista de contribuições).
 - `GET /alerts/stream` (SSE): `Authorization: Bearer` obrigatório; eventos
   `alert.created` / `alert.updated`; heartbeat
   `LIMEN_SSE_HEARTBEAT_SECONDS`; bridge Redis opcional worker→API.
-- Cliente Next: `fetch` + ReadableStream (ADR 0022), reconexão com backoff;
-  indicador smoke no shell (sem toast AA — E7.2).
+- Cliente Next: `fetch` + ReadableStream (ADR 0022), reconexão com backoff.
 - Spec:
   [`01-justificativa-sse.md`](specs/epic-07-alertas-polish/01-justificativa-sse.md).
+
+### Polish UI — a11y, tema e DLQ (Épico 7 / E7.2)
+
+- Tema dark/light persistente (`limen-theme`) com contraste AA nas telas estrela.
+- Toast `aria-live="polite"` para eventos SSE; página `/alertas` navegável por
+  teclado.
+- Uploads acessíveis (vitals + anexos video/áudio/prescriptions) com
+  `aria-describedby`; reveal/remask do Rótulo Sensível com anúncio SR.
+- Recharts via `next/dynamic` só em `/casos/[id]` e `/pacientes/[id]` (ADR 0027).
+- UI admin `/admin/falhas` (list/redrive/discard); nav e gate só para `admin`.
+- Spec:
+  [`02-telas-a11y-dlq.md`](specs/epic-07-alertas-polish/02-telas-a11y-dlq.md).
 
 ## Executar localmente
 
@@ -423,6 +435,6 @@ e frontend entram no Épico 8 (ADR [0028](docs/adr/0028-cicd-actions-ghcr.md)).
 | [`specs/epic-04-shell-frontend/`](specs/epic-04-shell-frontend/) | Shell Next (scaffold → login → Pacientes) |
 | [`specs/epic-05-resiliencia/`](specs/epic-05-resiliencia/) | Falha parcial, filas, DLQ/retries |
 | [`specs/epic-06-modalidades/`](specs/epic-06-modalidades/) | Vídeo (E6.1); áudio Azure F0 (E6.2); prescriptions + seed (E6.3) |
-| [`specs/epic-07-alertas-polish/`](specs/epic-07-alertas-polish/) | Justificativa + SSE (E7.1); a11y/DLQ (E7.2); Lighthouse gate (E7.3) |
-| [`frontend/`](frontend/) | App Next.js (Épico 4 + E7.1) |
+| [`specs/epic-07-alertas-polish/`](specs/epic-07-alertas-polish/) | Justificativa + SSE (E7.1); a11y/DLQ (E7.2 concluída); Lighthouse gate (E7.3) |
+| [`frontend/`](frontend/) | App Next.js (Épico 4 + E7.1–E7.2) |
 | [`.cursor/plans/arquitetura_multimodal_fase_4_a1c92623.plan.md`](.cursor/plans/arquitetura_multimodal_fase_4_a1c92623.plan.md) | Plano incremental dos épicos |

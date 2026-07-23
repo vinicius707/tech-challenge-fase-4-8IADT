@@ -226,7 +226,7 @@ flowchart LR
 | Épico | Status |
 | ----- | ------ |
 | 1–6 | Concluídos |
-| 7 Alertas + polish UI | Em andamento (E7.1 concluída; E7.2–E7.3 pendentes) |
+| 7 Alertas + polish UI | Em andamento (E7.1–E7.2 concluídas; E7.3 pendente) |
 | 8 CI/CD e entrega | Pendente |
 
 ---

@@ -11,7 +11,13 @@ e UI admin de Falhas de Processamento (API já existe no Épico 5).
 
 ## Status da entrega
 
-**Pendente** — executar após DoD de E7.1 (T7.6–T7.11 desta etapa E7.2).
+**Concluída em 22 de julho de 2026** (T7.6–T7.11: dark/light AA, toast polite,
+região Alertas, uploads a11y, reveal+SR, Recharts lazy, UI admin DLQ e
+fechamento docs).
+
+Etapa posterior do Épico 7 (spec própria):
+
+- E7.3 — Gate Lighthouse por regressão vs baseline
 
 ## Escopo
 
@@ -105,10 +111,10 @@ API DLQ já coberta no Épico 5 — esta etapa é UI + a11y.
 
 ## Critérios de pronto (DoD desta etapa E7.2)
 
-- [ ] Dark/light + AA nas telas estrela.
-- [ ] Toast polite + região Alertas navegável.
-- [ ] Uploads a11y; reveal rótulo + SR.
-- [ ] Recharts lazy (ADR 0027).
-- [ ] UI admin DLQ funcional.
-- [ ] Sem gate Lighthouse CI (E7.3); sem Épico 8.
-- [ ] Guia de uso / docs frontend atualizados no fechamento da etapa.
+- [x] Dark/light + AA nas telas estrela.
+- [x] Toast polite + região Alertas navegável.
+- [x] Uploads a11y; reveal rótulo + SR.
+- [x] Recharts lazy (ADR 0027).
+- [x] UI admin DLQ funcional.
+- [x] Sem gate Lighthouse CI (E7.3); sem Épico 8.
+- [x] Guia de uso / docs frontend atualizados no fechamento da etapa.

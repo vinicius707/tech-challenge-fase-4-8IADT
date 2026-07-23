@@ -213,7 +213,20 @@ Recriar do zero (apaga banco e Artefatos): `docker compose down -v`.
 ```
 
 Valida `/health`, o bucket `limen` e a revisão Alembic. Não cobre login/Paciente
-nem Caso sintético (este último entra no Épico 8).
+nem Caso sintético.
+
+### Smoke Caso vitais (Épico 8 / E8.1)
+
+```bash
+./scripts/smoke-caso-vitais.sh           # Compose up + Caso vitais até done
+./scripts/smoke-caso-vitais.sh --skip-up # stack já no ar
+```
+
+Enfileira um Caso só com `data/fixtures/vitals/vitals_medium.csv` (sem
+vídeo/áudio/prescrições), autentica com o Operador seed e faz poll até
+`status=done`. Espera `AZURE_ENABLED=false` (padrão do `.env.example`). CLI
+Python: [`scripts/smoke_caso_vitais.py`](scripts/smoke_caso_vitais.py).
+Publish GHCR e job de CI deste smoke ficam nas tarefas seguintes do E8.1.
 
 ## API — exemplos rápidos
 

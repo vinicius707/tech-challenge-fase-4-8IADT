@@ -62,4 +62,6 @@ python scripts/calibrate_vitals.py
 ```
 
 A saída deve coincidir com os SHA-256 acima. EDA exploratória:
-[`notebooks/eda_vitals_inicial.ipynb`](../../../notebooks/eda_vitals_inicial.ipynb).
+[`notebooks/eda_vitals_inicial.ipynb`](../../../notebooks/eda_vitals_inicial.ipynb)
+· EDA final:
+[`notebooks/eda_vitals_final.ipynb`](../../../notebooks/eda_vitals_final.ipynb).

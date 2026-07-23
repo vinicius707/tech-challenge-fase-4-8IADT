@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { ModalityUploadForm } from "@/components/cases/modality-upload-form";
+import { LazyModalityScoresChart } from "@/components/charts/lazy";
 import { buttonVariants } from "@/components/ui/button";
 import {
   CASE_POLL_INTERVAL_MS,
@@ -13,6 +14,7 @@ import {
   shouldPollCase,
   type AttachableModality,
 } from "@/lib/cases/api";
+import { buildModalityScorePoints } from "@/lib/charts/series";
 import { cn } from "@/lib/utils";
 
 type CaseDetailViewProps = {
@@ -208,6 +210,14 @@ export function CaseDetailView({ caseId }: CaseDetailViewProps) {
               </li>
             ))}
           </ul>
+          <div className="pt-2">
+            <h3 className="mb-2 text-sm font-medium">
+              Scores parciais por modalidade
+            </h3>
+            <LazyModalityScoresChart
+              points={buildModalityScorePoints(detail.justification.modalities)}
+            />
+          </div>
         </section>
       ) : null}
 

@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 
+import { LazyRiskTrendChart } from "@/components/charts/lazy";
 import { buttonVariants } from "@/components/ui/button";
 import { SensitiveLabelReveal } from "@/components/patients/sensitive-label-reveal";
+import { buildRiskTrendPoints } from "@/lib/charts/series";
 import { fetchPatient } from "@/lib/patients/api";
 import { cn } from "@/lib/utils";
 
@@ -33,6 +35,9 @@ export function PatientDetail({ patientId }: PatientDetailProps) {
   const patient = patientQuery.data;
   if (!patient) return null;
 
+  // Sem GET de Casos por Paciente ainda — tendência pronta para pontos futuros.
+  const trendPoints = buildRiskTrendPoints([]);
+
   return (
     <div className="flex max-w-xl flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -54,18 +59,34 @@ export function PatientDetail({ patientId }: PatientDetailProps) {
         </div>
       </dl>
 
-      <p className="text-sm text-muted-foreground">
-        A API desta etapa não expõe listagem de Casos por Paciente; use{" "}
-        <strong className="font-medium text-foreground">Novo Caso</strong> para
-        criar um Caso de vitais.
-      </p>
-
-      <Link
-        href="/pacientes"
-        className={cn(buttonVariants({ variant: "outline", size: "sm" }), "w-fit")}
+      <section
+        aria-labelledby="risk-trend-heading"
+        className="flex flex-col gap-2"
       >
-        Voltar à lista
-      </Link>
+        <h2 id="risk-trend-heading" className="text-sm font-medium">
+          Tendência de Risco
+        </h2>
+        <LazyRiskTrendChart points={trendPoints} />
+        <p className="text-xs text-muted-foreground">
+          A API ainda não lista Casos por Paciente; o gráfico carrega sob demanda
+          (Recharts lazy) e exibirá a série quando o histórico estiver disponível.
+        </p>
+      </section>
+
+      <div className="flex flex-wrap gap-2">
+        <Link
+          href="/alertas"
+          className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+        >
+          Alertas
+        </Link>
+        <Link
+          href="/pacientes"
+          className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+        >
+          Voltar à lista
+        </Link>
+      </div>
     </div>
   );
 }

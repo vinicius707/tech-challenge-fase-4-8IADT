@@ -227,6 +227,5 @@ flowchart LR
 
 ## Próximo passo de execução
 
-Os **Épicos 1–6** estão concluídos.
-Próximo: **Épico 7 — Alertas + polish UI** (Justificativa, SSE, a11y AA,
-Lighthouse gate).
+Os **Épicos 1–6** estão concluídos; **E7.1** (Justificativa + SSE) também.
+Próximo: **E7.2** — telas estrela, a11y AA, dark mode e DLQ UI.

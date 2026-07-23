@@ -12,28 +12,28 @@ Glossário de domínio: [`CONTEXT.md`](CONTEXT.md). Decisão de arquitetura:
 
 ## Estado atual
 
-Os **Épicos 1–6** estão concluídos (Fundação, Identidade, Núcleo Caso + fila,
-Shell Frontend, Resiliência e Modalidades PDF: vídeo, áudio e prescrições).
+Os **Épicos 1–6** estão concluídos. No Épico 7, a etapa **E7.1** (Justificativa
+template + SSE de Alertas) também está entregue.
 
 A entrega atual inclui autenticação JWT, Paciente com Rótulo Sensível, Caso com
 modalidades `vitals`, `video`, `audio` e `prescriptions` (Artefatos no MinIO,
-outbox → filas RQ `default` / `video` → Risco fundido e Alerta v1 se ≥ MEDIO),
-Provedor de Áudio (`azure` / `local` / `cache`) com CB e fallback, regras de
-Prescrição + desvio longitudinal, seed demo multimodal, falha parcial /
-reprocess, workers `worker` + `worker-video` e reconciler no Compose, e o shell
-Next.js (login, Pacientes, Novo Caso e detalhe com polling).
+outbox → filas RQ `default` / `video` → Risco fundido e Alerta versionado se ≥
+MEDIO), Justificativa template no `GET /cases/{id}` e na UI `/casos/[id]`, feed
+SSE `GET /alerts/stream` (Bearer; cliente `fetch` + reconexão), Provedor de
+Áudio com CB/fallback, regras de Prescrição + seed multimodal, falha parcial /
+reprocess, workers Compose e shell Next.js.
 
-Ainda não fazem parte da implementação: chamada Azure Speech real obrigatória
-no CI (`AZURE_ENABLED=false` por padrão), UI polish de upload / Justificativa
-rica / SSE (Épico 7), seed/notebooks finais e CI/CD GHCR (Épico 8).
+Ainda não fazem parte da implementação: polish a11y/dark/DLQ UI (E7.2), gate
+Lighthouse (E7.3), chamada Azure Speech real obrigatória no CI
+(`AZURE_ENABLED=false`), seed/notebooks finais e CI/CD GHCR (Épico 8).
 
 ## O que já foi entregue
 
 ### Fundação (Épico 1)
 
 - FastAPI no backend.
-- PostgreSQL com migrações Alembic até `20260721_0015` (inclui `provider`,
-  idempotência de áudio e de prescriptions).
+- PostgreSQL com migrações Alembic até `20260722_0016` (inclui `justification`
+  JSON no Caso, `provider`, idempotências de áudio/prescriptions).
 - Redis como broker da fila RQ.
 - MinIO S3-compatible; bucket `limen` criado de forma idempotente.
 - Docker Compose, smoke local e CI magra (pytest).
@@ -121,6 +121,20 @@ rica / SSE (Épico 7), seed/notebooks finais e CI/CD GHCR (Épico 8).
   [`scripts/seed_multimodal_demo.py`](scripts/seed_multimodal_demo.py).
 - Spec:
   [`03-prescricoes-seed.md`](specs/epic-06-modalidades/03-prescricoes-seed.md).
+
+### Alertas — Justificativa + SSE (Épico 7 / E7.1)
+
+- Justificativa template determinística (sem LLM) no `GET /cases/{id}`:
+  contribuições por modalidade `done`, pesos iguais, modalidades
+  `failed`/`skipped` como indisponíveis; snapshot JSON persistido na fusão.
+- UI mínima em `/casos/[id]` (narrativa + lista de contribuições).
+- `GET /alerts/stream` (SSE): `Authorization: Bearer` obrigatório; eventos
+  `alert.created` / `alert.updated`; heartbeat
+  `LIMEN_SSE_HEARTBEAT_SECONDS`; bridge Redis opcional worker→API.
+- Cliente Next: `fetch` + ReadableStream (ADR 0022), reconexão com backoff;
+  indicador smoke no shell (sem toast AA — E7.2).
+- Spec:
+  [`01-justificativa-sse.md`](specs/epic-07-alertas-polish/01-justificativa-sse.md).
 
 ## Executar localmente
 
@@ -224,12 +238,24 @@ echo "$CASE" | jq
 CASE_ID=$(echo "$CASE" | jq -r .id)
 ```
 
-Após o worker processar, o GET traz Risco e Alerta (se ≥ MEDIO):
+Após o worker processar, o GET traz Risco, Alerta (se ≥ MEDIO) e
+`justification` (quando o Caso fecha `done`):
 
 ```bash
 curl -s "http://localhost:8000/cases/$CASE_ID" \
-  -H "Authorization: Bearer $TOKEN" | jq
+  -H "Authorization: Bearer $TOKEN" | jq '{status, risk_level, justification}'
 ```
+
+### Feed SSE de Alertas
+
+```bash
+curl -N -H "Authorization: Bearer $TOKEN" \
+  "http://localhost:8000/alerts/stream"
+```
+
+Requer Bearer (sem token na query). Comentários `: ping` / `: connected` são
+heartbeats; eventos nomeados `alert.created` e `alert.updated` trazem JSON em
+`data:`.
 
 ### Anexar modalidade vídeo ao Caso
 
@@ -333,6 +359,7 @@ Trocar a chave sem recriptografar torna rótulos existentes ilegíveis.
 | `REDIS_URL` | Broker RQ |
 | `RQ_QUEUE_NAME` | Fila do worker `default` (padrão `default`) |
 | `RQ_VIDEO_QUEUE_NAME` | Fila do worker `worker-video` (padrão `video`) |
+| `LIMEN_SSE_HEARTBEAT_SECONDS` | Intervalo de ping SSE de Alertas (padrão `15`) |
 | `LIMEN_TIMEOUT_VITALS_SECONDS` | Timeout job vitais (padrão `30`) |
 | `LIMEN_TIMEOUT_AUDIO_SECONDS` | Timeout job áudio (padrão `90`) |
 | `LIMEN_TIMEOUT_VIDEO_SECONDS` | Timeout job vídeo (padrão `180`) |
@@ -396,5 +423,6 @@ e frontend entram no Épico 8 (ADR [0028](docs/adr/0028-cicd-actions-ghcr.md)).
 | [`specs/epic-04-shell-frontend/`](specs/epic-04-shell-frontend/) | Shell Next (scaffold → login → Pacientes) |
 | [`specs/epic-05-resiliencia/`](specs/epic-05-resiliencia/) | Falha parcial, filas, DLQ/retries |
 | [`specs/epic-06-modalidades/`](specs/epic-06-modalidades/) | Vídeo (E6.1); áudio Azure F0 (E6.2); prescriptions + seed (E6.3) |
-| [`frontend/`](frontend/) | App Next.js (Épico 4) |
+| [`specs/epic-07-alertas-polish/`](specs/epic-07-alertas-polish/) | Justificativa + SSE (E7.1); a11y/DLQ (E7.2); Lighthouse gate (E7.3) |
+| [`frontend/`](frontend/) | App Next.js (Épico 4 + E7.1) |
 | [`.cursor/plans/arquitetura_multimodal_fase_4_a1c92623.plan.md`](.cursor/plans/arquitetura_multimodal_fase_4_a1c92623.plan.md) | Plano incremental dos épicos |

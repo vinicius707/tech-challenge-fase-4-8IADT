@@ -39,7 +39,7 @@ Contratos Given/When/Then escritos **antes** da implementação TDD.
 | 6 Modalidades | [`../specs/epic-06-modalidades/01-video-pose-yolo.md`](../specs/epic-06-modalidades/01-video-pose-yolo.md) | Concluída (E6.1) |
 | 6 Modalidades | [`../specs/epic-06-modalidades/02-audio-azure.md`](../specs/epic-06-modalidades/02-audio-azure.md) | Concluída (E6.2) |
 | 6 Modalidades | [`../specs/epic-06-modalidades/03-prescricoes-seed.md`](../specs/epic-06-modalidades/03-prescricoes-seed.md) | Concluída (E6.3) |
-| 7 Alertas + polish | [`../specs/epic-07-alertas-polish/01-justificativa-sse.md`](../specs/epic-07-alertas-polish/01-justificativa-sse.md) | Pendente (E7.1) |
+| 7 Alertas + polish | [`../specs/epic-07-alertas-polish/01-justificativa-sse.md`](../specs/epic-07-alertas-polish/01-justificativa-sse.md) | Concluída (E7.1) |
 | 7 Alertas + polish | [`../specs/epic-07-alertas-polish/02-telas-a11y-dlq.md`](../specs/epic-07-alertas-polish/02-telas-a11y-dlq.md) | Pendente (E7.2) |
 | 7 Alertas + polish | [`../specs/epic-07-alertas-polish/03-lighthouse-gate.md`](../specs/epic-07-alertas-polish/03-lighthouse-gate.md) | Pendente (E7.3) |
 

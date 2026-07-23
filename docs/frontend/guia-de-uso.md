@@ -1,7 +1,7 @@
 # Guia de uso — Frontend Limen (Épico 4)
 
 Documentação operacional e visual do shell Next.js: login, Pacientes, Novo Caso
-de vitais e detalhe de Caso com Risco/Alerta.
+de vitais e detalhe de Caso com Risco/Alerta/Justificativa (E7.1).
 
 > O Limen é um **protótipo acadêmico** e **não é um dispositivo médico**. Não use
 > para decisões clínicas reais.
@@ -79,7 +79,7 @@ Neste épico, `medico` e `admin` usam as **mesmas telas** (sem UI de DLQ).
 | `/pacientes` | autenticada | Lista + criar Paciente mínimo |
 | `/pacientes/[id]` | autenticada | Detalhe (código + rótulo mascarado) |
 | `/pacientes/[id]/novo-caso` | autenticada | Upload CSV de vitais |
-| `/casos/[id]` | autenticada | Status, polling, Risco e Alertas |
+| `/casos/[id]` | autenticada | Status, polling, Risco, Justificativa e Alertas |
 
 Rotas futuras (desabilitadas na nav): `/alertas`, `/admin/falhas`.
 
@@ -155,6 +155,10 @@ Quando o worker concluir com `done`:
 
 - Mostra `risk_score` e `risk_level` (`BAIXO` / `MEDIO` / `ALTO`)
 - Lista Alertas (`level` + `version`) se existirem
+- Seção **Justificativa** (narrativa template + contribuições por modalidade)
+  quando o Caso está `done` e o backend enviou `justification`
+- Indicador smoke de feed SSE de Alertas no header do shell (“ao vivo” /
+  último evento) — toast AA fica em E7.2
 - Se `BAIXO`, a seção de Alertas aparece vazia (“Nenhum Alerta”)
 
 Se `failed`, a UI mostra aviso de falha (sem painel DLQ neste épico).

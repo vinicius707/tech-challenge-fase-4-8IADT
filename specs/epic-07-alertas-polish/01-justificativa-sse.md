@@ -10,7 +10,8 @@ Alertas versionados já persistidos (Épicos 3/5).
 
 ## Status da entrega
 
-**Pendente** (T7.0: specs SDD; implementação T7.1–T7.5 desta etapa E7.1).
+**Concluída em 22 de julho de 2026** (T7.0–T7.5: specs, Justificativa template,
+SSE Bearer, UI mínima, cliente fetch e fechamento docs).
 
 Etapas posteriores do Épico 7 (specs próprias):
 
@@ -135,9 +136,9 @@ preservando histórico append-only no GET do Caso.
 
 ## Critérios de pronto (DoD desta etapa E7.1)
 
-- [ ] Justificativa template no contrato do Caso + testes TDD.
-- [ ] SSE `fetch`+Bearer conforme ADR 0022; sem token na query.
-- [ ] Eventos cobrem criação e nova versão de Alerta.
-- [ ] UI mínima da Justificativa em `/casos/[id]`.
-- [ ] Sem dark/AA/DLQ UI/Lighthouse gate (E7.2/E7.3).
-- [ ] README / índice docs atualizados no fechamento da etapa.
+- [x] Justificativa template no contrato do Caso + testes TDD.
+- [x] SSE `fetch`+Bearer conforme ADR 0022; sem token na query.
+- [x] Eventos cobrem criação e nova versão de Alerta.
+- [x] UI mínima da Justificativa em `/casos/[id]`.
+- [x] Sem dark/AA/DLQ UI/Lighthouse gate (E7.2/E7.3).
+- [x] README / índice docs atualizados no fechamento da etapa.

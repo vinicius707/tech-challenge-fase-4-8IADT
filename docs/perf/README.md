@@ -17,7 +17,9 @@ Artefatos e regras de Lighthouse do shell frontend.
   restritivo).
 - **Rotas gate:** `/login`, `/pacientes`.
 - **SEO:** só relatório; fora do gate.
-- **CI:** job de gate na T7.13 (esta pasta documenta a regra compartilhada com o
-  script local).
+- **CI:** job `Lighthouse gate` em [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml)
+  — `npm run build` + `npm start`, depois `npm run lighthouse:check`; artefatos
+  em `docs/perf/check/` (upload no Actions). Baseline versionada permanece
+  intocada pelo job.
 
 Detalhes e regeneração: [`baseline/README.md`](baseline/README.md).

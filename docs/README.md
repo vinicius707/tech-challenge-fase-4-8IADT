@@ -101,7 +101,7 @@ arquivo quando o plano supersede uma decisão anterior.
 - Índice: [`perf/README.md`](perf/README.md) — gate absoluto + regressão (tolerância
   2; rotas `/login`, `/pacientes`)
 - Baseline versionada: [`perf/baseline/`](perf/baseline/)
-- Script local: `npm run lighthouse:check` em `frontend/` (CI na T7.13)
+- Script / CI: `npm run lighthouse:check` em `frontend/` (job `Lighthouse gate`)
 
 ## Frontend (operacional)
 

@@ -11,7 +11,8 @@ Next.js App Router + Tailwind CSS + shadcn/ui. Proxy `/api/*` → FastAPI
 | --- | -------- |
 | [Guia de uso + prints](../docs/frontend/guia-de-uso.md) | Fluxo login → Paciente → Caso |
 | [Troubleshooting](../docs/frontend/troubleshooting.md) | Diagnóstico Compose/UI/API |
-| [Baseline Lighthouse](../docs/perf/baseline/) | Scores versionados |
+| [Baseline Lighthouse](../docs/perf/baseline/) | Scores versionados + gate |
+| [Gate Lighthouse](../docs/perf/README.md) | Absoluto + regressão (CI) |
 
 ## Subir tudo (recomendado)
 
@@ -43,6 +44,7 @@ Health via proxy: <http://localhost:3000/api/health>
 | `npm test` | Vitest (proxy + auth/sessão) |
 | `npm run lint` | ESLint |
 | `npm run lighthouse:baseline` | Regenera [`docs/perf/baseline/`](../docs/perf/baseline/) (frontend no ar) |
+| `npm run lighthouse:check` | Gate vs baseline (absoluto + regressão; não grava baseline) |
 
 ## Variáveis
 

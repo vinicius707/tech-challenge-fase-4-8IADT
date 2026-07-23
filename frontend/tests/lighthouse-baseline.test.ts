@@ -33,11 +33,12 @@ describe("lighthouse baseline (T4.7)", () => {
     ).toBe(true);
   });
 
-  it("CI não adiciona gate de Lighthouse (ainda T7.13)", () => {
+  it("CI roda gate Lighthouse sem gravar baseline", () => {
     const ci = readFileSync(
       path.join(repoRoot, ".github", "workflows", "ci.yml"),
       "utf8",
     );
-    expect(ci.toLowerCase()).not.toMatch(/lighthouse/);
+    expect(ci).toMatch(/lighthouse:check/);
+    expect(ci).toMatch(/docs\/perf\/check/);
   });
 });

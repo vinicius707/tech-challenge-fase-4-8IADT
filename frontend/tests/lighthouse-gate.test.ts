@@ -186,11 +186,11 @@ describe("lighthouse gate (T7.12)", () => {
     expect(text).toMatch(/-1/);
   });
 
-  it("CI ainda não adiciona gate nesta tarefa (T7.13)", () => {
+  it("reutiliza a mesma regra no CI (job Lighthouse)", () => {
     const ci = readFileSync(
       path.join(repoRoot, ".github", "workflows", "ci.yml"),
       "utf8",
     );
-    expect(ci.toLowerCase()).not.toMatch(/lighthouse/);
+    expect(ci).toMatch(/lighthouse:check/);
   });
 });

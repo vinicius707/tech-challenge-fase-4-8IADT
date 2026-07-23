@@ -28,8 +28,7 @@ Resumo máquina-legível: [`summary.json`](summary.json).
 `/pacientes` usa sessão sintética em `localStorage` (`limen-session`) apenas para
 passar o AuthGate e medir o shell autenticado — o token não é válido na API.
 
-`/casos/[id]` fica fora do gate local até haver sessão sintética estável no CI
-(T7.13+).
+`/casos/[id]` fica fora do gate até haver sessão sintética estável no CI.
 
 ## Gate (absoluto + regressão)
 
@@ -88,6 +87,10 @@ npm run lighthouse:check
   `docs/perf/baseline/`.
 - Exit `0` se todos os scores gated ≥ piso; `1` caso contrário (mensagem com
   rota + categoria + delta).
+
+O mesmo comando roda no CI (job **Lighthouse gate**), com upload dos
+relatórios em `docs/perf/check/` como artefato Actions — sem alterar este
+diretório `baseline/`.
 
 Dependências de geração (dev): `lighthouse`, `chrome-launcher`, `puppeteer-core`
 em `frontend/`. Requer Chrome/Chromium instalado na máquina.

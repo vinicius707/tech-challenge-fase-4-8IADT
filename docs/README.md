@@ -37,7 +37,7 @@ Contratos Given/When/Then escritos **antes** da implementação TDD.
 | 5 Resiliência | [`../specs/epic-05-resiliencia/01-falha-parcial-reprocess.md`](../specs/epic-05-resiliencia/01-falha-parcial-reprocess.md) | Concluída |
 | 5 Resiliência | [`../specs/epic-05-resiliencia/02-filas-dlq-retries.md`](../specs/epic-05-resiliencia/02-filas-dlq-retries.md) | Concluída |
 | 6 Modalidades | [`../specs/epic-06-modalidades/01-video-pose-yolo.md`](../specs/epic-06-modalidades/01-video-pose-yolo.md) | Concluída (E6.1) |
-| 6 Modalidades | [`../specs/epic-06-modalidades/02-audio-azure.md`](../specs/epic-06-modalidades/02-audio-azure.md) | Concluída (E6.2) |
+| 6 Modalidades | [`../specs/epic-06-modalidades/02-audio-azure.md`](../specs/epic-06-modalidades/02-audio-azure.md) | Concluída (E6.2 seam); real → Épico 10 |
 | 6 Modalidades | [`../specs/epic-06-modalidades/03-prescricoes-seed.md`](../specs/epic-06-modalidades/03-prescricoes-seed.md) | Concluída (E6.3) |
 | 7 Alertas + polish | [`../specs/epic-07-alertas-polish/01-justificativa-sse.md`](../specs/epic-07-alertas-polish/01-justificativa-sse.md) | Concluída (E7.1) |
 | 7 Alertas + polish | [`../specs/epic-07-alertas-polish/02-telas-a11y-dlq.md`](../specs/epic-07-alertas-polish/02-telas-a11y-dlq.md) | Concluída (E7.2) |
@@ -49,6 +49,11 @@ Contratos Given/When/Then escritos **antes** da implementação TDD.
 | 9 Vitais ML | [`../specs/epic-09-vitais-ml/02-isolation-forest-runtime.md`](../specs/epic-09-vitais-ml/02-isolation-forest-runtime.md) | Spec (E9.2) — pendente impl. |
 | 9 Vitais ML | [`../specs/epic-09-vitais-ml/03-autoencoder-notebook.md`](../specs/epic-09-vitais-ml/03-autoencoder-notebook.md) | Spec (E9.3) — pendente impl. |
 | 9 Vitais ML | [`../specs/epic-09-vitais-ml/04-comparacao-relatorio-roteiro.md`](../specs/epic-09-vitais-ml/04-comparacao-relatorio-roteiro.md) | Spec (E9.4) — pendente impl. |
+| 10 Azure áudio real | [`../specs/epic-10-azure-audio-real/01-speech-language-evidencia.md`](../specs/epic-10-azure-audio-real/01-speech-language-evidencia.md) | Spec (E10) — pendente impl. |
+
+> Fila de implementação das frentes de IA real: **Épico 10 → Épico 11 (YOLOv8,
+> ainda sem spec) → Épico 9**. O Épico 9 tem SDD pronto; **não está encerrado**
+> (código não iniciado). Épicos 6.x permanecem Concluída (seam/sintético).
 
 ## ADRs
 
@@ -92,6 +97,13 @@ arquivo quando o plano supersede uma decisão anterior.
 | [0015](adr/0015-retry-circuit-breaker-azure.md) | Retry / CB Azure |
 | [0017](adr/0017-timeouts-por-modalidade.md) | Timeouts por modalidade |
 | [0020](adr/0020-filas-separadas-video.md) | Filas `video` / `default` |
+| [0031](adr/0031-audio-nlp-modelagem.md) | Áudio NLP: Termo Crítico / Sentimento como Anomalias |
+
+### IA real e evidência
+
+| ADR | Tema |
+| --- | ---- |
+| [0030](adr/0030-ia-real-opt-in-evidencia.md) | IA real opt-in; CI sintético; evidência commitada |
 
 ### Frontend (épicos seguintes)
 
@@ -130,7 +142,9 @@ arquivo quando o plano supersede uma decisão anterior.
 | 6 | Modalidades PDF | Concluído (E6.1 vídeo; E6.2 áudio; E6.3 prescrições + seed) |
 | 7 | Alertas + polish UI | Concluído (E7.1–E7.3) |
 | 8 | CI/CD e entrega | Concluído (E8.1–E8.2) |
-| 9 | Vitais ML (portfólio) | Specs + ADR 0029; **impl. não iniciada** — rodar baseline atual |
+| 9 | Vitais ML (portfólio) | Specs + ADR 0029; **impl. não iniciada** (3º na fila de IA real) |
+| 10 | Azure áudio real | Spec SDD; **impl. não iniciada** (1º na fila: Speech + Language + evidência) |
+| 11 | YOLOv8 vídeo real | Planejado (2º na fila); spec ainda não escrita |
 
 ## Entrega acadêmica (E8.2)
 

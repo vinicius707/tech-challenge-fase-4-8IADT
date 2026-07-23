@@ -16,9 +16,15 @@ Speech Azure F0 com **cache**, **fallback local** e **circuit breaker**
 **Concluída em 21 de julho de 2026** (T6.7–T6.12: spec, fixtures, upload,
 analyzer/cache/Azure, badge/fusão e fechamento docs).
 
+Este épico entregou o **seam** (Provedor de Áudio, cache, CB, analyzer local,
+Azure **injetável**/stub). O caminho Azure **real** (Speech SDK + Text
+Analytics + Termos Críticos + evidência commitada) é o
+[Épico 10](../epic-10-azure-audio-real/01-speech-language-evidencia.md) — não
+reabre esta spec.
+
 Pré-requisito: E6.1 (vídeo) concluída nesta branch.
 
-Etapa posterior: E6.3 Prescrições — regras + histórico + seed multimodal.
+Etapa posterior (na época): E6.3 Prescrições. Caminho real de áudio: Épico 10.
 
 ## Escopo
 

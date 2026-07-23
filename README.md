@@ -24,10 +24,10 @@ Provedor de Áudio com CB/fallback, regras de Prescrição + seed multimodal, fa
 parcial / reprocess, workers Compose, shell Next.js (tema dark/light) e gate
 Lighthouse no CI (`npm run lighthouse:check`).
 
-Ainda não fazem parte da implementação: job CI do smoke Compose de Caso vitais,
-seed/notebooks/relatório finais (Épico 8 / E8.2); chamada Azure Speech real
-obrigatória no CI (`AZURE_ENABLED=false`). Publish GHCR em `main` já está no
-workflow (T8.2); smoke local: `./scripts/smoke-caso-vitais.sh`.
+Ainda não fazem parte da implementação: seed/notebooks/relatório finais
+(Épico 8 / E8.2); chamada Azure Speech real obrigatória no CI
+(`AZURE_ENABLED=false`). Publish GHCR em `main` e smoke Compose de Caso vitais
+já estão no workflow; localmente: `./scripts/smoke-caso-vitais.sh`.
 
 ## O que já foi entregue
 
@@ -227,7 +227,7 @@ Enfileira um Caso só com `data/fixtures/vitals/vitals_medium.csv` (sem
 vídeo/áudio/prescrições), autentica com o Operador seed e faz poll até
 `status=done`. Espera `AZURE_ENABLED=false` (padrão do `.env.example`). CLI
 Python: [`scripts/smoke_caso_vitais.py`](scripts/smoke_caso_vitais.py).
-Publish GHCR e job de CI deste smoke ficam nas tarefas seguintes do E8.1.
+O mesmo fluxo roda no CI (job **Smoke Caso vitais**).
 
 ## API — exemplos rápidos
 
@@ -453,8 +453,9 @@ e PRs: backend (`uv sync`, compileall, pytest), job **Lighthouse gate**
 e job **Docker images (GHCR)** — build de `limen-backend` / `limen-frontend` em
 todo evento; **push** para `ghcr.io/<owner>/…` com tags `main-<sha>` e `latest`
 **somente** em push na `main` (`GITHUB_TOKEN`, ADR
-[0028](docs/adr/0028-cicd-actions-ghcr.md)). Job CI do smoke Caso vitais fica na
-próxima tarefa do E8.1; localmente: `./scripts/smoke-caso-vitais.sh`.
+[0028](docs/adr/0028-cicd-actions-ghcr.md)); e job **Smoke Caso vitais**
+(`needs: backend`, Compose + `./scripts/smoke-caso-vitais.sh`,
+`AZURE_ENABLED=false`) em push e PR — localmente o mesmo script.
 
 ## Documentação
 

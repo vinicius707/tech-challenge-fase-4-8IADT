@@ -84,6 +84,7 @@ services:
       SEED_ADMIN_USERNAME: ${SEED_ADMIN_USERNAME:-}
       SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
       PII_ENCRYPTION_KEY: ${PII_ENCRYPTION_KEY:-}
+      AZURE_ENABLED: ${AZURE_ENABLED:-false}
       RQ_QUEUE_NAME: ${RQ_QUEUE_NAME:-default}
     depends_on:
       postgres:

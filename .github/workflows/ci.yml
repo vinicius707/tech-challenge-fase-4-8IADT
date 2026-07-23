@@ -153,3 +153,40 @@ jobs:
             ${{ steps.image.outputs.name }}:latest
           cache-from: type=gha,scope=limen-${{ matrix.image }}
           cache-to: type=gha,mode=max,scope=limen-${{ matrix.image }}
+
+  # Spec E8.1 Cenário 4: smoke Compose + Caso vitais.
+  # Matriz: push e pull_request (mesmo `on` do workflow). Local: ./scripts/smoke-caso-vitais.sh
+  smoke-caso-vitais:
+    name: Smoke Caso vitais
+    needs: backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      AZURE_ENABLED: "false"
+      SMOKE_WAIT_TIMEOUT_SECONDS: "300"
+      SMOKE_POLL_TIMEOUT_SECONDS: "180"
+      SMOKE_IDEMPOTENCY_KEY: smoke-ci-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Instalar uv
+        uses: astral-sh/setup-uv@v8.3.2
+        with:
+          version: "0.11.2"
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+
+      - name: Preparar .env (seed + AZURE_ENABLED=false)
+        run: |
+          cp .env.example .env
+          if grep -q '^AZURE_ENABLED=' .env; then
+            sed -i 's/^AZURE_ENABLED=.*/AZURE_ENABLED=false/' .env
+          else
+            printf 'AZURE_ENABLED=false\n' >> .env
+          fi
+          grep -q '^AZURE_ENABLED=false$' .env
+
+      - name: Smoke Compose + Caso vitais
+        run: ./scripts/smoke-caso-vitais.sh

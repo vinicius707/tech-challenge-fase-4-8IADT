@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { LogoutButton } from "@/components/auth/logout-button";
+import { AlertsStreamIndicator } from "@/components/alerts/alerts-stream-indicator";
 import { Button } from "@/components/ui/button";
 import { primaryNavItems } from "@/lib/shell/nav";
 import { useSessionStore } from "@/lib/auth/session";
@@ -37,6 +38,7 @@ export function AppShell({ children }: AppShellProps) {
           </Button>
           <p className="text-lg font-semibold tracking-tight">Limen</p>
           <div className="ml-auto flex min-w-0 items-center gap-3">
+            <AlertsStreamIndicator />
             <p className="truncate text-sm text-muted-foreground">
               <span className="font-medium text-foreground">{username}</span>
               {role ? (

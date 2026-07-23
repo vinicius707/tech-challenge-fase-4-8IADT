@@ -212,6 +212,7 @@ flowchart LR
   E5 --> E6[6 Modalidades]
   E6 --> E7[7 Alertas + polish]
   E7 --> E8[8 CI/CD + entrega]
+  E8 --> E9[9 Vitais ML]
 
   style E1 fill:#d4edda
   style E2 fill:#d4edda
@@ -221,11 +222,13 @@ flowchart LR
   style E6 fill:#d4edda
   style E7 fill:#d4edda
   style E8 fill:#d4edda
+  style E9 fill:#fff3cd
 ```
 
 | Épico | Status |
 | ----- | ------ |
 | 1–8 | Concluídos |
+| 9 | Specs + ADR 0029; implementação pendente |
 
 ---
 
@@ -234,7 +237,7 @@ flowchart LR
 | Documento | Conteúdo |
 | --------- | -------- |
 | [`README.md`](../README.md) | Operação local, curls, env |
-| [`adr/`](adr/) | Decisões (0001–0028) |
+| [`adr/`](adr/) | Decisões (0001–0029) |
 | [`../specs/`](../specs/) | Contratos SDD por épico |
 | [`../CONTEXT.md`](../CONTEXT.md) | Linguagem ubíqua |
 | [`frontend/guia-de-uso.md`](frontend/guia-de-uso.md) | UI (Épico 4) |

@@ -10,5 +10,8 @@ data/downloads/
 
 .ipynb_checkpoints/
 
+# Clones de projetos de referência (somente local)
+refs/
+
 # Saída local do Lighthouse em modo check (não versionar)
 docs/perf/check/

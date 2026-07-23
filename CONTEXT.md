@@ -36,6 +36,10 @@ _Avoid_: Detecção de sangramento, análise de procedimento cirúrgico, diagnó
 Sequência temporal sintética de sinais fisiológicos (ex.: frequência cardíaca, SpO2, pressão) associada a um Caso, com anomalias injetadas de forma controlada para demo e testes. Faixas calibradas por datasets públicos de referência (ex.: Kaggle/PhysioNet), sem PHI real em runtime.
 _Avoid_: Prontuário real, streaming contínuo de monitor hospitalar
 
+**Backend de Vitais**:
+Modo do `VitalsAnomalyEngine` selecionado por `LIMEN_VITALS_BACKEND`: `thresholds` (limiares; default CI), `isolation_forest` (sklearn) ou `hybrid` (limiares OU IF). Autoencoder PyTorch é evidência de notebook — não é um valor deste backend.
+_Avoid_: autoencoder no worker, Torch na imagem da API, download de dataset no runtime
+
 **Prescrição**:
 Registro de medicamento/dose/intervalo associado a um Caso. Anomalias vêm de regras determinísticas (faixa, intervalo, medicamento inesperado) e, quando houver histórico do Paciente, de desvio longitudinal vs. doses anteriores.
 _Avoid_: Prescrição eletrônica hospitalar real, integração com farmácia

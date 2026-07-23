@@ -36,6 +36,20 @@ class AlertResponse(BaseModel):
     created_at: datetime
 
 
+class JustificationModalityResponse(BaseModel):
+    modality: str
+    status: str
+    weight: float | None = None
+    partial_score: float | None = None
+    partial_level: str | None = None
+    top_anomalies: list[str] = Field(default_factory=list)
+
+
+class JustificationResponse(BaseModel):
+    narrative: str
+    modalities: list[JustificationModalityResponse] = Field(default_factory=list)
+
+
 class ReprocessRequest(BaseModel):
     """Body opcional: filtra modalidades failed a reprocessar."""
 
@@ -53,5 +67,6 @@ class CaseResponse(BaseModel):
     modalities: list[ModalityResponse] = Field(default_factory=list)
     artifacts: list[ArtifactResponse] = Field(default_factory=list)
     alerts: list[AlertResponse] = Field(default_factory=list)
+    justification: JustificationResponse | None = None
     created_at: datetime
     updated_at: datetime

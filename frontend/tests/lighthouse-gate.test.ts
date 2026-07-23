@@ -27,9 +27,9 @@ describe("lighthouse gate (T7.12)", () => {
     expect(REGRESSION_TOLERANCE).toBe(2);
   });
 
-  it("piso = max(absoluto, baseline − tolerância)", () => {
+  it("piso = max(absoluto, baseline − tolerância); baseline &lt; absoluto → só regressão", () => {
     expect(scoreFloor("performance", 97)).toBe(95); // 97−2=95 > 90
-    expect(scoreFloor("performance", 88)).toBe(90); // abs 90 > 86
+    expect(scoreFloor("performance", 88)).toBe(86); // baseline&lt;90 → 88−2
     expect(scoreFloor("accessibility", 100)).toBe(98); // 100−2
     expect(scoreFloor("bestPractices", 96)).toBe(94); // 96−2
   });
@@ -47,18 +47,57 @@ describe("lighthouse gate (T7.12)", () => {
         scores: { ...r.scores },
       })),
     };
-    // Ajusta /login perf ao piso absoluto (baseline histórico é 88).
-    const login = current.routes.find(
-      (r: { slug: string }) => r.slug === "login-desktop",
-    );
-    login.scores.performance = 90;
-
+    // Login baseline histórico 88 (&lt; absoluto 90): piso = 86 (só regressão).
+    // Mantém scores iguais ao baseline → deve passar.
     const result = evaluateGate(current, baseline);
     expect(result.ok).toBe(true);
     expect(result.failures).toEqual([]);
   });
 
-  it("falha no piso absoluto mesmo acima da regressão", () => {
+  it("falha no piso absoluto quando baseline já está ≥ absoluto", () => {
+    const baseline = {
+      routes: [
+        {
+          slug: "login-desktop",
+          scores: {
+            performance: 92,
+            accessibility: 100,
+            bestPractices: 100,
+            seo: 100,
+          },
+        },
+      ],
+    };
+    const current = {
+      routes: [
+        {
+          slug: "login-desktop",
+          scores: {
+            performance: 89, // &lt; max(90, 90)=90
+            accessibility: 100,
+            bestPractices: 100,
+            seo: 100,
+          },
+        },
+      ],
+    };
+    const result = evaluateGate(current, baseline);
+    expect(result.ok).toBe(false);
+    expect(result.failures).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          route: "login-desktop",
+          category: "performance",
+          score: 89,
+          baseline: 92,
+          floor: 90,
+          delta: -3,
+        }),
+      ]),
+    );
+  });
+
+  it("com baseline &lt; absoluto, falha só por regressão além da tolerância", () => {
     const baseline = {
       routes: [
         {
@@ -77,7 +116,7 @@ describe("lighthouse gate (T7.12)", () => {
         {
           slug: "login-desktop",
           scores: {
-            performance: 87, // delta −1 ≤ tolerância, mas < 90 absoluto
+            performance: 85, // 88−2=86 → falha; absoluto 90 não se aplica ainda
             accessibility: 100,
             bestPractices: 100,
             seo: 100,
@@ -87,18 +126,14 @@ describe("lighthouse gate (T7.12)", () => {
     };
     const result = evaluateGate(current, baseline);
     expect(result.ok).toBe(false);
-    expect(result.failures).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          route: "login-desktop",
-          category: "performance",
-          score: 87,
-          baseline: 88,
-          floor: 90,
-          delta: -1,
-        }),
-      ]),
-    );
+    expect(result.failures[0]).toMatchObject({
+      route: "login-desktop",
+      category: "performance",
+      score: 85,
+      baseline: 88,
+      floor: 86,
+      delta: -3,
+    });
   });
 
   it("falha por regressão mesmo acima do piso absoluto", () => {

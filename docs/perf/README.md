@@ -13,13 +13,16 @@ Artefatos e regras de Lighthouse do shell frontend.
 ## Gate (E7.3)
 
 - **Absolutos (desktop):** Perf ≥90, A11y ≥95, Best Practices ≥90.
-- **Regressão:** falha se score &lt; baseline − **2** (ou &lt; absoluto — o mais
-  restritivo).
+- **Regressão:** tolerância de **2** pontos vs baseline.
+- **Piso efetivo:** `max(absoluto, baseline − 2)` quando o baseline já está
+  ≥ absoluto; se o baseline versionado ainda estiver abaixo do absoluto (hoje:
+  `/login` Perf 88), o piso é só `baseline − 2` até um commit explícito de novo
+  baseline.
 - **Rotas gate:** `/login`, `/pacientes`.
 - **SEO:** só relatório; fora do gate.
 - **CI:** job `Lighthouse gate` em [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml)
-  — `npm run build` + `npm start`, depois `npm run lighthouse:check`; artefatos
-  em `docs/perf/check/` (upload no Actions). Baseline versionada permanece
-  intocada pelo job.
+  — `npm run build` + `npm start`, depois `npm run lighthouse:check` com
+  `LIMEN_LH_RUNS=3` (mediana); artefatos em `docs/perf/check/` (upload no
+  Actions). Baseline versionada permanece intocada pelo job.
 
 Detalhes e regeneração: [`baseline/README.md`](baseline/README.md).

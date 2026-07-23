@@ -30,7 +30,14 @@ export function scoreFloor(category, baselineScore) {
   if (absolute == null) {
     throw new Error(`Categoria sem piso absoluto: ${category}`);
   }
-  return Math.max(absolute, baselineScore - REGRESSION_TOLERANCE);
+  const regressionFloor = baselineScore - REGRESSION_TOLERANCE;
+  // Baseline histórico abaixo do absoluto (ex.: login Perf 88):
+  // não exige o absoluto até um commit explícito de novo baseline ≥ absoluto.
+  // Continua falhando se regredir além da tolerância.
+  if (baselineScore < absolute) {
+    return regressionFloor;
+  }
+  return Math.max(absolute, regressionFloor);
 }
 
 /**

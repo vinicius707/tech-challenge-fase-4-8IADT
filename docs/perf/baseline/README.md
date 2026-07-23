@@ -41,7 +41,7 @@ Lógica em [`scripts/lighthouse-gate.mjs`](../../../scripts/lighthouse-gate.mjs)
 | Best Practices | ≥ **90** |
 | SEO | informado no relatório; **fora** do gate |
 | Tolerância de regressão | **2** pontos abaixo do baseline |
-| Piso efetivo | `max(absoluto, baseline − 2)` (o mais restritivo) |
+| Piso efetivo | Se baseline ≥ absoluto: `max(absoluto, baseline − 2)`. Se baseline &lt; absoluto (ex.: login Perf 88): só `baseline − 2` até um novo baseline explícito. |
 
 Falhas listam `rota / categoria`, `score`, `baseline`, `floor` e `delta`.
 

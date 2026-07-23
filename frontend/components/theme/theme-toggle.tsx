@@ -1,7 +1,5 @@
 "use client";
 
-import { Moon, Sun } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import { useThemeStore } from "@/lib/theme/store";
 
@@ -19,11 +17,7 @@ export function ThemeToggle() {
       aria-label={`Ativar tema ${next}`}
       title={`Tema ${theme === "dark" ? "escuro" : "claro"}`}
     >
-      {theme === "dark" ? (
-        <Sun aria-hidden="true" />
-      ) : (
-        <Moon aria-hidden="true" />
-      )}
+      {theme === "dark" ? "Claro" : "Escuro"}
     </Button>
   );
 }

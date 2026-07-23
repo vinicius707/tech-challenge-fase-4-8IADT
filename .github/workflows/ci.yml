@@ -44,7 +44,7 @@ jobs:
   lighthouse:
     name: Lighthouse gate
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 45
 
     steps:
       - name: Checkout
@@ -91,6 +91,8 @@ jobs:
         env:
           LIMEN_BASE_URL: http://127.0.0.1:3000
           CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+          # Mediana de 3 runs — reduz flake de Perf no limite do piso absoluto.
+          LIMEN_LH_RUNS: "3"
         run: npm run lighthouse:check
 
       - name: Upload relatórios Lighthouse

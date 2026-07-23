@@ -9,6 +9,8 @@ import {
   REGRESSION_TOLERANCE,
   evaluateGate,
   formatGateFailures,
+  median,
+  medianRouteScores,
   scoreFloor,
 } from "../../scripts/lighthouse-gate.mjs";
 
@@ -186,11 +188,56 @@ describe("lighthouse gate (T7.12)", () => {
     expect(text).toMatch(/-1/);
   });
 
+  it("mediana estabiliza scores entre runs", () => {
+    expect(median([88, 95, 90])).toBe(90);
+    expect(median([85, 88])).toBe(87);
+    const routes = medianRouteScores([
+      [
+        {
+          slug: "login-desktop",
+          url: "/login",
+          scores: {
+            performance: 88,
+            accessibility: 100,
+            bestPractices: 100,
+            seo: 100,
+          },
+        },
+      ],
+      [
+        {
+          slug: "login-desktop",
+          url: "/login",
+          scores: {
+            performance: 95,
+            accessibility: 100,
+            bestPractices: 100,
+            seo: 100,
+          },
+        },
+      ],
+      [
+        {
+          slug: "login-desktop",
+          url: "/login",
+          scores: {
+            performance: 90,
+            accessibility: 100,
+            bestPractices: 100,
+            seo: 100,
+          },
+        },
+      ],
+    ]);
+    expect(routes[0].scores.performance).toBe(90);
+  });
+
   it("reutiliza a mesma regra no CI (job Lighthouse)", () => {
     const ci = readFileSync(
       path.join(repoRoot, ".github", "workflows", "ci.yml"),
       "utf8",
     );
     expect(ci).toMatch(/lighthouse:check/);
+    expect(ci).toMatch(/LIMEN_LH_RUNS:\s*["']3["']/);
   });
 });

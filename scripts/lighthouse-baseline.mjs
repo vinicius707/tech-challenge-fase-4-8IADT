@@ -16,7 +16,11 @@ import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 import { execSync } from "node:child_process";
 
-import { evaluateGate, formatGateFailures } from "./lighthouse-gate.mjs";
+import {
+  evaluateGate,
+  formatGateFailures,
+  medianRouteScores,
+} from "./lighthouse-gate.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
@@ -176,15 +180,25 @@ async function runCheck() {
     "utf8",
   );
   const baseline = JSON.parse(baselineRaw);
-  const routes = await measureRoutes(checkDir);
+  const runs = Math.max(1, Number(process.env.LIMEN_LH_RUNS || "1") || 1);
+  /** @type {Awaited<ReturnType<typeof measureRoutes>>[]} */
+  const measured = [];
+  for (let i = 0; i < runs; i += 1) {
+    const out =
+      runs === 1 ? checkDir : path.join(checkDir, `run-${i + 1}`);
+    measured.push(await measureRoutes(out));
+  }
+  const routes = runs === 1 ? measured[0] : medianRouteScores(measured);
 
   const current = {
     generatedAt: new Date().toISOString(),
     gitSha: gitSha(),
     baseUrl,
     formFactor: "desktop",
+    runs,
     routes,
   };
+  await mkdir(checkDir, { recursive: true });
   await writeFile(
     path.join(checkDir, "summary.json"),
     `${JSON.stringify(current, null, 2)}\n`,

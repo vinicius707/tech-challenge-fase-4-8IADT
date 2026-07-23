@@ -1,6 +1,13 @@
+import dynamic from "next/dynamic";
+
 import { AuthGate } from "@/components/auth/auth-gate";
 import { LoginForm } from "@/components/auth/login-form";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
+
+const ThemeToggle = dynamic(
+  () =>
+    import("@/components/theme/theme-toggle").then((m) => m.ThemeToggle),
+  { ssr: false },
+);
 
 export default function LoginPage() {
   return (

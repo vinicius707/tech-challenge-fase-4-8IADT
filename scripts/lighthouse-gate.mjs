@@ -104,6 +104,48 @@ export function evaluateGate(current, baseline) {
 }
 
 /**
+ * Mediana de números (para estabilizar runs Lighthouse no CI).
+ * @param {number[]} values
+ * @returns {number}
+ */
+export function median(values) {
+  if (!values.length) throw new Error("median: lista vazia");
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  if (sorted.length % 2 === 0) {
+    return Math.round((sorted[mid - 1] + sorted[mid]) / 2);
+  }
+  return sorted[mid];
+}
+
+/**
+ * Agrega várias medições por slug usando mediana por categoria.
+ * @param {RouteScores[][]} runs
+ * @returns {RouteScores[]}
+ */
+export function medianRouteScores(runs) {
+  if (!runs.length) return [];
+  const slugs = runs[0].map((r) => r.slug);
+  return slugs.map((slug) => {
+    const samples = runs.map((routes) => routes.find((r) => r.slug === slug));
+    const first = samples.find(Boolean);
+    const categories = ["performance", "accessibility", "bestPractices", "seo"];
+    /** @type {Record<string, number>} */
+    const scores = {};
+    for (const cat of categories) {
+      scores[cat] = median(
+        samples.map((s) => s?.scores?.[cat]).filter((n) => typeof n === "number"),
+      );
+    }
+    return {
+      slug,
+      url: first?.url ?? slug,
+      scores,
+    };
+  });
+}
+
+/**
  * @param {GateFailure[]} failures
  * @returns {string}
  */

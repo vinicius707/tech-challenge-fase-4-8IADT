@@ -105,6 +105,9 @@ class SqlAlchemyCaseStore:
             row.prescriptions_content_sha256 = case.prescriptions_content_sha256
             row.updated_at = case.updated_at or datetime.now(tz=UTC)
 
+            # FK escalar (sem relationship): o UOW não ordena inserts filhos.
+            # Flush do Case antes de artifacts/modalities/alerts (Postgres/CI).
+            session.flush()
             self._sync_artifacts(session, case)
             session.flush()
             self._sync_modalities(session, case)

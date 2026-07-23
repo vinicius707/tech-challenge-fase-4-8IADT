@@ -18,6 +18,10 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db import Base
 
+# FK `cases.patient_id` → `patients.id`: o worker RQ importa só o case store.
+# Sem registrar Patient no MetaData, flush() levanta NoReferencedTableError.
+from app.patients.models import Patient as _Patient  # noqa: F401
+
 
 class Case(Base):
     __tablename__ = "cases"

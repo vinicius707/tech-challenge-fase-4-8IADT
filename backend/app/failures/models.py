@@ -8,6 +8,9 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db import Base
 
+# FK patient_id: worker pode gravar Falha sem ter importado o módulo patients antes.
+from app.patients.models import Patient as _Patient  # noqa: F401
+
 
 class ProcessingFailure(Base):
     """Registro de Falha de Processamento após esgotar retries / erro permanente."""

@@ -42,6 +42,8 @@ Contratos Given/When/Then escritos **antes** da implementação TDD.
 | 7 Alertas + polish | [`../specs/epic-07-alertas-polish/01-justificativa-sse.md`](../specs/epic-07-alertas-polish/01-justificativa-sse.md) | Concluída (E7.1) |
 | 7 Alertas + polish | [`../specs/epic-07-alertas-polish/02-telas-a11y-dlq.md`](../specs/epic-07-alertas-polish/02-telas-a11y-dlq.md) | Concluída (E7.2) |
 | 7 Alertas + polish | [`../specs/epic-07-alertas-polish/03-lighthouse-gate.md`](../specs/epic-07-alertas-polish/03-lighthouse-gate.md) | Concluída (E7.3) |
+| 8 CI/CD e entrega | [`../specs/epic-08-cicd-entrega/01-ghcr-smoke-vitais.md`](../specs/epic-08-cicd-entrega/01-ghcr-smoke-vitais.md) | Concluída (E8.1) |
+| 8 CI/CD e entrega | [`../specs/epic-08-cicd-entrega/02-seed-notebooks-relatorio.md`](../specs/epic-08-cicd-entrega/02-seed-notebooks-relatorio.md) | Concluída (E8.2) |
 
 ## ADRs
 
@@ -121,4 +123,22 @@ arquivo quando o plano supersede uma decisão anterior.
 | 5 | Resiliência | Concluído |
 | 6 | Modalidades PDF | Concluído (E6.1 vídeo; E6.2 áudio; E6.3 prescrições + seed) |
 | 7 | Alertas + polish UI | Concluído (E7.1–E7.3) |
-| 8 | CI/CD e entrega | Pendente |
+| 8 | CI/CD e entrega | Concluído (E8.1–E8.2) |
+
+## Entrega acadêmica (E8.2)
+
+- Relatório Fase 4: [`relatorio-fase4.md`](relatorio-fase4.md) (capítulo de datasets)
+- Roteiro de vídeo: [`demo/roteiro-video.md`](demo/roteiro-video.md)
+- Notebooks: [`../notebooks/`](../notebooks/)
+- Seed Compose: [`../scripts/seed-multimodal-demo.sh`](../scripts/seed-multimodal-demo.sh)
+- Spec: [`../specs/epic-08-cicd-entrega/02-seed-notebooks-relatorio.md`](../specs/epic-08-cicd-entrega/02-seed-notebooks-relatorio.md)
+
+## CI/CD (E8.1)
+
+- Workflow: [`../.github/workflows/ci.yml`](../.github/workflows/ci.yml) —
+  backend, Lighthouse, imagens GHCR, smoke Caso vitais
+- Imagens: `ghcr.io/<owner>/limen-backend` e `limen-frontend` (`main-<sha>`,
+  `latest` só em push na `main`)
+- Smoke local/CI: [`../scripts/smoke-caso-vitais.sh`](../scripts/smoke-caso-vitais.sh)
+- ADR: [0028](adr/0028-cicd-actions-ghcr.md)
+- Spec: [`../specs/epic-08-cicd-entrega/01-ghcr-smoke-vitais.md`](../specs/epic-08-cicd-entrega/01-ghcr-smoke-vitais.md)

@@ -103,3 +103,111 @@ jobs:
           path: docs/perf/check/
           if-no-files-found: warn
           retention-days: 14
+
+  images:
+    name: Docker images (GHCR)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: backend
+            context: ./backend
+          - image: frontend
+            context: ./frontend
+    env:
+      # Publish só em push na main (PRs: build sem push). Spec E8.1 / ADR 0028.
+      PUBLISH: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Nome da imagem (GHCR exige lowercase)
+        id: image
+        run: |
+          owner="$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')"
+          echo "name=ghcr.io/${owner}/limen-${{ matrix.image }}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login no GHCR
+        if: env.PUBLISH == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build (e push se main)
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          push: ${{ env.PUBLISH == 'true' }}
+          tags: |
+            ${{ steps.image.outputs.name }}:main-${{ github.sha }}
+            ${{ steps.image.outputs.name }}:latest
+          cache-from: type=gha,scope=limen-${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=limen-${{ matrix.image }}
+
+  # Spec E8.1 Cenário 4: smoke Compose + Caso vitais.
+  # Matriz: push e pull_request (mesmo `on` do workflow). Local: ./scripts/smoke-caso-vitais.sh
+  smoke-caso-vitais:
+    name: Smoke Caso vitais
+    needs: backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      AZURE_ENABLED: "false"
+      SMOKE_WAIT_TIMEOUT_SECONDS: "300"
+      SMOKE_POLL_TIMEOUT_SECONDS: "180"
+      SMOKE_IDEMPOTENCY_KEY: smoke-ci-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Instalar uv
+        uses: astral-sh/setup-uv@v8.3.2
+        with:
+          version: "0.11.2"
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+
+      - name: Preparar .env (seed + AZURE_ENABLED=false)
+        run: |
+          cp .env.example .env
+          if grep -q '^AZURE_ENABLED=' .env; then
+            sed -i 's/^AZURE_ENABLED=.*/AZURE_ENABLED=false/' .env
+          else
+            printf 'AZURE_ENABLED=false\n' >> .env
+          fi
+          grep -q '^AZURE_ENABLED=false$' .env
+
+      - name: Smoke Compose + Caso vitais
+        run: ./scripts/smoke-caso-vitais.sh
+
+      - name: Logs Compose (diagnóstico em falha)
+        if: failure()
+        run: |
+          docker compose logs backend worker outbox-reconciler --tail=200 || true
+          docker compose exec -T redis redis-cli LLEN rq:queue:default || true
+          docker compose exec -T backend python - <<'PY' || true
+          from sqlalchemy import create_engine, text
+          import os
+          url = os.environ["POSTGRES_URL"].replace("postgresql://", "postgresql+psycopg://", 1)
+          eng = create_engine(url)
+          with eng.connect() as conn:
+              rows = conn.execute(text(
+                  "select status, count(*) from outbox_jobs group by status order by status"
+              )).all()
+              print("outbox_jobs by status:", rows)
+              cases = conn.execute(text(
+                  "select id, status from cases order by created_at desc limit 5"
+              )).all()
+              print("recent cases:", cases)
+          PY

@@ -84,6 +84,7 @@ services:
       SEED_ADMIN_USERNAME: ${SEED_ADMIN_USERNAME:-}
       SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
       PII_ENCRYPTION_KEY: ${PII_ENCRYPTION_KEY:-}
+      AZURE_ENABLED: ${AZURE_ENABLED:-false}
       RQ_QUEUE_NAME: ${RQ_QUEUE_NAME:-default}
     depends_on:
       postgres:
@@ -131,6 +132,18 @@ services:
         condition: service_healthy
       backend:
         condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'python -c "from redis import Redis; import os; r=Redis.from_url(os.environ[\"REDIS_URL\"], socket_connect_timeout=2); workers=r.smembers(\"rq:workers\"); raise SystemExit(0 if workers else 1)"',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
 
   worker-video:
     build:
@@ -158,6 +171,8 @@ services:
       redis:
         condition: service_healthy
       backend:
+        condition: service_healthy
+      minio:
         condition: service_healthy
 
   outbox-reconciler:

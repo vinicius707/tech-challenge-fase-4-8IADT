@@ -25,7 +25,7 @@ todos:
     status: completed
   - id: epic-08
     content: "Épico 8 CI/CD+entrega: GHCR, smoke vitais, seed, relatório, roteiro vídeo"
-    status: pending
+    status: completed
 isProject: false
 ---
 
@@ -227,5 +227,5 @@ flowchart LR
 
 ## Próximo passo de execução
 
-Os **Épicos 1–7** estão concluídos (E7.1–E7.3).
-Próximo: **Épico 8** — publish GHCR, smoke Compose + Caso vitais, seed/notebooks/relatório.
+Os **Épicos 1–8** estão concluídos (E8.1 GHCR/smoke + E8.2 entrega acadêmica,
+T8.0–T8.8).

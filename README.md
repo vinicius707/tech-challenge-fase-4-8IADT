@@ -12,21 +12,16 @@ Glossário de domínio: [`CONTEXT.md`](CONTEXT.md). Decisão de arquitetura:
 
 ## Estado atual
 
-Os **Épicos 1–7** estão concluídos (Fundação → Alertas + polish UI, incluindo
-gate Lighthouse por regressão).
+Os **Épicos 1–8** estão concluídos (Fundação → CI/CD e entrega acadêmica).
 
-A entrega atual inclui autenticação JWT, Paciente com Rótulo Sensível (reveal +
-SR), Caso com modalidades `vitals`, `video`, `audio` e `prescriptions` (Artefatos
-no MinIO, outbox → filas RQ `default` / `video` → Risco fundido e Alerta
-versionado se ≥ MEDIO), Justificativa template, feed SSE de Alertas com toast
-`aria-live="polite"`, Recharts lazy em Caso/Paciente, painel admin de Falhas,
-Provedor de Áudio com CB/fallback, regras de Prescrição + seed multimodal, falha
-parcial / reprocess, workers Compose, shell Next.js (tema dark/light) e gate
-Lighthouse no CI (`npm run lighthouse:check`).
+A entrega inclui autenticação JWT, Paciente com Rótulo Sensível (reveal + SR),
+Caso multimodal (`vitals` / `video` / `audio` / `prescriptions`), Risco fundido e
+Alertas versionados, Justificativa template, SSE, UI a11y + tema, Lighthouse
+gate, publish GHCR em `main`, smoke Caso vitais, seed multimodal Compose,
+notebooks, relatório e roteiro de vídeo.
 
-Ainda não fazem parte da implementação: publish GHCR, smoke Compose de Caso
-vitais de entrega, seed/notebooks/relatório finais (Épico 8); chamada Azure
-Speech real obrigatória no CI (`AZURE_ENABLED=false`).
+Fora do gate de CI (opcional / futuro): chamada Azure Speech real obrigatória
+(`AZURE_ENABLED=false` no CI/demo).
 
 ## O que já foi entregue
 
@@ -120,7 +115,10 @@ Speech real obrigatória no CI (`AZURE_ENABLED=false`).
   longitudinal vs. histórico do Paciente (ADR 0010).
 - Contribui ao Risco (fusão; falha parcial intacta); timeout padrão 30s.
 - Seed demo multimodal (vitals+vídeo+áudio+prescriptions):
-  [`scripts/seed_multimodal_demo.py`](scripts/seed_multimodal_demo.py).
+  [`scripts/seed-multimodal-demo.sh`](scripts/seed-multimodal-demo.sh) (HTTP /
+  Compose) ou
+  [`scripts/seed_multimodal_demo.py`](scripts/seed_multimodal_demo.py)
+  (`--memory` / `--http`).
 - Spec:
   [`03-prescricoes-seed.md`](specs/epic-06-modalidades/03-prescricoes-seed.md).
 
@@ -164,24 +162,69 @@ Speech real obrigatória no CI (`AZURE_ENABLED=false`).
 - Spec:
   [`03-lighthouse-gate.md`](specs/epic-07-alertas-polish/03-lighthouse-gate.md).
 
+### CI/CD — GHCR + smoke vitais (Épico 8 / E8.1)
+
+- Imagens `ghcr.io/<owner>/limen-backend` e `limen-frontend`: build em todo
+  evento CI; **push** com tags `main-<sha>` e `latest` **somente** em push na
+  `main` (`GITHUB_TOKEN`, ADR [0028](docs/adr/0028-cicd-actions-ghcr.md)).
+- Smoke Compose + Caso só com vitais (`AZURE_ENABLED=false`):
+  [`scripts/smoke-caso-vitais.sh`](scripts/smoke-caso-vitais.sh) (local) e job
+  **Smoke Caso vitais** no CI (`needs: backend`, push e PR).
+- Spec:
+  [`01-ghcr-smoke-vitais.md`](specs/epic-08-cicd-entrega/01-ghcr-smoke-vitais.md).
+
+### Entrega acadêmica (Épico 8 / E8.2)
+
+- Seed Compose: `./scripts/seed-multimodal-demo.sh` (após `start-limen.sh`).
+- Notebooks: [`notebooks/`](notebooks/) (`eda_vitals_final`, `evidencia_modalidades`).
+- Relatório (capítulo datasets): [`docs/relatorio-fase4.md`](docs/relatorio-fase4.md).
+- Roteiro de vídeo: [`docs/demo/roteiro-video.md`](docs/demo/roteiro-video.md).
+- Spec:
+  [`02-seed-notebooks-relatorio.md`](specs/epic-08-cicd-entrega/02-seed-notebooks-relatorio.md).
+
 ## Executar localmente
 
 Pré-requisitos: Docker Compose v2; portas 3000, 5432, 6379, 8000, 9000 e 9001
 livres (ou remapeadas no `.env`).
 
-### Forma recomendada (script)
+### Forma recomendada (script) — build local
 
 ```bash
 ./scripts/start-limen.sh
+./scripts/seed-multimodal-demo.sh    # demo multimodal (opcional)
 ```
 
 O script cria `.env` se necessário, sobe o Compose com `--build --wait`, valida
 API + UI e imprime as URLs. Variantes: `--smoke`, `--down`, `--reset`.
 
+Smokes:
+
+```bash
+./scripts/smoke-foundation.sh        # health + MinIO + Alembic
+./scripts/smoke-caso-vitais.sh       # Caso só vitais até done
+```
+
 Guia visual da UI: [`docs/frontend/guia-de-uso.md`](docs/frontend/guia-de-uso.md).  
 Problemas comuns: [`docs/frontend/troubleshooting.md`](docs/frontend/troubleshooting.md).
 
-### Forma manual
+### Imagens GHCR (sem rebuild)
+
+Após o publish em `main`, dá para puxar `limen-backend` / `limen-frontend`:
+
+```bash
+cp .env.example .env
+export GHCR_OWNER=<seu-usuario-ou-org-lowercase>
+export LIMEN_IMAGE_TAG=latest   # ou main-<sha>
+docker compose -f docker-compose.yml -f docker-compose.ghcr.yml pull
+docker compose -f docker-compose.yml -f docker-compose.ghcr.yml up -d --no-build --wait
+./scripts/seed-multimodal-demo.sh
+```
+
+Override: [`docker-compose.ghcr.yml`](docker-compose.ghcr.yml). Packages privados
+exigem `docker login ghcr.io`. CD da demo continua sendo Compose (ADR 0028) —
+sem deploy cloud automático.
+
+### Forma manual (build local)
 
 ```bash
 cp .env.example .env
@@ -213,7 +256,20 @@ Recriar do zero (apaga banco e Artefatos): `docker compose down -v`.
 ```
 
 Valida `/health`, o bucket `limen` e a revisão Alembic. Não cobre login/Paciente
-nem Caso sintético (este último entra no Épico 8).
+nem Caso sintético.
+
+### Smoke Caso vitais (Épico 8 / E8.1)
+
+```bash
+./scripts/smoke-caso-vitais.sh           # Compose up + Caso vitais até done
+./scripts/smoke-caso-vitais.sh --skip-up # stack já no ar
+```
+
+Enfileira um Caso só com `data/fixtures/vitals/vitals_medium.csv` (sem
+vídeo/áudio/prescrições), autentica com o Operador seed e faz poll até
+`status=done`. Espera `AZURE_ENABLED=false` (padrão do `.env.example`). CLI
+Python: [`scripts/smoke_caso_vitais.py`](scripts/smoke_caso_vitais.py).
+O mesmo fluxo roda no CI (job **Smoke Caso vitais**).
 
 ## API — exemplos rápidos
 
@@ -321,15 +377,27 @@ curl -s -X POST "http://localhost:8000/cases/$CASE_ID/modalities/prescriptions" 
 O job vai para a fila `default`. Fixtures alternativas: `prescriptions_medium.csv`
 e `prescriptions_high.csv`.
 
-### Seed demo multimodal (in-memory)
+### Seed demo multimodal (Épico 8 / E8.2)
+
+Ordem da demo humana: **up → seed → UI**.
 
 ```bash
-cd backend && uv run python ../scripts/seed_multimodal_demo.py
+./scripts/start-limen.sh                 # Compose + Operadores seed
+./scripts/seed-multimodal-demo.sh        # HTTP: Caso com 4 modalidades
+# UI: http://localhost:3000  (login medico / medico_dev_only)
 ```
 
-Cria (ou reutiliza) um Caso com as quatro modalidades via `Idempotency-Key`
-fixas. Smoke sem Compose; na stack real, use os curls acima com as mesmas chaves
-documentadas no script.
+O seed HTTP usa as `Idempotency-Key` fixas (`limen-demo-multimodal-*-v1`),
+anexa `vitals` + `video` + `audio` + `prescriptions` e é **idempotente**
+(reexecutar não duplica o Caso). Espera `AZURE_ENABLED=false`.
+
+Alternativa in-memory (sem Compose, só contrato/TDD):
+
+```bash
+cd backend && uv run python ../scripts/seed_multimodal_demo.py --memory
+```
+
+Não substitui o smoke de Caso vitais (`./scripts/smoke-caso-vitais.sh`).
 
 Rotas públicas nesta etapa: `GET /health`, `POST /auth/login`,
 `POST /auth/refresh`. Demais rotas exigem Bearer access token.
@@ -433,11 +501,15 @@ npm test
 ## Integração contínua
 
 O workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) roda em pushes
-e PRs: backend (`uv sync`, compileall, pytest) e job **Lighthouse gate**
+e PRs: backend (`uv sync`, compileall, pytest), job **Lighthouse gate**
 (build/start do frontend + `npm run lighthouse:check` vs
-[`docs/perf/baseline/`](docs/perf/baseline/), artefatos em `docs/perf/check/`).
-Publish GHCR e smoke Compose de Caso vitais ficam no Épico 8
-(ADR [0028](docs/adr/0028-cicd-actions-ghcr.md)).
+[`docs/perf/baseline/`](docs/perf/baseline/), artefatos em `docs/perf/check/`)
+e job **Docker images (GHCR)** — build de `limen-backend` / `limen-frontend` em
+todo evento; **push** para `ghcr.io/<owner>/…` com tags `main-<sha>` e `latest`
+**somente** em push na `main` (`GITHUB_TOKEN`, ADR
+[0028](docs/adr/0028-cicd-actions-ghcr.md)); e job **Smoke Caso vitais**
+(`needs: backend`, Compose + `./scripts/smoke-caso-vitais.sh`,
+`AZURE_ENABLED=false`) em push e PR — localmente o mesmo script.
 
 ## Documentação
 
@@ -453,5 +525,9 @@ Publish GHCR e smoke Compose de Caso vitais ficam no Épico 8
 | [`specs/epic-05-resiliencia/`](specs/epic-05-resiliencia/) | Falha parcial, filas, DLQ/retries |
 | [`specs/epic-06-modalidades/`](specs/epic-06-modalidades/) | Vídeo (E6.1); áudio Azure F0 (E6.2); prescriptions + seed (E6.3) |
 | [`specs/epic-07-alertas-polish/`](specs/epic-07-alertas-polish/) | Justificativa + SSE (E7.1); a11y/DLQ (E7.2); Lighthouse gate (E7.3) — concluído |
+| [`specs/epic-08-cicd-entrega/`](specs/epic-08-cicd-entrega/) | GHCR + smoke (E8.1); seed/notebooks/relatório/roteiro (E8.2) — concluído |
+| [`docs/relatorio-fase4.md`](docs/relatorio-fase4.md) | Relatório acadêmico (capítulo datasets) |
+| [`docs/demo/roteiro-video.md`](docs/demo/roteiro-video.md) | Roteiro da demo em vídeo |
+| [`notebooks/`](notebooks/) | EDA e evidência multimodal |
 | [`frontend/`](frontend/) | App Next.js (Épico 4 + Épico 7) |
 | [`.cursor/plans/arquitetura_multimodal_fase_4_a1c92623.plan.md`](.cursor/plans/arquitetura_multimodal_fase_4_a1c92623.plan.md) | Plano incremental dos épicos |

@@ -1,7 +1,8 @@
-# Baseline Lighthouse — Épico 4 (shell)
+# Baseline Lighthouse — shell Limen
 
 Baseline versionada de performance / a11y / best-practices / SEO do shell
-Limen. **Sem gate de CI** neste épico (comparação futura no Épico 7/8).
+Limen. O **gate por regressão** (Épico 7 / E7.3) compara um run novo a este
+diretório — não sobrescreve estes artefatos no modo `check`.
 
 > O Limen é um protótipo acadêmico e não é um dispositivo médico.
 
@@ -15,7 +16,7 @@ Limen. **Sem gate de CI** neste épico (comparação futura no Épico 7/8).
 | URL base | `http://127.0.0.1:3000` |
 | Build | Next.js production (`npm run build` + `npm start`) |
 
-## Rotas medidas
+## Rotas medidas (gate)
 
 | Rota | Artefatos | Perf | A11y | BP | SEO |
 | ---- | --------- | ---- | ---- | -- | --- |
@@ -27,7 +28,28 @@ Resumo máquina-legível: [`summary.json`](summary.json).
 `/pacientes` usa sessão sintética em `localStorage` (`limen-session`) apenas para
 passar o AuthGate e medir o shell autenticado — o token não é válido na API.
 
-## Como regenerar
+`/casos/[id]` fica fora do gate local até haver sessão sintética estável no CI
+(T7.13+).
+
+## Gate (absoluto + regressão)
+
+Lógica em [`scripts/lighthouse-gate.mjs`](../../../scripts/lighthouse-gate.mjs):
+
+| Regra | Valor |
+| ----- | ----- |
+| Performance | ≥ **90** |
+| Accessibility | ≥ **95** |
+| Best Practices | ≥ **90** |
+| SEO | informado no relatório; **fora** do gate |
+| Tolerância de regressão | **2** pontos abaixo do baseline |
+| Piso efetivo | `max(absoluto, baseline − 2)` (o mais restritivo) |
+
+Falhas listam `rota / categoria`, `score`, `baseline`, `floor` e `delta`.
+
+Atualizar este diretório **somente** em commit explícito de “novo baseline”
+(não no modo `check` nem silenciosamente a cada PR).
+
+## Como regenerar (write baseline)
 
 1. Suba o frontend em produção local:
 
@@ -38,7 +60,7 @@ npm run build
 npm start -- -H 127.0.0.1 -p 3000
 ```
 
-2. Em outro terminal, na raiz do repositório (ou via script npm):
+2. Em outro terminal:
 
 ```bash
 cd frontend
@@ -48,8 +70,24 @@ npm run lighthouse:baseline
 
 Opcional: `LIMEN_BASE_URL=http://127.0.0.1:3000`.
 
-3. Atualize a tabela acima e o SHA em [`summary.json`](summary.json) se
-   necessário; abra os `.report.html` no browser para inspeção.
+3. Atualize a tabela acima e o SHA em [`summary.json`](summary.json); abra os
+   `.report.html` no browser para inspeção.
+
+## Como checar (modo check)
+
+Com o frontend no ar (mesmo pré-requisito):
+
+```bash
+cd frontend
+npm run lighthouse:check
+# equivalente: node ../scripts/lighthouse-baseline.mjs --check
+```
+
+- Mede `/login` e `/pacientes` (desktop).
+- Escreve artefatos em `docs/perf/check/` (gitignored) — **não** altera
+  `docs/perf/baseline/`.
+- Exit `0` se todos os scores gated ≥ piso; `1` caso contrário (mensagem com
+  rota + categoria + delta).
 
 Dependências de geração (dev): `lighthouse`, `chrome-launcher`, `puppeteer-core`
 em `frontend/`. Requer Chrome/Chromium instalado na máquina.

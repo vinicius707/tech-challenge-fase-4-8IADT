@@ -1,18 +1,22 @@
 #!/usr/bin/env node
 /**
- * Gera baseline Lighthouse (desktop) para /login e /pacientes.
+ * Lighthouse desktop — baseline (write) ou check vs baseline (gate).
+ *
  * Pré-requisito: frontend em LIMEN_BASE_URL (padrão http://127.0.0.1:3000).
  *
  * Uso:
+ *   node scripts/lighthouse-baseline.mjs           # grava docs/perf/baseline/
+ *   node scripts/lighthouse-baseline.mjs --check   # mede e compara (não grava baseline)
  *   cd frontend && npm run lighthouse:baseline
- *   # ou na raiz:
- *   node scripts/lighthouse-baseline.mjs
+ *   cd frontend && npm run lighthouse:check
  */
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 import { execSync } from "node:child_process";
+
+import { evaluateGate, formatGateFailures } from "./lighthouse-gate.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
@@ -22,7 +26,8 @@ const lighthouse = require("lighthouse").default;
 const chromeLauncher = require("chrome-launcher");
 const puppeteer = require("puppeteer-core");
 
-const outDir = path.join(repoRoot, "docs", "perf", "baseline");
+const baselineDir = path.join(repoRoot, "docs", "perf", "baseline");
+const checkDir = path.join(repoRoot, "docs", "perf", "check");
 const baseUrl = (process.env.LIMEN_BASE_URL || "http://127.0.0.1:3000").replace(
   /\/$/,
   "",
@@ -54,6 +59,10 @@ const LH_FLAGS = {
   disableStorageReset: true,
 };
 
+function isCheckMode(argv = process.argv.slice(2)) {
+  return argv.includes("--check") || argv.includes("check");
+}
+
 function gitSha() {
   try {
     return execSync("git rev-parse --short HEAD", {
@@ -65,7 +74,7 @@ function gitSha() {
   }
 }
 
-async function writeReport(slug, result) {
+async function writeReport(outDir, slug, result) {
   const reports = Array.isArray(result.report) ? result.report : [result.report];
   const jsonReport =
     reports.find((r) => typeof r === "string" && r.trimStart().startsWith("{")) ??
@@ -91,11 +100,8 @@ async function writeReport(slug, result) {
   };
 }
 
-async function main() {
+async function measureRoutes(outDir) {
   await mkdir(outDir, { recursive: true });
-  const sha = gitSha();
-  const generatedAt = new Date().toISOString();
-
   const chrome = await chromeLauncher.launch({
     chromeFlags: ["--headless=new", "--no-sandbox", "--disable-gpu"],
   });
@@ -114,7 +120,7 @@ async function main() {
       loginPage,
     );
     await loginPage.close();
-    const login = await writeReport("login-desktop", loginResult);
+    const login = await writeReport(outDir, "login-desktop", loginResult);
 
     const pacientesPage = await browser.newPage();
     await pacientesPage.goto(`${baseUrl}/login`, {
@@ -130,25 +136,74 @@ async function main() {
       pacientesPage,
     );
     await pacientesPage.close();
-    const pacientes = await writeReport("pacientes-desktop", pacientesResult);
-
-    const summary = {
-      generatedAt,
-      gitSha: sha,
-      baseUrl,
-      formFactor: "desktop",
-      routes: [login, pacientes],
-      note: "Baseline do Épico 4 — sem gate de CI. Sessão de /pacientes é token sintético só para renderizar o shell autenticado.",
-    };
-    await writeFile(
-      path.join(outDir, "summary.json"),
-      `${JSON.stringify(summary, null, 2)}\n`,
+    const pacientes = await writeReport(
+      outDir,
+      "pacientes-desktop",
+      pacientesResult,
     );
 
-    console.log(JSON.stringify(summary, null, 2));
+    return [login, pacientes];
   } finally {
     await browser.disconnect();
     await chrome.kill();
+  }
+}
+
+async function runBaseline() {
+  const sha = gitSha();
+  const generatedAt = new Date().toISOString();
+  const routes = await measureRoutes(baselineDir);
+
+  const summary = {
+    generatedAt,
+    gitSha: sha,
+    baseUrl,
+    formFactor: "desktop",
+    routes,
+    note: "Baseline Lighthouse — atualizar só em commit explícito de novo baseline. Gate: scripts/lighthouse-gate.mjs (modo --check).",
+  };
+  await writeFile(
+    path.join(baselineDir, "summary.json"),
+    `${JSON.stringify(summary, null, 2)}\n`,
+  );
+
+  console.log(JSON.stringify(summary, null, 2));
+}
+
+async function runCheck() {
+  const baselineRaw = await readFile(
+    path.join(baselineDir, "summary.json"),
+    "utf8",
+  );
+  const baseline = JSON.parse(baselineRaw);
+  const routes = await measureRoutes(checkDir);
+
+  const current = {
+    generatedAt: new Date().toISOString(),
+    gitSha: gitSha(),
+    baseUrl,
+    formFactor: "desktop",
+    routes,
+  };
+  await writeFile(
+    path.join(checkDir, "summary.json"),
+    `${JSON.stringify(current, null, 2)}\n`,
+  );
+
+  const result = evaluateGate(current, baseline);
+  const message = formatGateFailures(result.failures);
+  console.log(JSON.stringify({ ...current, gate: result }, null, 2));
+  console.error(message);
+  if (!result.ok) {
+    process.exit(1);
+  }
+}
+
+async function main() {
+  if (isCheckMode()) {
+    await runCheck();
+  } else {
+    await runBaseline();
   }
 }
 

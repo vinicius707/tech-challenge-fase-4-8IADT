@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "lighthouse:baseline": "node ../scripts/lighthouse-baseline.mjs"
+    "lighthouse:baseline": "node ../scripts/lighthouse-baseline.mjs",
+    "lighthouse:check": "node ../scripts/lighthouse-baseline.mjs --check"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

@@ -98,8 +98,10 @@ arquivo quando o plano supersede uma decisão anterior.
 
 ## Performance
 
-- Baseline Lighthouse (Épico 4, sem gate de CI):
-  [`perf/baseline/`](perf/baseline/)
+- Índice: [`perf/README.md`](perf/README.md) — gate absoluto + regressão (tolerância
+  2; rotas `/login`, `/pacientes`)
+- Baseline versionada: [`perf/baseline/`](perf/baseline/)
+- Script local: `npm run lighthouse:check` em `frontend/` (CI na T7.13)
 
 ## Frontend (operacional)
 

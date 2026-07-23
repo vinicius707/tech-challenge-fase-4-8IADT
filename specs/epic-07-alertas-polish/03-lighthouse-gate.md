@@ -10,7 +10,9 @@ além de uma tolerância documentada vs `docs/perf/baseline/`.
 
 ## Status da entrega
 
-**Pendente** — executar após DoD de E7.1 e E7.2 (T7.12–T7.14 desta etapa E7.3).
+**Concluída em 22 de julho de 2026** (T7.12–T7.14: script `check` vs baseline,
+job Lighthouse no CI com gate absoluto + regressão, e fechamento docs do
+Épico 7).
 
 ## Escopo
 
@@ -72,7 +74,7 @@ obrigatório; orçamento de bundle Webpack aparte.
 
 ## Critérios de pronto (DoD desta etapa E7.3)
 
-- [ ] Gate Lighthouse no CI (absoluto + regressão).
-- [ ] Tolerância e rotas documentadas em `docs/perf/` + README.
-- [ ] Fechamento docs do Épico 7 (índice specs, plano, guia se afetado).
-- [ ] Sem GHCR publish / smoke Compose de entrega (Épico 8).
+- [x] Gate Lighthouse no CI (absoluto + regressão).
+- [x] Tolerância e rotas documentadas em `docs/perf/` + README.
+- [x] Fechamento docs do Épico 7 (índice specs, plano, guia se afetado).
+- [x] Sem GHCR publish / smoke Compose de entrega (Épico 8).

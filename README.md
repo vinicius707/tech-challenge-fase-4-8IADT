@@ -12,9 +12,8 @@ Glossário de domínio: [`CONTEXT.md`](CONTEXT.md). Decisão de arquitetura:
 
 ## Estado atual
 
-Os **Épicos 1–6** estão concluídos. No Épico 7, as etapas **E7.1** (Justificativa
-template + SSE) e **E7.2** (telas estrela, a11y AA, dark/light, DLQ UI) também
-estão entregues.
+Os **Épicos 1–7** estão concluídos (Fundação → Alertas + polish UI, incluindo
+gate Lighthouse por regressão).
 
 A entrega atual inclui autenticação JWT, Paciente com Rótulo Sensível (reveal +
 SR), Caso com modalidades `vitals`, `video`, `audio` e `prescriptions` (Artefatos
@@ -22,11 +21,12 @@ no MinIO, outbox → filas RQ `default` / `video` → Risco fundido e Alerta
 versionado se ≥ MEDIO), Justificativa template, feed SSE de Alertas com toast
 `aria-live="polite"`, Recharts lazy em Caso/Paciente, painel admin de Falhas,
 Provedor de Áudio com CB/fallback, regras de Prescrição + seed multimodal, falha
-parcial / reprocess, workers Compose e shell Next.js (tema dark/light).
+parcial / reprocess, workers Compose, shell Next.js (tema dark/light) e gate
+Lighthouse no CI (`npm run lighthouse:check`).
 
-Ainda não fazem parte da implementação: gate Lighthouse (E7.3), chamada Azure
-Speech real obrigatória no CI (`AZURE_ENABLED=false`), seed/notebooks finais e
-CI/CD GHCR (Épico 8).
+Ainda não fazem parte da implementação: publish GHCR, smoke Compose de Caso
+vitais de entrega, seed/notebooks/relatório finais (Épico 8); chamada Azure
+Speech real obrigatória no CI (`AZURE_ENABLED=false`).
 
 ## O que já foi entregue
 
@@ -67,7 +67,8 @@ CI/CD GHCR (Épico 8).
 - Proxy `/api/*` → FastAPI (`BACKEND_URL`); serviço `frontend` no Compose.
 - Login (Zustand), shell landmarks, Pacientes, Novo Caso vitais e detalhe de
   Caso com polling/Risco/Alertas.
-- Baseline Lighthouse (sem gate): [`docs/perf/baseline/`](docs/perf/baseline/).
+- Baseline Lighthouse: [`docs/perf/baseline/`](docs/perf/baseline/) (gate no
+  Épico 7 / E7.3).
 - Guia de uso + prints + troubleshooting:
   [`docs/frontend/`](docs/frontend/).
 - Script de start: [`scripts/start-limen.sh`](scripts/start-limen.sh).
@@ -147,6 +148,21 @@ CI/CD GHCR (Épico 8).
 - UI admin `/admin/falhas` (list/redrive/discard); nav e gate só para `admin`.
 - Spec:
   [`02-telas-a11y-dlq.md`](specs/epic-07-alertas-polish/02-telas-a11y-dlq.md).
+
+### Gate Lighthouse (Épico 7 / E7.3)
+
+- Pisos absolutos (desktop): Perf ≥90, A11y ≥95, Best Practices ≥90; SEO só
+  relatório.
+- Regressão: piso efetivo = `max(absoluto, baseline − 2)` vs
+  [`docs/perf/baseline/summary.json`](docs/perf/baseline/summary.json).
+- Local: `npm run lighthouse:check` (frontend em produção); artefatos em
+  `docs/perf/check/` (gitignored) — **não** altera o baseline.
+- CI: job **Lighthouse gate** em
+  [`.github/workflows/ci.yml`](.github/workflows/ci.yml) com upload dos
+  relatórios.
+- Índice: [`docs/perf/README.md`](docs/perf/README.md).
+- Spec:
+  [`03-lighthouse-gate.md`](specs/epic-07-alertas-polish/03-lighthouse-gate.md).
 
 ## Executar localmente
 
@@ -417,10 +433,11 @@ npm test
 ## Integração contínua
 
 O workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) roda em pushes
-e PRs: `uv sync`, lint placeholder (sintaxe Python) e pytest. A baseline
-Lighthouse em [`docs/perf/baseline/`](docs/perf/baseline/) é artefato versionado
-**sem gate** neste épico. Build/publicação de imagens, smoke com Caso sintético
-e frontend entram no Épico 8 (ADR [0028](docs/adr/0028-cicd-actions-ghcr.md)).
+e PRs: backend (`uv sync`, compileall, pytest) e job **Lighthouse gate**
+(build/start do frontend + `npm run lighthouse:check` vs
+[`docs/perf/baseline/`](docs/perf/baseline/), artefatos em `docs/perf/check/`).
+Publish GHCR e smoke Compose de Caso vitais ficam no Épico 8
+(ADR [0028](docs/adr/0028-cicd-actions-ghcr.md)).
 
 ## Documentação
 
@@ -435,6 +452,6 @@ e frontend entram no Épico 8 (ADR [0028](docs/adr/0028-cicd-actions-ghcr.md)).
 | [`specs/epic-04-shell-frontend/`](specs/epic-04-shell-frontend/) | Shell Next (scaffold → login → Pacientes) |
 | [`specs/epic-05-resiliencia/`](specs/epic-05-resiliencia/) | Falha parcial, filas, DLQ/retries |
 | [`specs/epic-06-modalidades/`](specs/epic-06-modalidades/) | Vídeo (E6.1); áudio Azure F0 (E6.2); prescriptions + seed (E6.3) |
-| [`specs/epic-07-alertas-polish/`](specs/epic-07-alertas-polish/) | Justificativa + SSE (E7.1); a11y/DLQ (E7.2 concluída); Lighthouse gate (E7.3) |
-| [`frontend/`](frontend/) | App Next.js (Épico 4 + E7.1–E7.2) |
+| [`specs/epic-07-alertas-polish/`](specs/epic-07-alertas-polish/) | Justificativa + SSE (E7.1); a11y/DLQ (E7.2); Lighthouse gate (E7.3) — concluído |
+| [`frontend/`](frontend/) | App Next.js (Épico 4 + Épico 7) |
 | [`.cursor/plans/arquitetura_multimodal_fase_4_a1c92623.plan.md`](.cursor/plans/arquitetura_multimodal_fase_4_a1c92623.plan.md) | Plano incremental dos épicos |

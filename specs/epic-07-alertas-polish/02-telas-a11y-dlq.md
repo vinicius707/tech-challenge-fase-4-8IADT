@@ -17,7 +17,7 @@ fechamento docs).
 
 Etapa posterior do Épico 7 (spec própria):
 
-- E7.3 — Gate Lighthouse por regressão vs baseline
+- E7.3 — Gate Lighthouse por regressão vs baseline (concluída)
 
 ## Escopo
 

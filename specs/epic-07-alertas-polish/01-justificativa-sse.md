@@ -15,8 +15,8 @@ SSE Bearer, UI mínima, cliente fetch e fechamento docs).
 
 Etapas posteriores do Épico 7 (specs próprias):
 
-- E7.2 — Telas estrela + a11y AA + dark mode + DLQ UI
-- E7.3 — Gate Lighthouse por regressão vs baseline
+- E7.2 — Telas estrela + a11y AA + dark mode + DLQ UI (concluída)
+- E7.3 — Gate Lighthouse por regressão vs baseline (concluída)
 
 ## Escopo
 

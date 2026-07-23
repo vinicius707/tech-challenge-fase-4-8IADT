@@ -201,7 +201,8 @@ ADRs: [0023](../adr/0023-frontend-nextjs.md), [0024](../adr/0024-ui-tailwind-sha
 [0025](../adr/0025-estado-query-zustand.md), [0026](../adr/0026-rotas-frontend.md),
 [0027](../adr/0027-graficos-recharts-lazy.md), [0003](../adr/0003-painel-dlq-redrive.md).
 
-Baseline Lighthouse (sem gate): [`../perf/baseline/`](../perf/baseline/).
+Baseline e gate Lighthouse: [`../perf/README.md`](../perf/README.md)
+([`baseline/`](../perf/baseline/); `npm run lighthouse:check` / job CI).
 
 ## Fixtures de vitais
 

@@ -13,16 +13,16 @@ todos:
     status: completed
   - id: epic-04
     content: "Épico 4 Shell Next: auth, Pacientes/Caso vitais, baseline Lighthouse"
-    status: pending
+    status: completed
   - id: epic-05
     content: "Épico 5 Resiliência: falha parcial, reprocess, DLQ API, timeouts, filas"
-    status: pending
+    status: completed
   - id: epic-06
     content: "Épico 6 Modalidades PDF: vídeo, áudio Azure F0, prescrições"
-    status: pending
+    status: completed
   - id: epic-07
     content: "Épico 7 Alertas+polish UI: SSE, Justificativa, a11y AA, dark mode, Lighthouse budget"
-    status: pending
+    status: completed
   - id: epic-08
     content: "Épico 8 CI/CD+entrega: GHCR, smoke vitais, seed, relatório, roteiro vídeo"
     status: pending
@@ -227,5 +227,5 @@ flowchart LR
 
 ## Próximo passo de execução
 
-Os **Épicos 1–6** estão concluídos; **E7.1** e **E7.2** também.
-Próximo: **E7.3** — gate Lighthouse por regressão vs baseline.
+Os **Épicos 1–7** estão concluídos (E7.1–E7.3).
+Próximo: **Épico 8** — publish GHCR, smoke Compose + Caso vitais, seed/notebooks/relatório.

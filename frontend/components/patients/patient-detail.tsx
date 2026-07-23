@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 
 import { buttonVariants } from "@/components/ui/button";
-import { fetchPatient, formatPatientLabel } from "@/lib/patients/api";
+import { SensitiveLabelReveal } from "@/components/patients/sensitive-label-reveal";
+import { fetchPatient } from "@/lib/patients/api";
 import { cn } from "@/lib/utils";
 
 type PatientDetailProps = {
@@ -44,11 +45,9 @@ export function PatientDetail({ patientId }: PatientDetailProps) {
         </Link>
       </div>
 
+      <SensitiveLabelReveal patient={patient} />
+
       <dl className="grid gap-3 text-sm">
-        <div>
-          <dt className="text-muted-foreground">Rótulo Sensível</dt>
-          <dd className="font-medium">{formatPatientLabel(patient)}</dd>
-        </div>
         <div>
           <dt className="text-muted-foreground">Identificador</dt>
           <dd className="font-mono text-xs">{patient.id}</dd>

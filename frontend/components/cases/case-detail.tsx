@@ -2,20 +2,28 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { ModalityUploadForm } from "@/components/cases/modality-upload-form";
 import { buttonVariants } from "@/components/ui/button";
 import {
   CASE_POLL_INTERVAL_MS,
   CASE_POLL_TIMEOUT_MS,
   fetchCase,
   shouldPollCase,
+  type AttachableModality,
 } from "@/lib/cases/api";
 import { cn } from "@/lib/utils";
 
 type CaseDetailViewProps = {
   caseId: string;
 };
+
+const ATTACHABLE_MODALITIES: AttachableModality[] = [
+  "video",
+  "audio",
+  "prescriptions",
+];
 
 function CaseSkeleton() {
   return (
@@ -34,6 +42,7 @@ function CaseSkeleton() {
 }
 
 export function CaseDetailView({ caseId }: CaseDetailViewProps) {
+  const queryClient = useQueryClient();
   const [pollTimedOut, setPollTimedOut] = useState(false);
 
   useEffect(() => {
@@ -74,6 +83,8 @@ export function CaseDetailView({ caseId }: CaseDetailViewProps) {
   const polling = shouldPollCase(detail.status);
   const showProcessing = polling && !pollTimedOut;
   const vitals = detail.modalities.find((m) => m.modality === "vitals");
+  const present = new Set(detail.modalities.map((m) => m.modality));
+  const missingUploads = ATTACHABLE_MODALITIES.filter((m) => !present.has(m));
 
   if (showProcessing) {
     return (
@@ -139,6 +150,31 @@ export function CaseDetailView({ caseId }: CaseDetailViewProps) {
           {Math.round(CASE_POLL_TIMEOUT_MS / 1000)}s. A atualização automática
           foi pausada (timeout de UX); recarregue a página para tentar de novo.
         </p>
+      ) : null}
+
+      {missingUploads.length > 0 ? (
+        <section
+          aria-labelledby="modality-uploads-heading"
+          className="flex flex-col gap-3"
+        >
+          <h2 id="modality-uploads-heading" className="text-sm font-medium">
+            Anexar modalidades
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            Envie video, áudio ou prescriptions com rótulos e erros associados
+            ao controle (teclado: Tab / Enter).
+          </p>
+          {missingUploads.map((modality) => (
+            <ModalityUploadForm
+              key={modality}
+              caseId={caseId}
+              modality={modality}
+              onAttached={(updated) => {
+                queryClient.setQueryData(["cases", caseId], updated);
+              }}
+            />
+          ))}
+        </section>
       ) : null}
 
       {detail.status === "done" && detail.justification ? (

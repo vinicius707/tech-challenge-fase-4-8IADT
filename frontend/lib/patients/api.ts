@@ -9,6 +9,13 @@ export type Patient = {
   updatedAt: string;
 };
 
+export type SensitiveLabelReveal = {
+  id: string;
+  code: string;
+  sensitiveLabel: string;
+  revealedAt: string;
+};
+
 type PatientApiItem = {
   id: string;
   code: string;
@@ -20,6 +27,13 @@ type PatientApiItem = {
 
 type PatientListApi = {
   items: PatientApiItem[];
+};
+
+type SensitiveLabelRevealApi = {
+  id: string;
+  code: string;
+  sensitive_label: string;
+  revealed_at: string;
 };
 
 function mapPatient(item: PatientApiItem): Patient {
@@ -37,6 +51,17 @@ export function parsePatientList(body: PatientListApi): Patient[] {
   return (body.items ?? []).map(mapPatient);
 }
 
+export function parseSensitiveLabelReveal(
+  body: SensitiveLabelRevealApi,
+): SensitiveLabelReveal {
+  return {
+    id: body.id,
+    code: body.code,
+    sensitiveLabel: body.sensitive_label,
+    revealedAt: body.revealed_at,
+  };
+}
+
 export function formatPatientLabel(patient: {
   hasSensitiveLabel: boolean;
   sensitiveLabelMasked: string | null;
@@ -45,6 +70,16 @@ export function formatPatientLabel(patient: {
     return patient.sensitiveLabelMasked;
   }
   return "—";
+}
+
+export function formatSensitiveLabelAnnouncement(
+  state: "revealed" | "masked",
+  plaintext?: string,
+): string {
+  if (state === "revealed") {
+    return `Rótulo Sensível revelado: ${plaintext ?? ""}.`;
+  }
+  return "Rótulo Sensível remascarado.";
 }
 
 export async function fetchPatients(): Promise<Patient[]> {
@@ -79,4 +114,24 @@ export async function createPatient(): Promise<Patient> {
   }
   const body = (await response.json()) as PatientApiItem;
   return mapPatient(body);
+}
+
+export async function revealSensitiveLabel(
+  patientId: string,
+): Promise<SensitiveLabelReveal> {
+  const response = await apiFetch(
+    `/api/patients/${patientId}/sensitive-label/reveal`,
+    { method: "POST" },
+  );
+  if (response.status === 404) {
+    throw new Error("Rótulo Sensível não disponível");
+  }
+  if (response.status === 503) {
+    throw new Error("Criptografia de Rótulo Sensível indisponível");
+  }
+  if (!response.ok) {
+    throw new Error(`Falha ao revelar Rótulo Sensível (${response.status})`);
+  }
+  const body = (await response.json()) as SensitiveLabelRevealApi;
+  return parseSensitiveLabelReveal(body);
 }

@@ -201,3 +201,54 @@ export async function fetchCase(caseId: string): Promise<CaseDetail> {
   const body = (await response.json()) as CaseDetailApi;
   return parseCaseDetail(body);
 }
+
+export type AttachableModality = "video" | "audio" | "prescriptions";
+
+export function modalityUploadPath(
+  caseId: string,
+  modality: AttachableModality,
+): string {
+  return `/api/cases/${caseId}/modalities/${modality}`;
+}
+
+export function messageForAttachModalityError(status: number): string {
+  if (status === 400) {
+    return "Header Idempotency-Key é obrigatório.";
+  }
+  if (status === 401) {
+    return "Sessão expirada. Faça login novamente.";
+  }
+  if (status === 404) {
+    return "Caso não encontrado.";
+  }
+  if (status === 409) {
+    return "Modalidade já anexada ou conflito de idempotência.";
+  }
+  if (status === 503) {
+    return "Armazenamento indisponível. Tente novamente.";
+  }
+  return `Falha ao anexar modalidade (${status}).`;
+}
+
+export async function attachCaseModality(
+  caseId: string,
+  modality: AttachableModality,
+  file: File,
+  idempotencyKey: string,
+): Promise<CaseDetail> {
+  const form = new FormData();
+  form.append("file", file);
+
+  const response = await apiFetch(modalityUploadPath(caseId, modality), {
+    method: "POST",
+    headers: { "Idempotency-Key": idempotencyKey },
+    body: form,
+  });
+
+  if (!response.ok) {
+    throw new Error(messageForAttachModalityError(response.status));
+  }
+
+  const body = (await response.json()) as CaseDetailApi;
+  return parseCaseDetail(body);
+}

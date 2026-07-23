@@ -24,9 +24,10 @@ Provedor de Áudio com CB/fallback, regras de Prescrição + seed multimodal, fa
 parcial / reprocess, workers Compose, shell Next.js (tema dark/light) e gate
 Lighthouse no CI (`npm run lighthouse:check`).
 
-Ainda não fazem parte da implementação: publish GHCR, smoke Compose de Caso
-vitais de entrega, seed/notebooks/relatório finais (Épico 8); chamada Azure
-Speech real obrigatória no CI (`AZURE_ENABLED=false`).
+Ainda não fazem parte da implementação: job CI do smoke Compose de Caso vitais,
+seed/notebooks/relatório finais (Épico 8 / E8.2); chamada Azure Speech real
+obrigatória no CI (`AZURE_ENABLED=false`). Publish GHCR em `main` já está no
+workflow (T8.2); smoke local: `./scripts/smoke-caso-vitais.sh`.
 
 ## O que já foi entregue
 
@@ -446,11 +447,14 @@ npm test
 ## Integração contínua
 
 O workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) roda em pushes
-e PRs: backend (`uv sync`, compileall, pytest) e job **Lighthouse gate**
+e PRs: backend (`uv sync`, compileall, pytest), job **Lighthouse gate**
 (build/start do frontend + `npm run lighthouse:check` vs
-[`docs/perf/baseline/`](docs/perf/baseline/), artefatos em `docs/perf/check/`).
-Publish GHCR e smoke Compose de Caso vitais ficam no Épico 8
-(ADR [0028](docs/adr/0028-cicd-actions-ghcr.md)).
+[`docs/perf/baseline/`](docs/perf/baseline/), artefatos em `docs/perf/check/`)
+e job **Docker images (GHCR)** — build de `limen-backend` / `limen-frontend` em
+todo evento; **push** para `ghcr.io/<owner>/…` com tags `main-<sha>` e `latest`
+**somente** em push na `main` (`GITHUB_TOKEN`, ADR
+[0028](docs/adr/0028-cicd-actions-ghcr.md)). Job CI do smoke Caso vitais fica na
+próxima tarefa do E8.1; localmente: `./scripts/smoke-caso-vitais.sh`.
 
 ## Documentação
 

@@ -35,7 +35,20 @@ describe("lighthouse CI gate (T7.13)", () => {
     expect(ci).toMatch(/node-version:\s*["']22\.19/);
   });
 
-  it("não publica GHCR neste job (Épico 8)", () => {
-    expect(ci.toLowerCase()).not.toMatch(/ghcr\.io|docker\/login-action/);
+  it("não publica GHCR no job Lighthouse (publish fica no job de imagens)", () => {
+    const lighthouseJob = ci.split(/^  [a-z0-9_-]+:/m).find((block) =>
+      /lighthouse/i.test(block),
+    );
+    expect(lighthouseJob).toBeDefined();
+    expect(lighthouseJob!.toLowerCase()).not.toMatch(
+      /ghcr\.io|docker\/login-action|docker\/build-push-action/,
+    );
+  });
+
+  it("o workflow tem publish GHCR só em main (Épico 8 / T8.2)", () => {
+    expect(ci.toLowerCase()).toMatch(/ghcr\.io/);
+    expect(ci).toMatch(/docker\/login-action/);
+    expect(ci).toMatch(/refs\/heads\/main/);
+    expect(ci).toMatch(/limen-backend|limen-frontend/);
   });
 });

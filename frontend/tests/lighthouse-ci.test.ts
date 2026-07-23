@@ -31,6 +31,10 @@ describe("lighthouse CI gate (T7.13)", () => {
     expect(ci).not.toMatch(/path:\s*docs\/perf\/baseline/);
   });
 
+  it("usa Node ≥22.19 no job Lighthouse (engine do lighthouse)", () => {
+    expect(ci).toMatch(/node-version:\s*["']22\.19/);
+  });
+
   it("não publica GHCR neste job (Épico 8)", () => {
     expect(ci.toLowerCase()).not.toMatch(/ghcr\.io|docker\/login-action/);
   });

@@ -12,8 +12,9 @@ Glossário de domínio: [`CONTEXT.md`](CONTEXT.md). Decisão de arquitetura:
 
 ## Estado atual
 
-Os **Épicos 1–7** estão concluídos (Fundação → Alertas + polish UI, incluindo
-gate Lighthouse por regressão).
+Os **Épicos 1–7** estão concluídos. O **Épico 8 / E8.1** (publish GHCR + smoke
+Caso vitais) também está concluído; resta **E8.2** (seed/notebooks/relatório/
+roteiro).
 
 A entrega atual inclui autenticação JWT, Paciente com Rótulo Sensível (reveal +
 SR), Caso com modalidades `vitals`, `video`, `audio` e `prescriptions` (Artefatos
@@ -21,13 +22,13 @@ no MinIO, outbox → filas RQ `default` / `video` → Risco fundido e Alerta
 versionado se ≥ MEDIO), Justificativa template, feed SSE de Alertas com toast
 `aria-live="polite"`, Recharts lazy em Caso/Paciente, painel admin de Falhas,
 Provedor de Áudio com CB/fallback, regras de Prescrição + seed multimodal, falha
-parcial / reprocess, workers Compose, shell Next.js (tema dark/light) e gate
-Lighthouse no CI (`npm run lighthouse:check`).
+parcial / reprocess, workers Compose, shell Next.js (tema dark/light), gate
+Lighthouse no CI, publish GHCR em `main` e smoke Compose de Caso vitais
+(`./scripts/smoke-caso-vitais.sh`).
 
-Ainda não fazem parte da implementação: seed/notebooks/relatório finais
+Ainda não fazem parte da implementação: notebooks/relatório/roteiro finais
 (Épico 8 / E8.2); chamada Azure Speech real obrigatória no CI
-(`AZURE_ENABLED=false`). Publish GHCR em `main` e smoke Compose de Caso vitais
-já estão no workflow; localmente: `./scripts/smoke-caso-vitais.sh`.
+(`AZURE_ENABLED=false`).
 
 ## O que já foi entregue
 
@@ -164,6 +165,17 @@ já estão no workflow; localmente: `./scripts/smoke-caso-vitais.sh`.
 - Índice: [`docs/perf/README.md`](docs/perf/README.md).
 - Spec:
   [`03-lighthouse-gate.md`](specs/epic-07-alertas-polish/03-lighthouse-gate.md).
+
+### CI/CD — GHCR + smoke vitais (Épico 8 / E8.1)
+
+- Imagens `ghcr.io/<owner>/limen-backend` e `limen-frontend`: build em todo
+  evento CI; **push** com tags `main-<sha>` e `latest` **somente** em push na
+  `main` (`GITHUB_TOKEN`, ADR [0028](docs/adr/0028-cicd-actions-ghcr.md)).
+- Smoke Compose + Caso só com vitais (`AZURE_ENABLED=false`):
+  [`scripts/smoke-caso-vitais.sh`](scripts/smoke-caso-vitais.sh) (local) e job
+  **Smoke Caso vitais** no CI (`needs: backend`, push e PR).
+- Spec:
+  [`01-ghcr-smoke-vitais.md`](specs/epic-08-cicd-entrega/01-ghcr-smoke-vitais.md).
 
 ## Executar localmente
 
@@ -471,6 +483,6 @@ todo evento; **push** para `ghcr.io/<owner>/…` com tags `main-<sha>` e `latest
 | [`specs/epic-05-resiliencia/`](specs/epic-05-resiliencia/) | Falha parcial, filas, DLQ/retries |
 | [`specs/epic-06-modalidades/`](specs/epic-06-modalidades/) | Vídeo (E6.1); áudio Azure F0 (E6.2); prescriptions + seed (E6.3) |
 | [`specs/epic-07-alertas-polish/`](specs/epic-07-alertas-polish/) | Justificativa + SSE (E7.1); a11y/DLQ (E7.2); Lighthouse gate (E7.3) — concluído |
-| [`specs/epic-08-cicd-entrega/`](specs/epic-08-cicd-entrega/) | GHCR + smoke vitais (E8.1); seed/notebooks/relatório (E8.2) — spec |
+| [`specs/epic-08-cicd-entrega/`](specs/epic-08-cicd-entrega/) | GHCR + smoke vitais (E8.1) — concluído; seed/notebooks/relatório (E8.2) — spec |
 | [`frontend/`](frontend/) | App Next.js (Épico 4 + Épico 7) |
 | [`.cursor/plans/arquitetura_multimodal_fase_4_a1c92623.plan.md`](.cursor/plans/arquitetura_multimodal_fase_4_a1c92623.plan.md) | Plano incremental dos épicos |

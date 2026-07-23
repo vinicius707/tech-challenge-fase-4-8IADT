@@ -10,7 +10,8 @@ enfileira um Caso sintético só com vitais até `done` (`AZURE_ENABLED=false`).
 
 ## Status da entrega
 
-**Spec (T8.0)** — pendente de implementação (T8.1–T8.4).
+**Concluída em 22 de julho de 2026** (T8.0–T8.4: specs E8.1/E8.2, smoke Caso
+vitais local + CI, publish GHCR só em `main`, e fechamento docs do E8.1).
 
 Etapa posterior do Épico 8 (spec própria):
 
@@ -71,12 +72,12 @@ Nenhuma decisão nova de arquitetura identificada (ADR 0028 já fecha o desenho)
 
 | Imagem | Contexto de build | Tags em `main` |
 | ------ | ----------------- | -------------- |
-| `backend` | `backend/Dockerfile` | `main-<sha>`, `latest` |
-| `frontend` | `frontend/Dockerfile` | `main-<sha>`, `latest` |
+| `limen-backend` | `backend/Dockerfile` | `main-<sha>`, `latest` |
+| `limen-frontend` | `frontend/Dockerfile` | `main-<sha>`, `latest` |
 
-Registry: `ghcr.io`. Permissões do job: `packages: write` (e `contents: read`)
-apenas no job/step de publish. Login via `GITHUB_TOKEN` (ou equivalente
-documentado).
+Registry: `ghcr.io/<owner>/…` (owner em lowercase). Permissões do job:
+`packages: write` (e `contents: read`) no job de imagens. Login via
+`GITHUB_TOKEN`.
 
 ### Smoke Caso vitais
 
@@ -141,9 +142,9 @@ timeout
 
 ## Critérios de pronto (DoD desta etapa E8.1)
 
-- [ ] Spec SDD aprovada e versionada (esta).
-- [ ] Script `smoke-caso-vitais` (nome final na implementação) documentado.
-- [ ] Job/steps: build imagens + publish GHCR só em `main`.
-- [ ] Job/step de smoke Compose + Caso vitais com `AZURE_ENABLED=false`.
-- [ ] README/`docs` atualizados no fechamento E8.1 (T8.4).
-- [ ] Sem E2E UI; sem publish em PR; sem artefatos de E8.2.
+- [x] Spec SDD aprovada e versionada (esta).
+- [x] Script `smoke-caso-vitais` (nome final na implementação) documentado.
+- [x] Job/steps: build imagens + publish GHCR só em `main`.
+- [x] Job/step de smoke Compose + Caso vitais com `AZURE_ENABLED=false`.
+- [x] README/`docs` atualizados no fechamento E8.1 (T8.4).
+- [x] Sem E2E UI; sem publish em PR; sem artefatos de E8.2.

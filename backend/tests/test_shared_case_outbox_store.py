@@ -170,6 +170,14 @@ def test_save_new_case_with_artifacts_honors_foreign_keys(
     assert saved.modalities[0].artifact_id == saved.artifacts[0].id
 
 
+def test_case_models_register_patients_for_worker_fk_resolution() -> None:
+    """Regressão worker RQ: flush exige `patients` no MetaData (FK patient_id)."""
+    from app.db import Base
+
+    assert "patients" in Base.metadata.tables
+    assert "cases" in Base.metadata.tables
+
+
 def test_worker_case_update_is_visible_to_api_store(
     session_factory: sessionmaker[Session],
 ) -> None:

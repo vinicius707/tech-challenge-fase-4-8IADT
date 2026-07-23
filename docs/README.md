@@ -123,7 +123,14 @@ arquivo quando o plano supersede uma decisão anterior.
 | 5 | Resiliência | Concluído |
 | 6 | Modalidades PDF | Concluído (E6.1 vídeo; E6.2 áudio; E6.3 prescrições + seed) |
 | 7 | Alertas + polish UI | Concluído (E7.1–E7.3) |
-| 8 | CI/CD e entrega | E8.1 concluído (GHCR + smoke vitais); E8.2 pendente |
+| 8 | CI/CD e entrega | E8.1 concluído; E8.2 em andamento (relatório/roteiro prontos; fechamento README pendente) |
+
+## Entrega acadêmica (E8.2)
+
+- Relatório Fase 4: [`relatorio-fase4.md`](relatorio-fase4.md) (capítulo de datasets)
+- Roteiro de vídeo: [`demo/roteiro-video.md`](demo/roteiro-video.md)
+- Notebooks: [`../notebooks/`](../notebooks/)
+- Spec: [`../specs/epic-08-cicd-entrega/02-seed-notebooks-relatorio.md`](../specs/epic-08-cicd-entrega/02-seed-notebooks-relatorio.md)
 
 ## CI/CD (E8.1)
 

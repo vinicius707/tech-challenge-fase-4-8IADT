@@ -26,11 +26,11 @@ parcial / reprocess, workers Compose, shell Next.js (tema dark/light), gate
 Lighthouse no CI, publish GHCR em `main` e smoke Compose de Caso vitais
 (`./scripts/smoke-caso-vitais.sh`).
 
-Ainda não fazem parte da implementação: relatório/roteiro finais
-(Épico 8 / E8.2); chamada Azure Speech real obrigatória no CI
-(`AZURE_ENABLED=false`). Seed multimodal Compose:
-`./scripts/seed-multimodal-demo.sh` (após `./scripts/start-limen.sh`).
-Notebooks finais: [`notebooks/`](notebooks/).
+Ainda não fazem parte da implementação: fechamento fino do README de entrega
+E8.2 (T8.8); chamada Azure Speech real obrigatória no CI (`AZURE_ENABLED=false`).
+Relatório: [`docs/relatorio-fase4.md`](docs/relatorio-fase4.md). Roteiro:
+[`docs/demo/roteiro-video.md`](docs/demo/roteiro-video.md). Notebooks:
+[`notebooks/`](notebooks/). Seed: `./scripts/seed-multimodal-demo.sh`.
 
 ## O que já foi entregue
 

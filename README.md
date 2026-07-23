@@ -12,25 +12,16 @@ Glossário de domínio: [`CONTEXT.md`](CONTEXT.md). Decisão de arquitetura:
 
 ## Estado atual
 
-Os **Épicos 1–7** estão concluídos. O **Épico 8 / E8.1** (publish GHCR + smoke
-Caso vitais) também está concluído; resta **E8.2** (seed/notebooks/relatório/
-roteiro).
+Os **Épicos 1–8** estão concluídos (Fundação → CI/CD e entrega acadêmica).
 
-A entrega atual inclui autenticação JWT, Paciente com Rótulo Sensível (reveal +
-SR), Caso com modalidades `vitals`, `video`, `audio` e `prescriptions` (Artefatos
-no MinIO, outbox → filas RQ `default` / `video` → Risco fundido e Alerta
-versionado se ≥ MEDIO), Justificativa template, feed SSE de Alertas com toast
-`aria-live="polite"`, Recharts lazy em Caso/Paciente, painel admin de Falhas,
-Provedor de Áudio com CB/fallback, regras de Prescrição + seed multimodal, falha
-parcial / reprocess, workers Compose, shell Next.js (tema dark/light), gate
-Lighthouse no CI, publish GHCR em `main` e smoke Compose de Caso vitais
-(`./scripts/smoke-caso-vitais.sh`).
+A entrega inclui autenticação JWT, Paciente com Rótulo Sensível (reveal + SR),
+Caso multimodal (`vitals` / `video` / `audio` / `prescriptions`), Risco fundido e
+Alertas versionados, Justificativa template, SSE, UI a11y + tema, Lighthouse
+gate, publish GHCR em `main`, smoke Caso vitais, seed multimodal Compose,
+notebooks, relatório e roteiro de vídeo.
 
-Ainda não fazem parte da implementação: fechamento fino do README de entrega
-E8.2 (T8.8); chamada Azure Speech real obrigatória no CI (`AZURE_ENABLED=false`).
-Relatório: [`docs/relatorio-fase4.md`](docs/relatorio-fase4.md). Roteiro:
-[`docs/demo/roteiro-video.md`](docs/demo/roteiro-video.md). Notebooks:
-[`notebooks/`](notebooks/). Seed: `./scripts/seed-multimodal-demo.sh`.
+Fora do gate de CI (opcional / futuro): chamada Azure Speech real obrigatória
+(`AZURE_ENABLED=false` no CI/demo).
 
 ## O que já foi entregue
 
@@ -182,24 +173,58 @@ Relatório: [`docs/relatorio-fase4.md`](docs/relatorio-fase4.md). Roteiro:
 - Spec:
   [`01-ghcr-smoke-vitais.md`](specs/epic-08-cicd-entrega/01-ghcr-smoke-vitais.md).
 
+### Entrega acadêmica (Épico 8 / E8.2)
+
+- Seed Compose: `./scripts/seed-multimodal-demo.sh` (após `start-limen.sh`).
+- Notebooks: [`notebooks/`](notebooks/) (`eda_vitals_final`, `evidencia_modalidades`).
+- Relatório (capítulo datasets): [`docs/relatorio-fase4.md`](docs/relatorio-fase4.md).
+- Roteiro de vídeo: [`docs/demo/roteiro-video.md`](docs/demo/roteiro-video.md).
+- Spec:
+  [`02-seed-notebooks-relatorio.md`](specs/epic-08-cicd-entrega/02-seed-notebooks-relatorio.md).
+
 ## Executar localmente
 
 Pré-requisitos: Docker Compose v2; portas 3000, 5432, 6379, 8000, 9000 e 9001
 livres (ou remapeadas no `.env`).
 
-### Forma recomendada (script)
+### Forma recomendada (script) — build local
 
 ```bash
 ./scripts/start-limen.sh
+./scripts/seed-multimodal-demo.sh    # demo multimodal (opcional)
 ```
 
 O script cria `.env` se necessário, sobe o Compose com `--build --wait`, valida
 API + UI e imprime as URLs. Variantes: `--smoke`, `--down`, `--reset`.
 
+Smokes:
+
+```bash
+./scripts/smoke-foundation.sh        # health + MinIO + Alembic
+./scripts/smoke-caso-vitais.sh       # Caso só vitais até done
+```
+
 Guia visual da UI: [`docs/frontend/guia-de-uso.md`](docs/frontend/guia-de-uso.md).  
 Problemas comuns: [`docs/frontend/troubleshooting.md`](docs/frontend/troubleshooting.md).
 
-### Forma manual
+### Imagens GHCR (sem rebuild)
+
+Após o publish em `main`, dá para puxar `limen-backend` / `limen-frontend`:
+
+```bash
+cp .env.example .env
+export GHCR_OWNER=<seu-usuario-ou-org-lowercase>
+export LIMEN_IMAGE_TAG=latest   # ou main-<sha>
+docker compose -f docker-compose.yml -f docker-compose.ghcr.yml pull
+docker compose -f docker-compose.yml -f docker-compose.ghcr.yml up -d --no-build --wait
+./scripts/seed-multimodal-demo.sh
+```
+
+Override: [`docker-compose.ghcr.yml`](docker-compose.ghcr.yml). Packages privados
+exigem `docker login ghcr.io`. CD da demo continua sendo Compose (ADR 0028) —
+sem deploy cloud automático.
+
+### Forma manual (build local)
 
 ```bash
 cp .env.example .env
@@ -500,6 +525,9 @@ todo evento; **push** para `ghcr.io/<owner>/…` com tags `main-<sha>` e `latest
 | [`specs/epic-05-resiliencia/`](specs/epic-05-resiliencia/) | Falha parcial, filas, DLQ/retries |
 | [`specs/epic-06-modalidades/`](specs/epic-06-modalidades/) | Vídeo (E6.1); áudio Azure F0 (E6.2); prescriptions + seed (E6.3) |
 | [`specs/epic-07-alertas-polish/`](specs/epic-07-alertas-polish/) | Justificativa + SSE (E7.1); a11y/DLQ (E7.2); Lighthouse gate (E7.3) — concluído |
-| [`specs/epic-08-cicd-entrega/`](specs/epic-08-cicd-entrega/) | GHCR + smoke vitais (E8.1) — concluído; seed/notebooks/relatório (E8.2) — spec |
+| [`specs/epic-08-cicd-entrega/`](specs/epic-08-cicd-entrega/) | GHCR + smoke (E8.1); seed/notebooks/relatório/roteiro (E8.2) — concluído |
+| [`docs/relatorio-fase4.md`](docs/relatorio-fase4.md) | Relatório acadêmico (capítulo datasets) |
+| [`docs/demo/roteiro-video.md`](docs/demo/roteiro-video.md) | Roteiro da demo em vídeo |
+| [`notebooks/`](notebooks/) | EDA e evidência multimodal |
 | [`frontend/`](frontend/) | App Next.js (Épico 4 + Épico 7) |
 | [`.cursor/plans/arquitetura_multimodal_fase_4_a1c92623.plan.md`](.cursor/plans/arquitetura_multimodal_fase_4_a1c92623.plan.md) | Plano incremental dos épicos |

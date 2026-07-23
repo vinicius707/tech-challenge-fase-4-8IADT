@@ -11,8 +11,8 @@ imagens GHCR quando aplicável).
 
 ## Status da entrega
 
-**Spec (T8.0)** — pendente de implementação (T8.5–T8.8). Depende de E8.1
-(publish/smoke) para o README citar o fluxo GHCR + smoke vitais já existentes.
+**Concluída em 22 de julho de 2026** (T8.5–T8.8: seed HTTP Compose, notebooks
+finais, relatório + roteiro, README de entrega e fechamento do Épico 8).
 
 ## Escopo
 
@@ -149,11 +149,11 @@ documentados e localizar relatório/notebooks/roteiro/specs.
 
 ## Critérios de pronto (DoD desta etapa E8.2)
 
-- [ ] Spec SDD aprovada e versionada (esta).
-- [ ] Seed demo Compose documentado (e ajustado se necessário).
-- [ ] Notebooks finais commitados sob `notebooks/`.
-- [ ] Relatório com capítulo de datasets (catálogo mínimo acima).
-- [ ] Roteiro de vídeo versionado.
-- [ ] README + `docs/README.md` de entrega atualizados; menção “Épico 8
+- [x] Spec SDD aprovada e versionada (esta).
+- [x] Seed demo Compose documentado (e ajustado se necessário).
+- [x] Notebooks finais commitados sob `notebooks/`.
+- [x] Relatório com capítulo de datasets (catálogo mínimo acima).
+- [x] Roteiro de vídeo versionado.
+- [x] README + `docs/README.md` de entrega atualizados; menção “Épico 8
       pendente” removida/atualizada.
-- [ ] Sem novas features de produto; sem Azure obrigatório no CI; sem E2E UI.
+- [x] Sem novas features de produto; sem Azure obrigatório no CI; sem E2E UI.

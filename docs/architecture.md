@@ -220,13 +220,12 @@ flowchart LR
   style E5 fill:#d4edda
   style E6 fill:#d4edda
   style E7 fill:#d4edda
-  style E8 fill:#fff3cd
+  style E8 fill:#d4edda
 ```
 
 | Épico | Status |
 | ----- | ------ |
-| 1–7 | Concluídos |
-| 8 CI/CD e entrega | Pendente |
+| 1–8 | Concluídos |
 
 ---
 

@@ -43,7 +43,7 @@ Contratos Given/When/Then escritos **antes** da implementação TDD.
 | 7 Alertas + polish | [`../specs/epic-07-alertas-polish/02-telas-a11y-dlq.md`](../specs/epic-07-alertas-polish/02-telas-a11y-dlq.md) | Concluída (E7.2) |
 | 7 Alertas + polish | [`../specs/epic-07-alertas-polish/03-lighthouse-gate.md`](../specs/epic-07-alertas-polish/03-lighthouse-gate.md) | Concluída (E7.3) |
 | 8 CI/CD e entrega | [`../specs/epic-08-cicd-entrega/01-ghcr-smoke-vitais.md`](../specs/epic-08-cicd-entrega/01-ghcr-smoke-vitais.md) | Concluída (E8.1) |
-| 8 CI/CD e entrega | [`../specs/epic-08-cicd-entrega/02-seed-notebooks-relatorio.md`](../specs/epic-08-cicd-entrega/02-seed-notebooks-relatorio.md) | Spec (E8.2) |
+| 8 CI/CD e entrega | [`../specs/epic-08-cicd-entrega/02-seed-notebooks-relatorio.md`](../specs/epic-08-cicd-entrega/02-seed-notebooks-relatorio.md) | Concluída (E8.2) |
 
 ## ADRs
 
@@ -123,13 +123,14 @@ arquivo quando o plano supersede uma decisão anterior.
 | 5 | Resiliência | Concluído |
 | 6 | Modalidades PDF | Concluído (E6.1 vídeo; E6.2 áudio; E6.3 prescrições + seed) |
 | 7 | Alertas + polish UI | Concluído (E7.1–E7.3) |
-| 8 | CI/CD e entrega | E8.1 concluído; E8.2 em andamento (relatório/roteiro prontos; fechamento README pendente) |
+| 8 | CI/CD e entrega | Concluído (E8.1–E8.2) |
 
 ## Entrega acadêmica (E8.2)
 
 - Relatório Fase 4: [`relatorio-fase4.md`](relatorio-fase4.md) (capítulo de datasets)
 - Roteiro de vídeo: [`demo/roteiro-video.md`](demo/roteiro-video.md)
 - Notebooks: [`../notebooks/`](../notebooks/)
+- Seed Compose: [`../scripts/seed-multimodal-demo.sh`](../scripts/seed-multimodal-demo.sh)
 - Spec: [`../specs/epic-08-cicd-entrega/02-seed-notebooks-relatorio.md`](../specs/epic-08-cicd-entrega/02-seed-notebooks-relatorio.md)
 
 ## CI/CD (E8.1)

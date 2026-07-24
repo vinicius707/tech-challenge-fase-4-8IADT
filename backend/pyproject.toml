@@ -23,6 +23,9 @@ dependencies = [
 azure-speech = [
     "azure-cognitiveservices-speech>=1.40,<2",
 ]
+azure-language = [
+    "azure-ai-textanalytics>=5.3,<6",
+]
 
 [dependency-groups]
 dev = [

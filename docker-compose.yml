@@ -87,6 +87,8 @@ services:
       AZURE_ENABLED: ${AZURE_ENABLED:-false}
       AZURE_SPEECH_KEY: ${AZURE_SPEECH_KEY:-}
       AZURE_SPEECH_REGION: ${AZURE_SPEECH_REGION:-}
+      AZURE_LANGUAGE_KEY: ${AZURE_LANGUAGE_KEY:-}
+      AZURE_LANGUAGE_ENDPOINT: ${AZURE_LANGUAGE_ENDPOINT:-}
       RQ_QUEUE_NAME: ${RQ_QUEUE_NAME:-default}
     depends_on:
       postgres:
@@ -130,6 +132,8 @@ services:
       AZURE_ENABLED: ${AZURE_ENABLED:-false}
       AZURE_SPEECH_KEY: ${AZURE_SPEECH_KEY:-}
       AZURE_SPEECH_REGION: ${AZURE_SPEECH_REGION:-}
+      AZURE_LANGUAGE_KEY: ${AZURE_LANGUAGE_KEY:-}
+      AZURE_LANGUAGE_ENDPOINT: ${AZURE_LANGUAGE_ENDPOINT:-}
     depends_on:
       postgres:
         condition: service_healthy

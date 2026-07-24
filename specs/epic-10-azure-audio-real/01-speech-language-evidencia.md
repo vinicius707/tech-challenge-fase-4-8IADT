@@ -155,7 +155,7 @@ Sentimento, Termos Críticos, metadados) prontos para commit
 | T10.1 | Env + cliente Speech real injetável + TDD — **feita** |
 | T10.2 | Text Analytics + degradação independente + TDD — **feita** |
 | T10.3 | Termos Críticos + score `max(acústico, nlp)` + Anomalias — **feita** |
-| T10.4 | Artefato de Transcrição no MinIO |
+| T10.4 | Artefato de Transcrição no MinIO — **feita** |
 | T10.5 | Fixture TTS + `gerar-evidencia-audio.sh` + orquestrador fino |
 | T10.6 | Fechamento docs (README, `.env.example`, índice) |
 

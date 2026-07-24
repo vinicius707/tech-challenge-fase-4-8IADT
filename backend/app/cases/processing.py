@@ -186,15 +186,11 @@ def _risk_for_done_modality(
         content = runtime.blob_store.get(artifact.bucket, artifact.object_key)
         if content is None:
             return None
+        from app.azure.audio_nlp import build_audio_modality_risk
         from app.azure.provider import analyze_audio
-        from app.cases.vitals_engine import risk_level_from_score
 
         analysis = analyze_audio(content)
-        return ModalityRisk(
-            score=analysis.score,
-            level=risk_level_from_score(analysis.score),
-            anomalies=(),
-        )
+        return build_audio_modality_risk(analysis)
     if modality == "video":
         artifact = next((a for a in case.artifacts if a.modality == "video"), None)
         if artifact is None:

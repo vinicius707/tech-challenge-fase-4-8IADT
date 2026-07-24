@@ -14,8 +14,8 @@ vídeo: **Detecção em Cena** com YOLOv8 pré-treinado COCO (`ultralytics`) e
 
 ## Status da entrega
 
-**T11.0 concluída** (spec SDD + índice / ponte E6.1). Implementação T11.1+ em
-sessões seguintes nesta branch.
+**Concluída** (T11.0–T11.5). Spec SDD, YOLOv8 + MediaPipe opt-in, degradação
+independente, evidência de vídeo e fechamento de docs.
 
 Relação com E6.1: o Épico 6.1 permanece **Concluída** (seam: fixtures AVI,
 upload, fila `video`, Pose/Scene engines com backend `synthetic`, frames
@@ -150,17 +150,17 @@ vídeo (E11).
 | T11.2 | MediaPipe Pose injetável + TDD (pose) — **feita** |
 | T11.3 | Wiring worker-video / extras Compose + degradação independente — **feita** |
 | T11.4 | `gerar-evidencia-video.sh` + orquestrador real (E10+E11) — **feita** |
-| T11.5 | Fechamento docs (README, `.env.example`, índice) |
+| T11.5 | Fechamento docs (README, `.env.example`, índice) — **feita** |
 
 Branch: `feature/limen-epic-11-yolo-video-real` a partir de `main`.
 
 ## Critérios de pronto (DoD E11)
 
 - [x] Spec SDD aprovada (esta) + docs da T11.0.
-- [ ] YOLO + MediaPipe reais opt-in; TDD sem pesos/rede no CI.
-- [ ] Regressão E6.1 com `synthetic`; contrato de saída estável.
-- [ ] Degradação independente Pose ↔ Scene.
-- [ ] Evidência em `data/evidencia/video/` via script versionado; orquestrador
+- [x] YOLO + MediaPipe reais opt-in; TDD sem pesos/rede no CI.
+- [x] Regressão E6.1 com `synthetic`; contrato de saída estável.
+- [x] Degradação independente Pose ↔ Scene.
+- [x] Evidência em `data/evidencia/video/` via script versionado; orquestrador
       inclui vídeo.
-- [ ] `.env.example` / README / índice atualizados.
-- [ ] Sem fine-tune; sem claim clínico; sem Épico 9; sem UI nova.
+- [x] `.env.example` / README / índice atualizados.
+- [x] Sem fine-tune; sem claim clínico; sem Épico 9; sem UI nova.

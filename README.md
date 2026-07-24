@@ -12,17 +12,19 @@ Glossário de domínio: [`CONTEXT.md`](CONTEXT.md). Decisão de arquitetura:
 
 ## Estado atual
 
-Os **Épicos 1–8 e 10** estão concluídos (Fundação → CI/CD; Azure áudio real).
+Os **Épicos 1–8, 10 e 11** estão concluídos (Fundação → CI/CD; Azure áudio real;
+vídeo real YOLO + MediaPipe).
 
 A entrega inclui autenticação JWT, Paciente com Rótulo Sensível (reveal + SR),
 Caso multimodal (`vitals` / `video` / `audio` / `prescriptions`), Risco fundido e
 Alertas versionados, Justificativa template, SSE, UI a11y + tema, Lighthouse
 gate, publish GHCR em `main`, smoke Caso vitais, seed multimodal Compose,
-notebooks, relatório e roteiro de vídeo, além de Azure Speech + Language
-**opt-in** (CI permanece com `AZURE_ENABLED=false`).
+notebooks, relatório e roteiro de vídeo, Azure Speech + Language **opt-in** e
+vídeo real **opt-in** (CI permanece sintético: `AZURE_ENABLED=false`,
+`LIMEN_*_BACKEND=synthetic`).
 
 **Épico 9 (Vitais ML)** — ADR + specs SDD versionadas; **implementação ainda
-não iniciada** (fila: E11 YOLOv8 → E9). Baseline atual:
+não iniciada** (próximo na fila de IA real). Baseline atual:
 [`specs/epic-09-vitais-ml/00-baseline-atual.md`](specs/epic-09-vitais-ml/00-baseline-atual.md)
 · [`docs/adr/0029-vitais-ml-hibrido.md`](docs/adr/0029-vitais-ml-hibrido.md).
 
@@ -93,6 +95,7 @@ não iniciada** (fila: E11 YOLOv8 → E9). Baseline atual:
   (fusão com vitais; falha parcial intacta).
 - Spec:
   [`01-video-pose-yolo.md`](specs/epic-06-modalidades/01-video-pose-yolo.md).
+  Caminho real (Ultralytics + MediaPipe + evidência): **Épico 11**.
 
 ### Modalidades — Áudio (Épico 6 / E6.2)
 
@@ -196,13 +199,30 @@ não iniciada** (fila: E11 YOLOv8 → E9). Baseline atual:
   = origem da **fala** (Language não redefine o CB de Speech).
 - Fixtures TTS: [`data/fixtures/audio/tts/`](data/fixtures/audio/tts/).
 - Evidência: `./scripts/gerar-evidencia-audio.sh` →
-  [`data/evidencia/audio/`](data/evidencia/audio/); orquestrador fino
-  `./scripts/gerar-evidencia-real.sh`.
+  [`data/evidencia/audio/`](data/evidencia/audio/); orquestrador
+  `./scripts/gerar-evidencia-real.sh` (E10+E11).
 - Extras opcionais: `uv sync --extra azure-speech` e `--extra azure-language`.
 - ADRs [0030](docs/adr/0030-ia-real-opt-in-evidencia.md) /
   [0031](docs/adr/0031-audio-nlp-modelagem.md).
 - Spec:
   [`01-speech-language-evidencia.md`](specs/epic-10-azure-audio-real/01-speech-language-evidencia.md).
+
+### Vídeo real — YOLO + MediaPipe (Épico 11)
+
+- Detecção em Cena com YOLOv8 COCO (`LIMEN_YOLO_BACKEND=ultralytics`) e Análise
+  Postural com MediaPipe (`LIMEN_POSE_BACKEND=mediapipe`); CI permanece
+  `synthetic`.
+- Engines injetáveis (TDD sem pesos/rede); falha explícita se o extra estiver
+  ausente; Pose e Scene degradam de forma **independente**.
+- `worker-video` exporta os backends; extras Torch/MediaPipe só no override
+  [`docker-compose.video-real.yml`](docker-compose.video-real.yml) (API leve).
+- Evidência: `./scripts/gerar-evidencia-video.sh` →
+  [`data/evidencia/video/`](data/evidencia/video/).
+- Extras: `uv sync --extra ultralytics` e `--extra mediapipe`.
+- ADRs [0030](docs/adr/0030-ia-real-opt-in-evidencia.md) /
+  [0007](docs/adr/0007-escopo-video-fisio-cirurgia-leve.md).
+- Spec:
+  [`01-ultralytics-mediapipe-evidencia.md`](specs/epic-11-yolo-video-real/01-ultralytics-mediapipe-evidencia.md).
 
 ## Executar localmente
 
@@ -428,10 +448,21 @@ Com credenciais F0 locais no `.env` (`AZURE_ENABLED=true` + Speech/Language):
 ```bash
 ./scripts/gerar-evidencia-audio.sh --dry-run   # valida fixtures TTS sem rede
 ./scripts/gerar-evidencia-audio.sh             # gera data/evidencia/audio/*.json
-./scripts/gerar-evidencia-real.sh              # orquestrador (E10: só áudio)
 ```
 
-CI e demo padrão permanecem com `AZURE_ENABLED=false` (sem rede Azure).
+### Evidência vídeo real (Épico 11)
+
+```bash
+./scripts/gerar-evidencia-video.sh --dry-run   # Pose+Scene synthetic
+./scripts/gerar-evidencia-video.sh             # backends reais (extras instalados)
+# worker-video com Torch/MediaPipe:
+# docker compose -f docker-compose.yml -f docker-compose.video-real.yml build worker-video
+```
+
+Orquestrador E10+E11: `./scripts/gerar-evidencia-real.sh [--dry-run]`.
+
+CI e demo padrão permanecem sintéticos (`AZURE_ENABLED=false`,
+`LIMEN_*_BACKEND=synthetic`).
 
 Rotas públicas nesta etapa: `GET /health`, `POST /auth/login`,
 `POST /auth/refresh`. Demais rotas exigem Bearer access token.
@@ -504,8 +535,8 @@ Trocar a chave sem recriptografar torna rótulos existentes ilegíveis.
 | `LIMEN_AZURE_CB_FAILURE_THRESHOLD` | Falhas consecutivas do Speech para abrir o CB (padrão `3`) |
 | `LIMEN_AZURE_CB_OPEN_SECONDS` | Segundos com CB aberto forçando `local` (padrão `300`) |
 | `LIMEN_AZURE_CB_FORCE_OPEN` | Força CB aberto (`true`/`1`) — só TDD/demo |
-| `LIMEN_POSE_BACKEND` | Análise Postural: `synthetic` (padrão) ou `mediapipe` |
-| `LIMEN_YOLO_BACKEND` | Detecção em Cena: `synthetic` (padrão) ou `ultralytics` |
+| `LIMEN_POSE_BACKEND` | Análise Postural: `synthetic` (padrão CI) ou `mediapipe` (`uv sync --extra mediapipe`) |
+| `LIMEN_YOLO_BACKEND` | Detecção em Cena: `synthetic` (padrão CI) ou `ultralytics` (`uv sync --extra ultralytics`) |
 | `OUTBOX_RECONCILE_INTERVAL_SECONDS` | Intervalo do reconciler (padrão `5`) |
 
 Contrato: [`specs/epic-03-caso-fila/02-outbox-rq.md`](specs/epic-03-caso-fila/02-outbox-rq.md).
@@ -566,6 +597,7 @@ todo evento; **push** para `ghcr.io/<owner>/…` com tags `main-<sha>` e `latest
 | [`specs/epic-08-cicd-entrega/`](specs/epic-08-cicd-entrega/) | GHCR + smoke (E8.1); seed/notebooks/relatório/roteiro (E8.2) — concluído |
 | [`specs/epic-09-vitais-ml/`](specs/epic-09-vitais-ml/) | Vitais ML híbrido — SDD pronto; impl. pendente |
 | [`specs/epic-10-azure-audio-real/`](specs/epic-10-azure-audio-real/) | Azure Speech + Language + evidência (E10) — concluído |
+| [`specs/epic-11-yolo-video-real/`](specs/epic-11-yolo-video-real/) | YOLO Ultralytics + MediaPipe + evidência (E11) — concluído |
 | [`docs/relatorio-fase4.md`](docs/relatorio-fase4.md) | Relatório acadêmico (capítulo datasets) |
 | [`docs/demo/roteiro-video.md`](docs/demo/roteiro-video.md) | Roteiro da demo em vídeo |
 | [`notebooks/`](notebooks/) | EDA e evidência multimodal |

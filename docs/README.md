@@ -46,7 +46,7 @@ Contratos Given/When/Then escritos **antes** da implementação TDD.
 | 8 CI/CD e entrega | [`../specs/epic-08-cicd-entrega/02-seed-notebooks-relatorio.md`](../specs/epic-08-cicd-entrega/02-seed-notebooks-relatorio.md) | Concluída (E8.2) |
 | 9 Vitais ML | [`../specs/epic-09-vitais-ml/00-baseline-atual.md`](../specs/epic-09-vitais-ml/00-baseline-atual.md) | Baseline (só docs) |
 | 9 Vitais ML | [`../specs/epic-09-vitais-ml/01-etl-datasets-vitais.md`](../specs/epic-09-vitais-ml/01-etl-datasets-vitais.md) | Concluída (E9.1 ETL) |
-| 9 Vitais ML | [`../specs/epic-09-vitais-ml/02-isolation-forest-runtime.md`](../specs/epic-09-vitais-ml/02-isolation-forest-runtime.md) | Spec (E9.2) — pendente impl. |
+| 9 Vitais ML | [`../specs/epic-09-vitais-ml/02-isolation-forest-runtime.md`](../specs/epic-09-vitais-ml/02-isolation-forest-runtime.md) | Concluída (E9.2 IF runtime) |
 | 9 Vitais ML | [`../specs/epic-09-vitais-ml/03-autoencoder-notebook.md`](../specs/epic-09-vitais-ml/03-autoencoder-notebook.md) | Spec (E9.3) — pendente impl. |
 | 9 Vitais ML | [`../specs/epic-09-vitais-ml/04-comparacao-relatorio-roteiro.md`](../specs/epic-09-vitais-ml/04-comparacao-relatorio-roteiro.md) | Spec (E9.4) — pendente impl. |
 | 10 Azure áudio real | [`../specs/epic-10-azure-audio-real/01-speech-language-evidencia.md`](../specs/epic-10-azure-audio-real/01-speech-language-evidencia.md) | Concluída (E10) |

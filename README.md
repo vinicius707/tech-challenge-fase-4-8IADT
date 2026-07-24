@@ -537,6 +537,8 @@ Trocar a chave sem recriptografar torna rótulos existentes ilegíveis.
 | `LIMEN_AZURE_CB_FORCE_OPEN` | Força CB aberto (`true`/`1`) — só TDD/demo |
 | `LIMEN_POSE_BACKEND` | Análise Postural: `synthetic` (padrão CI) ou `mediapipe` (`uv sync --extra mediapipe`) |
 | `LIMEN_YOLO_BACKEND` | Detecção em Cena: `synthetic` (padrão CI) ou `ultralytics` (`uv sync --extra ultralytics`) |
+| `LIMEN_VITALS_BACKEND` | Vitais: `thresholds` (padrão CI), `isolation_forest` ou `hybrid` (demo; limiares OU IF) |
+| `LIMEN_VITALS_IF_MODEL_PATH` | Caminho do `.joblib` IF (Compose: `/models/vitals/isolation_forest.joblib`) |
 | `OUTBOX_RECONCILE_INTERVAL_SECONDS` | Intervalo do reconciler (padrão `5`) |
 
 Contrato: [`specs/epic-03-caso-fila/02-outbox-rq.md`](specs/epic-03-caso-fila/02-outbox-rq.md).

@@ -90,6 +90,11 @@ services:
       AZURE_LANGUAGE_KEY: ${AZURE_LANGUAGE_KEY:-}
       AZURE_LANGUAGE_ENDPOINT: ${AZURE_LANGUAGE_ENDPOINT:-}
       RQ_QUEUE_NAME: ${RQ_QUEUE_NAME:-default}
+      # Vitais ML (Épico 9): thresholds (CI) | isolation_forest | hybrid (demo).
+      LIMEN_VITALS_BACKEND: ${LIMEN_VITALS_BACKEND:-thresholds}
+      LIMEN_VITALS_IF_MODEL_PATH: /models/vitals/isolation_forest.joblib
+    volumes:
+      - ./models/vitals:/models/vitals:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -134,6 +139,10 @@ services:
       AZURE_SPEECH_REGION: ${AZURE_SPEECH_REGION:-}
       AZURE_LANGUAGE_KEY: ${AZURE_LANGUAGE_KEY:-}
       AZURE_LANGUAGE_ENDPOINT: ${AZURE_LANGUAGE_ENDPOINT:-}
+      LIMEN_VITALS_BACKEND: ${LIMEN_VITALS_BACKEND:-thresholds}
+      LIMEN_VITALS_IF_MODEL_PATH: /models/vitals/isolation_forest.joblib
+    volumes:
+      - ./models/vitals:/models/vitals:ro
     depends_on:
       postgres:
         condition: service_healthy

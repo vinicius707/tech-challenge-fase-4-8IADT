@@ -8,6 +8,7 @@ Artefato **pequeno versionado** para o backend `isolation_forest` /
 | Arquivo | Função |
 | ------- | ------ |
 | `isolation_forest.joblib` | IsolationForest sklearn + metadata (`feature_columns`, `seed`) |
+| `ae_export.pt` | Pesos AE PyTorch (**opcional**, gitignored; só notebook E9.3) |
 
 ## Regenerar
 
@@ -22,5 +23,6 @@ cd backend && uv run python ../scripts/train_vitals_if.py
 cd backend && uv run python ../scripts/train_vitals_if.py --from-fixtures
 ```
 
-Seed default: `20260721`. Pesos de autoencoder PyTorch (Épico 9.3) **não**
-entram aqui / não rodam no worker.
+Seed default: `20260721`. Autoencoder: ver
+`notebooks/train_vitals_autoencoder.ipynb` + `notebooks/requirements-ml.txt`
+(Torch **não** no worker).

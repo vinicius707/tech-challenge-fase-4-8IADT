@@ -13,6 +13,10 @@ data/downloads/
 data/processed/vitals/*
 !data/processed/vitals/README.md
 
+# Pesos AE PyTorch (notebook E9.3) — fora do Git / fora do worker
+models/vitals/*.pt
+models/vitals/ae_export.pt
+
 .ipynb_checkpoints/
 
 # Clones de projetos de referência (somente local)

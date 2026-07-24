@@ -149,7 +149,7 @@ vídeo (E11).
 | T11.1 | Env + YOLOv8 Ultralytics injetável + TDD (scene) — **feita** |
 | T11.2 | MediaPipe Pose injetável + TDD (pose) — **feita** |
 | T11.3 | Wiring worker-video / extras Compose + degradação independente — **feita** |
-| T11.4 | `gerar-evidencia-video.sh` + orquestrador real (E10+E11) |
+| T11.4 | `gerar-evidencia-video.sh` + orquestrador real (E10+E11) — **feita** |
 | T11.5 | Fechamento docs (README, `.env.example`, índice) |
 
 Branch: `feature/limen-epic-11-yolo-video-real` a partir de `main`.

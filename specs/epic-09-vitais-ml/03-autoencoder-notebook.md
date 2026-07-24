@@ -9,8 +9,8 @@ notebook, com export opcional de pesos, **sem** carregar AE no worker.
 
 ## Status da entrega
 
-**Pendente** — spec apenas (SDD). Depende de E9.1 (dados processados); pode
-rodar em paralelo documental com E9.2, mas a comparação completa fecha em E9.4.
+**Concluída (T9.3)** — notebook AE PyTorch + `requirements-ml.txt`; Torch fora
+do worker/API/CI.
 
 ## Escopo
 
@@ -57,7 +57,7 @@ artefatos; emenda final de relatório/roteiro (E9.4); MLP sklearn como AE.
 
 ## Critérios de pronto (DoD E9.3)
 
-- [ ] Spec SDD aprovada (esta).
-- [ ] Notebook AE + `requirements-ml` (ou equivalente) + README notebooks.
-- [ ] Export documentado; pesos grandes fora do Git se necessário.
-- [ ] Zero `torch` no backend/Docker de produção.
+- [x] Spec SDD aprovada (esta).
+- [x] Notebook AE + `requirements-ml` (ou equivalente) + README notebooks.
+- [x] Export documentado; pesos grandes fora do Git se necessário.
+- [x] Zero `torch` no backend/Docker de produção.

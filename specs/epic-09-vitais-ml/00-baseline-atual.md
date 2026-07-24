@@ -10,19 +10,19 @@ autoencoder. Este documento **não** entrega código novo.
 
 ## Status
 
-**Documentação apenas** — implementação do Épico 9 **não iniciada**.
-Use este baseline ao rodar a stack agora; depois das specs `01`–`04`, compare
-comportamento, deps e narrativa de demo.
+**Épico 9 concluído (T9.0–T9.4).** Este arquivo congela o **antes** (só limiares,
+sem sklearn no runtime histórico). O **depois** está no relatório §5.3,
+`compare_vitals_ml.ipynb` e ADR 0029.
 
 ## Tarefas planejadas (uma por commit, sessões futuras)
 
 | Tarefa | Spec | Conteúdo |
 | ------ | ---- | -------- |
-| T9.0 | esta | Congelar baseline + ADR/specs (docs only) |
-| T9.1 | `01` | ETL offline |
-| T9.2 | `02` | IF + flag no runtime |
-| T9.3 | `03` | Notebook AE PyTorch + export |
-| T9.4 | `04` | Comparação + relatório + roteiro |
+| T9.0 | esta | Congelar baseline + ADR/specs (docs only) — **feita** |
+| T9.1 | `01` | ETL offline — **feita** |
+| T9.2 | `02` | IF + flag no runtime — **feita** |
+| T9.3 | `03` | Notebook AE PyTorch + export — **feita** |
+| T9.4 | `04` | Comparação + relatório + roteiro — **feita** |
 
 Branch sugerida: `feature/limen-epic-09-vitais-ml` a partir de `main`.
 

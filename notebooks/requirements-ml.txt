@@ -1,0 +1,10 @@
+# Dependências ML só para notebooks (Épico 9 / E9.3).
+# NÃO instalar no backend Docker / CI do Limen.
+#
+#   python -m venv .venv-ml && source .venv-ml/bin/activate
+#   pip install -r notebooks/requirements-ml.txt
+
+torch>=2.2,<3
+numpy>=1.26,<3
+matplotlib>=3.8,<4
+jupyter>=1.0,<2

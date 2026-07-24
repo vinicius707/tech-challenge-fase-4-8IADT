@@ -10,9 +10,8 @@ flag `LIMEN_VITALS_BACKEND`, com artefato de modelo **pequeno versionado** e
 
 ## Status da entrega
 
-**Pendente** — spec apenas (SDD). Depende de E9.1 para dados de treino full;
-o modelo pequeno no Git pode ser gerado a partir de amostra processada ou
-features derivadas das fixtures + amostra ETL.
+**Concluída (T9.2)** — backends `thresholds` / `isolation_forest` / `hybrid`,
+artefato `models/vitals/isolation_forest.joblib`, CI em `thresholds`.
 
 ## Escopo
 
@@ -80,9 +79,9 @@ fixture).
 
 ## Critérios de pronto (DoD E9.2)
 
-- [ ] Spec SDD aprovada (esta).
-- [ ] Flag + backends implementados com TDD.
-- [ ] Modelo pequeno versionado + script de treino documentado.
-- [ ] `.env.example` e README atualizados.
-- [ ] CI permanece em `thresholds`; smoke não exige download de dataset.
-- [ ] Sem PyTorch no Dockerfile do backend.
+- [x] Spec SDD aprovada (esta).
+- [x] Flag + backends implementados com TDD.
+- [x] Modelo pequeno versionado + script de treino documentado.
+- [x] `.env.example` e README atualizados.
+- [x] CI permanece em `thresholds`; smoke não exige download de dataset.
+- [x] Sem PyTorch no Dockerfile do backend.

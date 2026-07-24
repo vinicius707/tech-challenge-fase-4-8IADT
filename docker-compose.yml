@@ -85,6 +85,8 @@ services:
       SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
       PII_ENCRYPTION_KEY: ${PII_ENCRYPTION_KEY:-}
       AZURE_ENABLED: ${AZURE_ENABLED:-false}
+      AZURE_SPEECH_KEY: ${AZURE_SPEECH_KEY:-}
+      AZURE_SPEECH_REGION: ${AZURE_SPEECH_REGION:-}
       RQ_QUEUE_NAME: ${RQ_QUEUE_NAME:-default}
     depends_on:
       postgres:
@@ -125,6 +127,9 @@ services:
       MINIO_SECURE: ${MINIO_SECURE:-false}
       RQ_QUEUE_NAME: ${RQ_QUEUE_NAME:-default}
       PII_ENCRYPTION_KEY: ${PII_ENCRYPTION_KEY:-}
+      AZURE_ENABLED: ${AZURE_ENABLED:-false}
+      AZURE_SPEECH_KEY: ${AZURE_SPEECH_KEY:-}
+      AZURE_SPEECH_REGION: ${AZURE_SPEECH_REGION:-}
     depends_on:
       postgres:
         condition: service_healthy

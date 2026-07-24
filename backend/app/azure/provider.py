@@ -60,9 +60,14 @@ def default_local_analyze(payload: bytes) -> dict[str, Any]:
 
 
 def default_azure_analyze(payload: bytes) -> dict[str, Any]:
-    """Stub sem rede. Com `AZURE_ENABLED` real, injete o cliente F0 via parâmetro."""
-    _ = payload
-    raise ConnectionError("Azure Speech não configurado neste protótipo (injete azure_analyze)")
+    """Speech real via env (T10.1). Sem key/region → ConnectionError → fallback `local`.
+
+    Testes injetam `azure_analyze=` ou patcham `recognize_with_azure_speech_sdk`
+    para não tocar rede/SDK no CI.
+    """
+    from app.azure.speech import create_speech_analyze
+
+    return create_speech_analyze()(payload)
 
 
 def analyze_audio(

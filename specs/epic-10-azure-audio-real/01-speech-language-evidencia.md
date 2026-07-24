@@ -152,7 +152,7 @@ Sentimento, Termos Críticos, metadados) prontos para commit
 | Tarefa | Conteúdo |
 | ------ | -------- |
 | T10.0 | Esta spec + notas de índice / CONTEXT / E6.2 (docs) — **feita** |
-| T10.1 | Env + cliente Speech real injetável + TDD |
+| T10.1 | Env + cliente Speech real injetável + TDD — **feita** |
 | T10.2 | Text Analytics + degradação independente + TDD |
 | T10.3 | Termos Críticos + score `max(acústico, nlp)` + Anomalias |
 | T10.4 | Artefato de Transcrição no MinIO |

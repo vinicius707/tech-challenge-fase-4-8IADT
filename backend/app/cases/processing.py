@@ -186,15 +186,11 @@ def _risk_for_done_modality(
         content = runtime.blob_store.get(artifact.bucket, artifact.object_key)
         if content is None:
             return None
+        from app.azure.audio_nlp import build_audio_modality_risk
         from app.azure.provider import analyze_audio
-        from app.cases.vitals_engine import risk_level_from_score
 
         analysis = analyze_audio(content)
-        return ModalityRisk(
-            score=analysis.score,
-            level=risk_level_from_score(analysis.score),
-            anomalies=(),
-        )
+        return build_audio_modality_risk(analysis)
     if modality == "video":
         artifact = next((a for a in case.artifacts if a.modality == "video"), None)
         if artifact is None:
@@ -367,6 +363,7 @@ def _process_audio_modality(
     runtime: CaseRuntime,
     now: datetime,
 ) -> CaseRecord:
+    from app.azure.audio_nlp import is_real_transcript
     from app.azure.provider import analyze_audio
 
     artifact = next((a for a in case.artifacts if a.modality == "audio"), None)
@@ -380,13 +377,40 @@ def _process_audio_modality(
         )
 
     analysis = analyze_audio(content)
-    return _replace_modality_status(
+    updated = _replace_modality_status(
         case,
         "audio",
         "done",
         now=now,
         provider=analysis.provider,
         set_provider=True,
+    )
+    if not is_real_transcript(analysis.transcript):
+        return updated
+
+    transcript_bytes = analysis.transcript.encode("utf-8")
+    object_key = f"cases/{case.id}/audio/transcript.txt"
+    runtime.blob_store.put(
+        bucket=artifact.bucket,
+        object_key=object_key,
+        content=transcript_bytes,
+        content_type="text/plain",
+    )
+    transcript_artifact = ArtifactRecord(
+        id=uuid.uuid4(),
+        case_id=case.id,
+        modality="audio_transcript",
+        bucket=artifact.bucket,
+        object_key=object_key,
+        content_sha256=hashlib.sha256(transcript_bytes).hexdigest(),
+        content_type="text/plain",
+        created_at=now,
+    )
+    kept = [a for a in updated.artifacts if a.modality != "audio_transcript"]
+    return _copy_case_meta(
+        updated,
+        now=now,
+        artifacts=[*kept, transcript_artifact],
     )
 
 

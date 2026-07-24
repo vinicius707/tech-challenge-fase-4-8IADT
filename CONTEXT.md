@@ -49,8 +49,20 @@ Arquivo binário de evidência ou resultado (vídeo, áudio, CSV, frame anotado)
 _Avoid_: Blob genérico, attachment sem vínculo a Caso
 
 **Provedor de Áudio**:
-Origem efetiva da análise de áudio em um Caso: `azure`, `local` (fallback) ou `cache`. Um circuit breaker pode forçar `local` temporariamente após falhas consecutivas do Azure.
-_Avoid_: “API de voz” genérica sem distinguir provedor
+Origem efetiva da **fala** em um Caso: `azure`, `local` (fallback) ou `cache`. O badge `azure` significa que o Speech produziu a Transcrição — não que o Language também respondeu. Speech e Language degradam de forma independente: sem Speech não há Transcrição real; sem Language não há Sentimento, mas a Transcrição (e os Termos Críticos sobre ela) seguem. Um circuit breaker pode forçar `local` temporariamente após falhas consecutivas do Speech.
+_Avoid_: “API de voz” genérica sem distinguir provedor, tratar Speech e Language como um único serviço, exigir Language para marcar `provider=azure`
+
+**Transcrição**:
+Texto em pt-BR produzido a partir do áudio de um Caso pelo Azure Speech. Só a Transcrição **real** (Speech) dispara Termo Crítico e alimenta Sentimento. O placeholder determinístico do fallback local (`local-transcript-{hash}`) **não** é Transcrição — não gera Termo Crítico nem Sentimento. A Transcrição real é armazenada como Artefato de texto no object store; é evidência da modalidade áudio, não uma modalidade nova.
+_Avoid_: Legenda, log de fala, PHI em texto claro fora do object store, tratar placeholder local como Transcrição, transcrição como Caso ou modalidade separada
+
+**Termo Crítico**:
+Expressão clínica de risco (ex.: “falta de ar”) detectada na Transcrição real por lista determinística PT-BR (algoritmo sempre local) e opcionalmente corroborada por key phrases do Azure Language. Quando presente, gera uma Anomalia da modalidade áudio. Sem Transcrição real, não há Termo Crítico.
+_Avoid_: Palavra-chave genérica, entidade médica sem risco, dependência exclusiva de Azure Language para detectar, Termo Crítico sobre placeholder local
+
+**Sentimento**:
+Polaridade afetiva da Transcrição estimada pelo Azure Text Analytics (Language). Sentimento fortemente negativo gera uma Anomalia da modalidade áudio; sem Azure fica indisponível e não bloqueia a fusão.
+_Avoid_: Diagnóstico de humor, emoção como score clínico, Sentimento calculado sem Azure
 
 **Risco**:
 Resultado da fusão multimodal de um Caso: escore numérico e nível BAIXO, MEDIO ou ALTO, justificado pelas Anomalias e evidências das modalidades.

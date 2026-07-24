@@ -12,21 +12,19 @@ Glossário de domínio: [`CONTEXT.md`](CONTEXT.md). Decisão de arquitetura:
 
 ## Estado atual
 
-Os **Épicos 1–8** estão concluídos (Fundação → CI/CD e entrega acadêmica).
+Os **Épicos 1–8 e 10** estão concluídos (Fundação → CI/CD; Azure áudio real).
 
 A entrega inclui autenticação JWT, Paciente com Rótulo Sensível (reveal + SR),
 Caso multimodal (`vitals` / `video` / `audio` / `prescriptions`), Risco fundido e
 Alertas versionados, Justificativa template, SSE, UI a11y + tema, Lighthouse
 gate, publish GHCR em `main`, smoke Caso vitais, seed multimodal Compose,
-notebooks, relatório e roteiro de vídeo.
+notebooks, relatório e roteiro de vídeo, além de Azure Speech + Language
+**opt-in** (CI permanece com `AZURE_ENABLED=false`).
 
 **Épico 9 (Vitais ML)** — ADR + specs SDD versionadas; **implementação ainda
-não iniciada**. Rode o baseline atual para comparar depois:
+não iniciada** (fila: E11 YOLOv8 → E9). Baseline atual:
 [`specs/epic-09-vitais-ml/00-baseline-atual.md`](specs/epic-09-vitais-ml/00-baseline-atual.md)
 · [`docs/adr/0029-vitais-ml-hibrido.md`](docs/adr/0029-vitais-ml-hibrido.md).
-
-Fora do gate de CI (opcional / futuro): chamada Azure Speech real obrigatória
-(`AZURE_ENABLED=false` no CI/demo).
 
 ## O que já foi entregue
 
@@ -102,13 +100,14 @@ Fora do gate de CI (opcional / futuro): chamada Azure Speech real obrigatória
   [`data/fixtures/audio/`](data/fixtures/audio/).
 - `POST /cases/{id}/modalities/audio` (multipart + `Idempotency-Key`) → MinIO +
   job na fila RQ `default` (não `video`).
-- Analyzer local determinístico + cache SHA-256 + Azure Speech F0 **injetável**;
+- Analyzer local determinístico + cache SHA-256 + Azure Speech **injetável**;
   circuit breaker (ADR 0015) força `local` sem rede.
 - Badge `provider` (`azure` \| `local` \| `cache`) em `GET /cases/{id}`; áudio
   contribui ao Risco (fusão com vitais/vídeo; falha parcial intacta).
 - CI/demo: `AZURE_ENABLED=false` (sem Azure real obrigatório).
 - Spec:
   [`02-audio-azure.md`](specs/epic-06-modalidades/02-audio-azure.md).
+  Caminho real (Speech + Language + evidência): **Épico 10**.
 
 ### Modalidades — Prescrições + seed (Épico 6 / E6.3)
 
@@ -186,6 +185,24 @@ Fora do gate de CI (opcional / futuro): chamada Azure Speech real obrigatória
 - Roteiro de vídeo: [`docs/demo/roteiro-video.md`](docs/demo/roteiro-video.md).
 - Spec:
   [`02-seed-notebooks-relatorio.md`](specs/epic-08-cicd-entrega/02-seed-notebooks-relatorio.md).
+
+### Azure áudio real (Épico 10)
+
+- Azure Speech (Transcrição pt-BR) + Azure Language (Sentimento + key phrases),
+  opt-in com `AZURE_ENABLED=true` e credenciais; CI permanece offline.
+- Termos Críticos locais (lista PT-BR) e Sentimento fortemente negativo →
+  Anomalias da modalidade `audio`; score `max(acústico/stt, nlp)`.
+- Transcrição real persistida como Artefato de texto no MinIO; badge `provider`
+  = origem da **fala** (Language não redefine o CB de Speech).
+- Fixtures TTS: [`data/fixtures/audio/tts/`](data/fixtures/audio/tts/).
+- Evidência: `./scripts/gerar-evidencia-audio.sh` →
+  [`data/evidencia/audio/`](data/evidencia/audio/); orquestrador fino
+  `./scripts/gerar-evidencia-real.sh`.
+- Extras opcionais: `uv sync --extra azure-speech` e `--extra azure-language`.
+- ADRs [0030](docs/adr/0030-ia-real-opt-in-evidencia.md) /
+  [0031](docs/adr/0031-audio-nlp-modelagem.md).
+- Spec:
+  [`01-speech-language-evidencia.md`](specs/epic-10-azure-audio-real/01-speech-language-evidencia.md).
 
 ## Executar localmente
 
@@ -404,6 +421,18 @@ cd backend && uv run python ../scripts/seed_multimodal_demo.py --memory
 
 Não substitui o smoke de Caso vitais (`./scripts/smoke-caso-vitais.sh`).
 
+### Evidência Azure áudio (Épico 10)
+
+Com credenciais F0 locais no `.env` (`AZURE_ENABLED=true` + Speech/Language):
+
+```bash
+./scripts/gerar-evidencia-audio.sh --dry-run   # valida fixtures TTS sem rede
+./scripts/gerar-evidencia-audio.sh             # gera data/evidencia/audio/*.json
+./scripts/gerar-evidencia-real.sh              # orquestrador (E10: só áudio)
+```
+
+CI e demo padrão permanecem com `AZURE_ENABLED=false` (sem rede Azure).
+
 Rotas públicas nesta etapa: `GET /health`, `POST /auth/login`,
 `POST /auth/refresh`. Demais rotas exigem Bearer access token.
 
@@ -467,10 +496,14 @@ Trocar a chave sem recriptografar torna rótulos existentes ilegíveis.
 | `LIMEN_TIMEOUT_PRESCRIPTIONS_SECONDS` | Timeout job prescriptions (padrão `30`) |
 | `LIMEN_RETRY_MAX_ATTEMPTS` | Máx. tentativas para erro transitório (padrão `3`) |
 | `LIMEN_RETRY_BASE_DELAY_SECONDS` | Base do backoff exponencial (padrão `1`) |
-| `AZURE_ENABLED` | Habilita caminho Azure Speech (padrão `false`; CI/demo usa local/cache) |
-| `LIMEN_AZURE_CB_FAILURE_THRESHOLD` | Falhas consecutivas para abrir o CB (padrão `3`) |
+| `AZURE_ENABLED` | Master switch do caminho Azure Speech/Language (padrão `false`; CI/demo usa local/cache) |
+| `AZURE_SPEECH_KEY` | Chave Azure Speech (Transcrição); vazio → fallback `local` |
+| `AZURE_SPEECH_REGION` | Região Azure Speech (ex.: `brazilsouth`) |
+| `AZURE_LANGUAGE_KEY` | Chave Azure Language / Text Analytics (Sentimento + key phrases) |
+| `AZURE_LANGUAGE_ENDPOINT` | Endpoint Azure Language (URL do recurso) |
+| `LIMEN_AZURE_CB_FAILURE_THRESHOLD` | Falhas consecutivas do Speech para abrir o CB (padrão `3`) |
 | `LIMEN_AZURE_CB_OPEN_SECONDS` | Segundos com CB aberto forçando `local` (padrão `300`) |
-| `LIMEN_AZURE_CB_FORCE_OPEN` | Força CB aberto no stub (`true`/`1`) |
+| `LIMEN_AZURE_CB_FORCE_OPEN` | Força CB aberto (`true`/`1`) — só TDD/demo |
 | `LIMEN_POSE_BACKEND` | Análise Postural: `synthetic` (padrão) ou `mediapipe` |
 | `LIMEN_YOLO_BACKEND` | Detecção em Cena: `synthetic` (padrão) ou `ultralytics` |
 | `OUTBOX_RECONCILE_INTERVAL_SECONDS` | Intervalo do reconciler (padrão `5`) |
@@ -528,9 +561,11 @@ todo evento; **push** para `ghcr.io/<owner>/…` com tags `main-<sha>` e `latest
 | [`specs/epic-03-caso-fila/`](specs/epic-03-caso-fila/) | Vitais, outbox/RQ, Caso → Risco/Alerta |
 | [`specs/epic-04-shell-frontend/`](specs/epic-04-shell-frontend/) | Shell Next (scaffold → login → Pacientes) |
 | [`specs/epic-05-resiliencia/`](specs/epic-05-resiliencia/) | Falha parcial, filas, DLQ/retries |
-| [`specs/epic-06-modalidades/`](specs/epic-06-modalidades/) | Vídeo (E6.1); áudio Azure F0 (E6.2); prescriptions + seed (E6.3) |
+| [`specs/epic-06-modalidades/`](specs/epic-06-modalidades/) | Vídeo (E6.1); áudio seam (E6.2); prescriptions + seed (E6.3) |
 | [`specs/epic-07-alertas-polish/`](specs/epic-07-alertas-polish/) | Justificativa + SSE (E7.1); a11y/DLQ (E7.2); Lighthouse gate (E7.3) — concluído |
 | [`specs/epic-08-cicd-entrega/`](specs/epic-08-cicd-entrega/) | GHCR + smoke (E8.1); seed/notebooks/relatório/roteiro (E8.2) — concluído |
+| [`specs/epic-09-vitais-ml/`](specs/epic-09-vitais-ml/) | Vitais ML híbrido — SDD pronto; impl. pendente |
+| [`specs/epic-10-azure-audio-real/`](specs/epic-10-azure-audio-real/) | Azure Speech + Language + evidência (E10) — concluído |
 | [`docs/relatorio-fase4.md`](docs/relatorio-fase4.md) | Relatório acadêmico (capítulo datasets) |
 | [`docs/demo/roteiro-video.md`](docs/demo/roteiro-video.md) | Roteiro da demo em vídeo |
 | [`notebooks/`](notebooks/) | EDA e evidência multimodal |

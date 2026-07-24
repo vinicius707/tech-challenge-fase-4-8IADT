@@ -19,6 +19,14 @@ dependencies = [
     "uvicorn[standard]>=0.34,<1",
 ]
 
+[project.optional-dependencies]
+azure-speech = [
+    "azure-cognitiveservices-speech>=1.40,<2",
+]
+azure-language = [
+    "azure-ai-textanalytics>=5.3,<6",
+]
+
 [dependency-groups]
 dev = [
     "httpx>=0.28,<1",

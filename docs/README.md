@@ -49,11 +49,12 @@ Contratos Given/When/Then escritos **antes** da implementação TDD.
 | 9 Vitais ML | [`../specs/epic-09-vitais-ml/02-isolation-forest-runtime.md`](../specs/epic-09-vitais-ml/02-isolation-forest-runtime.md) | Spec (E9.2) — pendente impl. |
 | 9 Vitais ML | [`../specs/epic-09-vitais-ml/03-autoencoder-notebook.md`](../specs/epic-09-vitais-ml/03-autoencoder-notebook.md) | Spec (E9.3) — pendente impl. |
 | 9 Vitais ML | [`../specs/epic-09-vitais-ml/04-comparacao-relatorio-roteiro.md`](../specs/epic-09-vitais-ml/04-comparacao-relatorio-roteiro.md) | Spec (E9.4) — pendente impl. |
-| 10 Azure áudio real | [`../specs/epic-10-azure-audio-real/01-speech-language-evidencia.md`](../specs/epic-10-azure-audio-real/01-speech-language-evidencia.md) | Spec (E10) — pendente impl. |
+| 10 Azure áudio real | [`../specs/epic-10-azure-audio-real/01-speech-language-evidencia.md`](../specs/epic-10-azure-audio-real/01-speech-language-evidencia.md) | Concluída (E10) |
 
-> Fila de implementação das frentes de IA real: **Épico 10 → Épico 11 (YOLOv8,
-> ainda sem spec) → Épico 9**. O Épico 9 tem SDD pronto; **não está encerrado**
-> (código não iniciado). Épicos 6.x permanecem Concluída (seam/sintético).
+> Fila de implementação das frentes de IA real: **Épico 10 (feito) → Épico 11
+> (YOLOv8, ainda sem spec) → Épico 9**. O Épico 9 tem SDD pronto; **não está
+> encerrado** (código não iniciado). Épicos 6.x permanecem Concluída
+> (seam/sintético).
 
 ## ADRs
 
@@ -142,9 +143,9 @@ arquivo quando o plano supersede uma decisão anterior.
 | 6 | Modalidades PDF | Concluído (E6.1 vídeo; E6.2 áudio; E6.3 prescrições + seed) |
 | 7 | Alertas + polish UI | Concluído (E7.1–E7.3) |
 | 8 | CI/CD e entrega | Concluído (E8.1–E8.2) |
-| 9 | Vitais ML (portfólio) | Specs + ADR 0029; **impl. não iniciada** (3º na fila de IA real) |
-| 10 | Azure áudio real | Spec SDD; **impl. não iniciada** (1º na fila: Speech + Language + evidência) |
-| 11 | YOLOv8 vídeo real | Planejado (2º na fila); spec ainda não escrita |
+| 9 | Vitais ML (portfólio) | Specs + ADR 0029; **impl. não iniciada** (próximo após E11) |
+| 10 | Azure áudio real | Concluído (E10) — Speech + Language opt-in + evidência |
+| 11 | YOLOv8 vídeo real | Planejado (próximo na fila); spec ainda não escrita |
 
 ## Entrega acadêmica (E8.2)
 
@@ -163,3 +164,13 @@ arquivo quando o plano supersede uma decisão anterior.
 - Smoke local/CI: [`../scripts/smoke-caso-vitais.sh`](../scripts/smoke-caso-vitais.sh)
 - ADR: [0028](adr/0028-cicd-actions-ghcr.md)
 - Spec: [`../specs/epic-08-cicd-entrega/01-ghcr-smoke-vitais.md`](../specs/epic-08-cicd-entrega/01-ghcr-smoke-vitais.md)
+
+## Azure áudio real (E10)
+
+- Spec:
+  [`../specs/epic-10-azure-audio-real/01-speech-language-evidencia.md`](../specs/epic-10-azure-audio-real/01-speech-language-evidencia.md)
+- ADRs: [0030](adr/0030-ia-real-opt-in-evidencia.md),
+  [0031](adr/0031-audio-nlp-modelagem.md) (+ [0015](adr/0015-retry-circuit-breaker-azure.md))
+- Evidência: [`../data/evidencia/audio/`](../data/evidencia/audio/) via
+  `./scripts/gerar-evidencia-audio.sh`
+- Env: `AZURE_ENABLED` + `AZURE_SPEECH_*` + `AZURE_LANGUAGE_*` no `.env.example`

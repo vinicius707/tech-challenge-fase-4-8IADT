@@ -13,8 +13,8 @@ offline (`AZURE_ENABLED=false`).
 
 ## Status da entrega
 
-**T10.0 concluída** (spec SDD + índice/CONTEXT/E6.2 + ADRs 0030/0031).
-Implementação T10.1+ em sessões seguintes nesta branch.
+**Concluída** (T10.0–T10.6). Spec SDD, Speech + Language opt-in, Termos Críticos,
+Artefato de Transcrição, evidência TTS e fechamento de docs.
 
 Relação com E6.2: o Épico 6.2 permanece **Concluída** (seam: upload, fila,
 Provedor de Áudio, cache, CB, analyzer local, Azure **injetável**). Este épico
@@ -157,7 +157,7 @@ Sentimento, Termos Críticos, metadados) prontos para commit
 | T10.3 | Termos Críticos + score `max(acústico, nlp)` + Anomalias — **feita** |
 | T10.4 | Artefato de Transcrição no MinIO — **feita** |
 | T10.5 | Fixture TTS + `gerar-evidencia-audio.sh` + orquestrador fino — **feita** |
-| T10.6 | Fechamento docs (README, `.env.example`, índice) |
+| T10.6 | Fechamento docs (README, `.env.example`, índice) — **feita** |
 
 Branch sugerida: `feature/limen-epic-10-azure-audio-real` a partir de `main`.
 
@@ -168,5 +168,5 @@ Branch sugerida: `feature/limen-epic-10-azure-audio-real` a partir de `main`.
 - [x] Termos Críticos locais + Sentimento → Anomalias; score `max(...)`.
 - [x] Transcrição real como Artefato; badge = origem da fala.
 - [x] Evidência em `data/evidencia/audio/` via script versionado.
-- [ ] `.env.example` / README / índice atualizados.
-- [ ] Sem Azure obrigatório no CI; sem UI nova; sem Épicos 11/9.
+- [x] `.env.example` / README / índice atualizados.
+- [x] Sem Azure obrigatório no CI; sem UI nova; sem Épicos 11/9.

@@ -117,6 +117,12 @@ citação metodológica ([ADR 0029](adr/0029-vitais-ml-hibrido.md)).
 - Limite clínico: escores são demonstração acadêmica — **não** validação
   clínica nem dispositivo médico.
 
+Evidência visual (Épico 12 — prints locais, fora do CI):
+
+![Comparação limiares × IF × AE](notebooks/images/04-compare-vitals-ml.png)
+
+![Curva de loss do autoencoder](notebooks/images/05-autoencoder-loss.png)
+
 ## 6. Modalidades e fusão de Risco
 
 - **Vitais:** `VitalsAnomalyEngine` com backends `thresholds` /

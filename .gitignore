@@ -19,6 +19,9 @@ models/vitals/ae_export.pt
 
 .ipynb_checkpoints/
 
+# Venv local dos notebooks AE (Torch) — fora do backend/CI
+.venv-ml/
+
 # Clones de projetos de referência (somente local)
 refs/
 

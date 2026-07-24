@@ -49,6 +49,9 @@ falha parcial / reprocess (0013); filas separadas para vídeo (0020); SSE via
 | 6 | Modalidades | Vídeo (pose/YOLO), áudio Azure F0/local, prescriptions + seed |
 | 7 | Alertas + polish | Justificativa, SSE, a11y/tema, Lighthouse gate |
 | 8 | CI/CD + entrega | GHCR, smoke vitais, seed HTTP, notebooks, este relatório |
+| 9 | Vitais ML | ETL offline, Isolation Forest opt-in, AE PyTorch só evidência |
+| 10 | Áudio Azure real | Speech + Language opt-in; CI com `AZURE_ENABLED=false` |
+| 11 | Vídeo real | YOLOv8 + MediaPipe opt-in; CI sintético |
 
 ## 4. Privacidade e segurança
 
@@ -87,15 +90,37 @@ baixa Kaggle/PhysioNet/AudioSet.
 | Prescrições | Sintético Limen | `data/fixtures/prescriptions/` | Regras + desvio longitudinal |
 
 Notebooks de evidência: [`../notebooks/`](../notebooks/)
-(`eda_vitals_final.ipynb`, `evidencia_modalidades.ipynb`).
+(`eda_vitals_final.ipynb`, `evidencia_modalidades.ipynb`,
+`train_vitals_autoencoder.ipynb`, `compare_vitals_ml.ipynb`).
 
 Regeneração de fixtures: `scripts/calibrate_vitals.py`,
 `prepare_video_fixtures.py`, `prepare_audio_fixtures.py`,
 `prepare_prescription_fixtures.py`.
 
+ETL offline (Épico 9): `scripts/etl_vitals_datasets.py` lê brutos opcionais em
+`data/raw/` (Kaggle Human vital signs + Hospital Deterioration) e gera
+`data/processed/vitals/` — **sem** download no CI/API. PhysioNet permanece
+citação metodológica ([ADR 0029](adr/0029-vitais-ml-hibrido.md)).
+
+### 5.3 Vitais ML (Épico 9 / ADR 0029)
+
+| Trilho | Flag / artefato | Papel |
+| ------ | --------------- | ----- |
+| Limiares | `LIMEN_VITALS_BACKEND=thresholds` (default CI) | Comportamento histórico HR/SpO2 |
+| Isolation Forest | `isolation_forest` ou `hybrid` + `models/vitals/isolation_forest.joblib` | Runtime sklearn/joblib |
+| Autoencoder PyTorch | notebook `train_vitals_autoencoder.ipynb` | **Só evidência** — **não** entra no worker/API |
+
+- `hybrid` = limiares **OU** IF (mais sensível; recomendado na demo local).
+- CI/smoke continuam em `thresholds` e **não** baixam datasets.
+- Comparação quantitativa (precision/recall/agreement) nas fixtures:
+  [`../notebooks/compare_vitals_ml.ipynb`](../notebooks/compare_vitals_ml.ipynb).
+- Limite clínico: escores são demonstração acadêmica — **não** validação
+  clínica nem dispositivo médico.
+
 ## 6. Modalidades e fusão de Risco
 
-- **Vitais:** AnomalyEngine em CSV sintético → escore parcial.
+- **Vitais:** `VitalsAnomalyEngine` com backends `thresholds` /
+  `isolation_forest` / `hybrid` (ADR 0029); AE só no notebook.
 - **Vídeo:** Análise Postural (MediaPipe/synthetic) + Detecção em Cena
   (YOLO/synthetic); fila `video`.
 - **Áudio:** Provedor Azure F0 com CB/fallback local; cache; `AZURE_ENABLED=false`

@@ -10,8 +10,9 @@ autoencoder. Este documento **não** entrega código novo.
 
 ## Status
 
-**Documentação + ETL (T9.1)** — Isolation Forest / AE ainda **não** no runtime.
-Use este baseline ao comparar limiares vs backends ML nas tarefas T9.2+.
+**Épico 9 concluído (T9.0–T9.4).** Este arquivo congela o **antes** (só limiares,
+sem sklearn no runtime histórico). O **depois** está no relatório §5.3,
+`compare_vitals_ml.ipynb` e ADR 0029.
 
 ## Tarefas planejadas (uma por commit, sessões futuras)
 
@@ -21,7 +22,7 @@ Use este baseline ao comparar limiares vs backends ML nas tarefas T9.2+.
 | T9.1 | `01` | ETL offline — **feita** |
 | T9.2 | `02` | IF + flag no runtime — **feita** |
 | T9.3 | `03` | Notebook AE PyTorch + export — **feita** |
-| T9.4 | `04` | Comparação + relatório + roteiro |
+| T9.4 | `04` | Comparação + relatório + roteiro — **feita** |
 
 Branch sugerida: `feature/limen-epic-09-vitais-ml` a partir de `main`.
 

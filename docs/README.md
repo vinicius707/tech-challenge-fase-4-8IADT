@@ -44,17 +44,16 @@ Contratos Given/When/Then escritos **antes** da implementação TDD.
 | 7 Alertas + polish | [`../specs/epic-07-alertas-polish/03-lighthouse-gate.md`](../specs/epic-07-alertas-polish/03-lighthouse-gate.md) | Concluída (E7.3) |
 | 8 CI/CD e entrega | [`../specs/epic-08-cicd-entrega/01-ghcr-smoke-vitais.md`](../specs/epic-08-cicd-entrega/01-ghcr-smoke-vitais.md) | Concluída (E8.1) |
 | 8 CI/CD e entrega | [`../specs/epic-08-cicd-entrega/02-seed-notebooks-relatorio.md`](../specs/epic-08-cicd-entrega/02-seed-notebooks-relatorio.md) | Concluída (E8.2) |
-| 9 Vitais ML | [`../specs/epic-09-vitais-ml/00-baseline-atual.md`](../specs/epic-09-vitais-ml/00-baseline-atual.md) | Baseline (só docs) |
+| 9 Vitais ML | [`../specs/epic-09-vitais-ml/00-baseline-atual.md`](../specs/epic-09-vitais-ml/00-baseline-atual.md) | Baseline pré-ML (referência) |
 | 9 Vitais ML | [`../specs/epic-09-vitais-ml/01-etl-datasets-vitais.md`](../specs/epic-09-vitais-ml/01-etl-datasets-vitais.md) | Concluída (E9.1 ETL) |
 | 9 Vitais ML | [`../specs/epic-09-vitais-ml/02-isolation-forest-runtime.md`](../specs/epic-09-vitais-ml/02-isolation-forest-runtime.md) | Concluída (E9.2 IF runtime) |
 | 9 Vitais ML | [`../specs/epic-09-vitais-ml/03-autoencoder-notebook.md`](../specs/epic-09-vitais-ml/03-autoencoder-notebook.md) | Concluída (E9.3 AE notebook) |
-| 9 Vitais ML | [`../specs/epic-09-vitais-ml/04-comparacao-relatorio-roteiro.md`](../specs/epic-09-vitais-ml/04-comparacao-relatorio-roteiro.md) | Spec (E9.4) — pendente impl. |
+| 9 Vitais ML | [`../specs/epic-09-vitais-ml/04-comparacao-relatorio-roteiro.md`](../specs/epic-09-vitais-ml/04-comparacao-relatorio-roteiro.md) | Concluída (E9.4 comparação/docs) |
 | 10 Azure áudio real | [`../specs/epic-10-azure-audio-real/01-speech-language-evidencia.md`](../specs/epic-10-azure-audio-real/01-speech-language-evidencia.md) | Concluída (E10) |
 | 11 Vídeo real (YOLO + Pose) | [`../specs/epic-11-yolo-video-real/01-ultralytics-mediapipe-evidencia.md`](../specs/epic-11-yolo-video-real/01-ultralytics-mediapipe-evidencia.md) | Concluída (E11) |
 
-> Fila de implementação das frentes de IA real: **Épico 10 (feito) → Épico 11
-> (feito) → Épico 9**. O Épico 9 tem SDD pronto; **não está encerrado** (código
-> não iniciado). Épicos 6.x permanecem Concluída (seam/sintético).
+> Frentes de IA real: **Épico 10 (feito) → Épico 11 (feito) → Épico 9 (feito)**.
+> Épicos 6.x permanecem Concluída no seam sintético; caminhos reais são opt-in.
 
 ## ADRs
 
@@ -143,7 +142,7 @@ arquivo quando o plano supersede uma decisão anterior.
 | 6 | Modalidades PDF | Concluído (E6.1 vídeo; E6.2 áudio; E6.3 prescrições + seed) |
 | 7 | Alertas + polish UI | Concluído (E7.1–E7.3) |
 | 8 | CI/CD e entrega | Concluído (E8.1–E8.2) |
-| 9 | Vitais ML (portfólio) | Specs + ADR 0029; **impl. não iniciada** (próximo na fila) |
+| 9 | Vitais ML (portfólio) | Concluído (E9.1–E9.4) — ETL, IF, AE evidência, comparação |
 | 10 | Azure áudio real | Concluído (E10) — Speech + Language opt-in + evidência |
 | 11 | Vídeo real (YOLO + Pose) | Concluído (E11) — Ultralytics + MediaPipe + evidência |
 

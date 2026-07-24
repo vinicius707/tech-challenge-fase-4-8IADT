@@ -12,21 +12,22 @@ Glossário de domínio: [`CONTEXT.md`](CONTEXT.md). Decisão de arquitetura:
 
 ## Estado atual
 
-Os **Épicos 1–8, 10 e 11** estão concluídos (Fundação → CI/CD; Azure áudio real;
-vídeo real YOLO + MediaPipe).
+Os **Épicos 1–11** estão concluídos (Fundação → CI/CD; Vitais ML; Azure áudio
+real; vídeo real YOLO + MediaPipe).
 
 A entrega inclui autenticação JWT, Paciente com Rótulo Sensível (reveal + SR),
 Caso multimodal (`vitals` / `video` / `audio` / `prescriptions`), Risco fundido e
 Alertas versionados, Justificativa template, SSE, UI a11y + tema, Lighthouse
 gate, publish GHCR em `main`, smoke Caso vitais, seed multimodal Compose,
-notebooks, relatório e roteiro de vídeo, Azure Speech + Language **opt-in** e
-vídeo real **opt-in** (CI permanece sintético: `AZURE_ENABLED=false`,
+notebooks, relatório e roteiro de vídeo, Vitais ML (`LIMEN_VITALS_BACKEND` +
+Isolation Forest; AE só evidência), Azure Speech + Language **opt-in** e
+vídeo real **opt-in** (CI permanece magro: `thresholds` / `AZURE_ENABLED=false` /
 `LIMEN_*_BACKEND=synthetic`).
 
-**Épico 9 (Vitais ML)** — ADR + specs SDD versionadas; **implementação ainda
-não iniciada** (próximo na fila de IA real). Baseline atual:
-[`specs/epic-09-vitais-ml/00-baseline-atual.md`](specs/epic-09-vitais-ml/00-baseline-atual.md)
-· [`docs/adr/0029-vitais-ml-hibrido.md`](docs/adr/0029-vitais-ml-hibrido.md).
+**Épico 9 (Vitais ML)** — ETL offline, IF no runtime, AE no notebook,
+comparação + relatório: specs em
+[`specs/epic-09-vitais-ml/`](specs/epic-09-vitais-ml/) ·
+[`docs/adr/0029-vitais-ml-hibrido.md`](docs/adr/0029-vitais-ml-hibrido.md).
 
 ## O que já foi entregue
 
@@ -597,7 +598,7 @@ todo evento; **push** para `ghcr.io/<owner>/…` com tags `main-<sha>` e `latest
 | [`specs/epic-06-modalidades/`](specs/epic-06-modalidades/) | Vídeo (E6.1); áudio seam (E6.2); prescriptions + seed (E6.3) |
 | [`specs/epic-07-alertas-polish/`](specs/epic-07-alertas-polish/) | Justificativa + SSE (E7.1); a11y/DLQ (E7.2); Lighthouse gate (E7.3) — concluído |
 | [`specs/epic-08-cicd-entrega/`](specs/epic-08-cicd-entrega/) | GHCR + smoke (E8.1); seed/notebooks/relatório/roteiro (E8.2) — concluído |
-| [`specs/epic-09-vitais-ml/`](specs/epic-09-vitais-ml/) | Vitais ML híbrido — SDD pronto; impl. pendente |
+| [`specs/epic-09-vitais-ml/`](specs/epic-09-vitais-ml/) | Vitais ML híbrido — ETL, IF runtime, AE evidência, comparação |
 | [`specs/epic-10-azure-audio-real/`](specs/epic-10-azure-audio-real/) | Azure Speech + Language + evidência (E10) — concluído |
 | [`specs/epic-11-yolo-video-real/`](specs/epic-11-yolo-video-real/) | YOLO Ultralytics + MediaPipe + evidência (E11) — concluído |
 | [`docs/relatorio-fase4.md`](docs/relatorio-fase4.md) | Relatório acadêmico (capítulo datasets) |

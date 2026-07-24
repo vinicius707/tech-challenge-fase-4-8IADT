@@ -11,8 +11,8 @@ UI além do necessário para contar a história.
 
 ## Status da entrega
 
-**Pendente** — spec apenas (SDD). Depende de E9.1–E9.3 entregues (ou stubs
-mínimos acordados). Esta etapa **não** implementa o motor; consolida evidência.
+**Concluída (T9.4)** — notebook de comparação, relatório §5.3, roteiro ~90%
+app / ~10% notebook, índices atualizados.
 
 ## Escopo
 
@@ -64,8 +64,8 @@ runtime.
 
 ## Critérios de pronto (DoD E9.4)
 
-- [ ] Spec SDD aprovada (esta).
-- [ ] Comparação limiares/IF/AE versionada (notebook).
-- [ ] Relatório e roteiro emendados.
-- [ ] Índices README atualizados.
-- [ ] Baseline (`00`) ainda descreve o “antes”; pós-E9 documenta o “depois”.
+- [x] Spec SDD aprovada (esta).
+- [x] Comparação limiares/IF/AE versionada (notebook).
+- [x] Relatório e roteiro emendados.
+- [x] Índices README atualizados.
+- [x] Baseline (`00`) ainda descreve o “antes”; pós-E9 documenta o “depois”.

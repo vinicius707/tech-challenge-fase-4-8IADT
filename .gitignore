@@ -5,8 +5,13 @@
 .DS_Store
 
 # Datasets brutos (calibração offline) — fixtures versionadas entram no Git
-data/raw/
+data/raw/*
+!data/raw/README.md
 data/downloads/
+
+# ETL Épico 9 — processados grandes gitignored; README versionado
+data/processed/vitals/*
+!data/processed/vitals/README.md
 
 .ipynb_checkpoints/
 

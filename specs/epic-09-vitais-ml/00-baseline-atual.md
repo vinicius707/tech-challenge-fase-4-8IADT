@@ -10,16 +10,15 @@ autoencoder. Este documento **não** entrega código novo.
 
 ## Status
 
-**Documentação apenas** — implementação do Épico 9 **não iniciada**.
-Use este baseline ao rodar a stack agora; depois das specs `01`–`04`, compare
-comportamento, deps e narrativa de demo.
+**Documentação + ETL (T9.1)** — Isolation Forest / AE ainda **não** no runtime.
+Use este baseline ao comparar limiares vs backends ML nas tarefas T9.2+.
 
 ## Tarefas planejadas (uma por commit, sessões futuras)
 
 | Tarefa | Spec | Conteúdo |
 | ------ | ---- | -------- |
-| T9.0 | esta | Congelar baseline + ADR/specs (docs only) |
-| T9.1 | `01` | ETL offline |
+| T9.0 | esta | Congelar baseline + ADR/specs (docs only) — **feita** |
+| T9.1 | `01` | ETL offline — **feita** |
 | T9.2 | `02` | IF + flag no runtime |
 | T9.3 | `03` | Notebook AE PyTorch + export |
 | T9.4 | `04` | Comparação + relatório + roteiro |

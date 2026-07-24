@@ -11,8 +11,8 @@ API.
 
 ## Status da entrega
 
-**Pendente** — spec apenas (SDD). Implementação em tarefa futura (T9.1+), após
-o baseline em [`00-baseline-atual.md`](00-baseline-atual.md).
+**Concluída (T9.1)** — script ETL + READMEs; fixtures sintéticas intactas;
+sem download no CI. Treino IF / AE ficam nas tarefas seguintes.
 
 ## Escopo
 
@@ -71,8 +71,8 @@ models/vitals/                 # reservado ao IF (spec 02) — não treinar aqui
 
 ## Critérios de pronto (DoD E9.1)
 
-- [ ] Spec SDD aprovada (esta).
-- [ ] Script ETL + README de `data/raw`/`processed` commitados.
-- [ ] Fixtures sintéticas e testes atuais intactos.
-- [ ] Nenhuma dependência nova obrigatória no `Dockerfile` do backend.
-- [ ] ADR 0029 referenciada; sem download ao vivo na API.
+- [x] Spec SDD aprovada (esta).
+- [x] Script ETL + README de `data/raw`/`processed` commitados.
+- [x] Fixtures sintéticas e testes atuais intactos.
+- [x] Nenhuma dependência nova obrigatória no `Dockerfile` do backend.
+- [x] ADR 0029 referenciada; sem download ao vivo na API.

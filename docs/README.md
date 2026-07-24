@@ -51,9 +51,11 @@ Contratos Given/When/Then escritos **antes** da implementação TDD.
 | 9 Vitais ML | [`../specs/epic-09-vitais-ml/04-comparacao-relatorio-roteiro.md`](../specs/epic-09-vitais-ml/04-comparacao-relatorio-roteiro.md) | Concluída (E9.4 comparação/docs) |
 | 10 Azure áudio real | [`../specs/epic-10-azure-audio-real/01-speech-language-evidencia.md`](../specs/epic-10-azure-audio-real/01-speech-language-evidencia.md) | Concluída (E10) |
 | 11 Vídeo real (YOLO + Pose) | [`../specs/epic-11-yolo-video-real/01-ultralytics-mediapipe-evidencia.md`](../specs/epic-11-yolo-video-real/01-ultralytics-mediapipe-evidencia.md) | Concluída (E11) |
+| 12 Notebooks evidência | [`../specs/epic-12-notebooks-evidencia/01-execucao-prints-docs.md`](../specs/epic-12-notebooks-evidencia/01-execucao-prints-docs.md) | Spec (E12) — pendente (prints + docs) |
 
 > Frentes de IA real: **Épico 10 (feito) → Épico 11 (feito) → Épico 9 (feito)**.
 > Épicos 6.x permanecem Concluída no seam sintético; caminhos reais são opt-in.
+> Épico 12 = evidência visual dos notebooks (fora do CI).
 
 ## ADRs
 
@@ -145,6 +147,7 @@ arquivo quando o plano supersede uma decisão anterior.
 | 9 | Vitais ML (portfólio) | Concluído (E9.1–E9.4) — ETL, IF, AE evidência, comparação |
 | 10 | Azure áudio real | Concluído (E10) — Speech + Language opt-in + evidência |
 | 11 | Vídeo real (YOLO + Pose) | Concluído (E11) — Ultralytics + MediaPipe + evidência |
+| 12 | Notebooks evidência visual | Spec pronta; **impl. pendente** (execução local + prints) |
 
 ## Entrega acadêmica (E8.2)
 

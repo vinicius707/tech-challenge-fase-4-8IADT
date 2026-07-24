@@ -1,9 +1,8 @@
-"""Detecção em Cena (YOLOv8 COCO + heurísticas) — ADR 0007 / Épico 6 T6.4.
+"""Detecção em Cena (YOLOv8 COCO + heurísticas) — ADR 0007 / Épico 6 + 11.
 
 Interface alinhada a YOLOv8 pré-treinado COCO; o backend padrão para
 fixtures/CI é sintético (cores/geometria das AVIs versionadas). Ultralytics
-real pode ser ligado depois via `LIMEN_YOLO_BACKEND=ultralytics` quando a
-lib estiver disponível.
+real: `LIMEN_YOLO_BACKEND=ultralytics` com detector injetável (T11.1).
 
 Heurísticas documentadas (demo de visão computacional — sem claim clínico):
 
@@ -16,19 +15,33 @@ Proibido: sangramento, diagnóstico cirúrgico, fine-tune clínico.
 
 from __future__ import annotations
 
-import os
 import struct
 import zlib
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Literal
 
 from app.cases.pose_engine import AnnotatedFrame
 from app.cases.video_avi import AviFrame, read_avi_bgr_frames
 from app.cases.vitals_engine import ModalityRisk, VitalsAnomaly, risk_level_from_score
+from app.cases.yolo_detector import (
+    create_ultralytics_frame_detector,
+    yolo_backend_from_environment,
+)
 
 # Classes COCO usadas nesta demo (subconjunto genérico — sem rótulo clínico).
 COCO_PERSON = "person"
 COCO_GENERIC_OBJECT = "bottle"  # proxy de objeto genérico na fixture
+
+
+@dataclass(frozen=True)
+class CocoDetection:
+    label: str
+    box: tuple[int, int, int, int]
+    confidence: float = 1.0
+
+
+FrameDetector = Callable[[AviFrame], list[CocoDetection]]
 
 
 @dataclass(frozen=True)
@@ -142,17 +155,50 @@ def _annotate_detections(
     return _png_rgb(w, h, bytes(rgb))
 
 
+def _synthetic_detect(frame: AviFrame) -> list[CocoDetection]:
+    out: list[CocoDetection] = []
+    person_box = _bbox_from_mask(frame, match=_is_person_pixel)
+    object_box = _bbox_from_mask(frame, match=_is_object_pixel)
+    if person_box is not None:
+        out.append(CocoDetection(label=COCO_PERSON, box=person_box))
+    if object_box is not None:
+        out.append(CocoDetection(label=COCO_GENERIC_OBJECT, box=object_box))
+    return out
+
+
+def _pick_box(
+    detections: list[CocoDetection], label: str
+) -> tuple[int, int, int, int] | None:
+    for det in detections:
+        if det.label == label:
+            return det.box
+    return None
+
+
 class SceneDetectionEngine:
     """Detecção em Cena no espírito YOLOv8 COCO + regras heurísticas."""
 
-    def analyze_avi(self, content: bytes) -> SceneDetectionResult:
-        backend = os.getenv("LIMEN_YOLO_BACKEND", "synthetic").strip().lower()
-        if backend == "ultralytics":
-            raise RuntimeError(
-                "LIMEN_YOLO_BACKEND=ultralytics exige ultralytics instalado "
-                "(fora do escopo fechado T6.4 / fixtures sintéticas)"
-            )
+    def __init__(self, detector: FrameDetector | None = None) -> None:
+        self._detector = detector
 
+    def analyze_avi(self, content: bytes) -> SceneDetectionResult:
+        backend = yolo_backend_from_environment()
+        if backend == "ultralytics":
+            detector = self._detector or create_ultralytics_frame_detector()
+            return self._analyze_with_detector(
+                content, detector=detector, backend="ultralytics"
+            )
+        return self._analyze_with_detector(
+            content, detector=_synthetic_detect, backend="synthetic"
+        )
+
+    def _analyze_with_detector(
+        self,
+        content: bytes,
+        *,
+        detector: FrameDetector,
+        backend: str,
+    ) -> SceneDetectionResult:
         frames = read_avi_bgr_frames(content)
         person_hits = 0
         object_hits = 0
@@ -160,14 +206,15 @@ class SceneDetectionEngine:
         classes_seen: set[str] = set()
 
         for frame in frames:
-            person_box = _bbox_from_mask(frame, match=_is_person_pixel)
-            object_box = _bbox_from_mask(frame, match=_is_object_pixel)
+            detections = detector(frame)
+            person_box = _pick_box(detections, COCO_PERSON)
+            object_box = _pick_box(detections, COCO_GENERIC_OBJECT)
+            for det in detections:
+                classes_seen.add(det.label)
             if person_box is not None:
                 person_hits += 1
-                classes_seen.add(COCO_PERSON)
             if object_box is not None:
                 object_hits += 1
-                classes_seen.add(COCO_GENERIC_OBJECT)
 
             if person_box is not None or object_box is not None:
                 if (
@@ -243,5 +290,5 @@ class SceneDetectionEngine:
             coco_classes=tuple(sorted(classes_seen)),
             heuristic_flags=flags,
             annotated_frames=ordered,
-            backend="synthetic",
+            backend=backend,
         )

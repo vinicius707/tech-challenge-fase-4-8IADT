@@ -75,11 +75,9 @@ reais (clips “reais” só na evidência local, se usados).
 | `LIMEN_YOLO_BACKEND` | `synthetic` \| `ultralytics` (Detecção em Cena) | `synthetic` |
 | `LIMEN_POSE_BACKEND` | `synthetic` \| `mediapipe` (Análise Postural) | `synthetic` |
 
-Sem o extra instalado / pesos indisponíveis com backend real → falha da
-modalidade **ou** fallback documentado para `synthetic` (decidir na T11.1/T11.2
-e registrar no README; preferência de rascunho: **falha explícita da análise
-daquele kind** com mensagem clara, sem inventar detecções — alinhado ao
-`RuntimeError` atual dos engines).
+Sem o extra instalado com backend real → **falha explícita** (`RuntimeError`)
+daquele kind, com mensagem clara, sem inventar detecções (fechado na T11.1
+para YOLO; T11.2 para MediaPipe).
 
 ## Regras de domínio (rascunho — fechar no grilling se necessário)
 
@@ -148,7 +146,7 @@ vídeo (E11).
 | Tarefa | Conteúdo |
 | ------ | -------- |
 | T11.0 | Esta spec + notas de índice / ponte E6.1 (docs) — **feita** |
-| T11.1 | Env + YOLOv8 Ultralytics injetável + TDD (scene) |
+| T11.1 | Env + YOLOv8 Ultralytics injetável + TDD (scene) — **feita** |
 | T11.2 | MediaPipe Pose injetável + TDD (pose) |
 | T11.3 | Wiring worker-video / extras Compose + degradação independente |
 | T11.4 | `gerar-evidencia-video.sh` + orquestrador real (E10+E11) |

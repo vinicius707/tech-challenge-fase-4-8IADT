@@ -26,6 +26,9 @@ azure-speech = [
 azure-language = [
     "azure-ai-textanalytics>=5.3,<6",
 ]
+ultralytics = [
+    "ultralytics>=8.3,<9",
+]
 
 [dependency-groups]
 dev = [

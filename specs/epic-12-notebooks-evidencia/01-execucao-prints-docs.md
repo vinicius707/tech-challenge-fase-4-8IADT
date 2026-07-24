@@ -11,7 +11,8 @@ avaliação.
 
 ## Status da entrega
 
-**Spec pronta (T12.0)** — execução dos notebooks e prints nas tarefas T12.1–T12.2.
+**Concluída (T12.2)** — notebooks executados, prints versionados e docs/índices
+atualizados (fora do CI).
 
 ## Escopo
 
@@ -104,8 +105,8 @@ Branch: `feature/limen-epic-12-notebooks-evidencia` a partir de `main`.
 ## Critérios de pronto (DoD E12)
 
 - [x] Spec SDD aprovada (esta).
-- [ ] Cinco notebooks executados com sucesso (evidência local do autor).
-- [ ] Cinco PNGs em `docs/notebooks/images/` commitados.
-- [ ] `notebooks/README.md` + `docs/README.md` (+ §5.3) atualizados.
-- [ ] Testes de presença verdes; CI sem Jupyter/Torch.
-- [ ] Sem alteração de runtime ML; sem download de dataset no CI.
+- [x] Cinco notebooks executados com sucesso (evidência local do autor).
+- [x] Cinco PNGs em `docs/notebooks/images/` commitados.
+- [x] `notebooks/README.md` + `docs/README.md` (+ §5.3) atualizados.
+- [x] Testes de presença verdes; CI sem Jupyter/Torch.
+- [x] Sem alteração de runtime ML; sem download de dataset no CI.

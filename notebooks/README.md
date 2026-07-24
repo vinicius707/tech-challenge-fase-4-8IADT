@@ -35,3 +35,28 @@ basta para limiares + IF; Torch é opcional para a linha do AE.
 O CI **não** instala `requirements-ml.txt` nem executa notebooks AE/comparação
 ([ADR 0029](../docs/adr/0029-vitais-ml-hibrido.md)). Export opcional:
 `models/vitals/ae_export.pt` (gitignored).
+
+## Evidência visual
+
+Prints leves da execução local (Épico 12) — **não** gerados no CI. Artefatos em
+[`../docs/notebooks/images/`](../docs/notebooks/images/).
+
+- EDA inicial — `01-eda-vitals-inicial.png`
+
+  ![EDA inicial](../docs/notebooks/images/01-eda-vitals-inicial.png)
+
+- EDA final — `02-eda-vitals-final.png`
+
+  ![EDA final](../docs/notebooks/images/02-eda-vitals-final.png)
+
+- Modalidades — `03-evidencia-modalidades.png`
+
+  ![Modalidades](../docs/notebooks/images/03-evidencia-modalidades.png)
+
+- Comparação ML — `04-compare-vitals-ml.png`
+
+  ![Comparação ML](../docs/notebooks/images/04-compare-vitals-ml.png)
+
+- Curva AE — `05-autoencoder-loss.png`
+
+  ![Curva AE](../docs/notebooks/images/05-autoencoder-loss.png)

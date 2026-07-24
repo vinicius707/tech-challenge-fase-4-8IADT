@@ -1,22 +1,28 @@
-"""Análise Postural (Pose) — ADR 0007 / Épico 6 T6.3.
+"""Análise Postural (Pose) — ADR 0007 / Épico 6 + 11.
 
 Interface alinhada a MediaPipe Pose; o backend padrão para fixtures/CI é
-sintético (silhueta das AVIs versionadas). MediaPipe real pode ser ligado
-depois via `LIMEN_POSE_BACKEND=mediapipe` quando a lib estiver disponível.
+sintético (silhueta das AVIs versionadas). MediaPipe real:
+`LIMEN_POSE_BACKEND=mediapipe` com estimador injetável (T11.2).
 """
 
 from __future__ import annotations
 
-import os
 import struct
 import zlib
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Literal
 
+from app.cases.pose_estimator import (
+    create_mediapipe_pose_estimator,
+    pose_backend_from_environment,
+)
 from app.cases.video_avi import AviFrame, read_avi_bgr_frames
 from app.cases.vitals_engine import ModalityRisk, VitalsAnomaly, risk_level_from_score
 
 VideoAnalysisKind = Literal["pose", "scene"]
+
+CentroidEstimator = Callable[[AviFrame], tuple[float, float] | None]
 
 
 @dataclass(frozen=True)
@@ -109,20 +115,32 @@ def _annotate_frame(frame: AviFrame, cx: float, cy: float) -> bytes:
 class PosturePoseEngine:
     """Análise Postural no espírito MediaPipe Pose (ângulos/estabilidade)."""
 
-    def analyze_avi(self, content: bytes) -> PostureAnalysisResult:
-        backend = os.getenv("LIMEN_POSE_BACKEND", "synthetic").strip().lower()
-        if backend == "mediapipe":
-            # Pronto para o plug-in real; fixtures CI usam synthetic.
-            raise RuntimeError(
-                "LIMEN_POSE_BACKEND=mediapipe exige MediaPipe instalado "
-                "(fora do escopo fechado T6.3 / fixtures sintéticas)"
-            )
+    def __init__(self, estimator: CentroidEstimator | None = None) -> None:
+        self._estimator = estimator
 
+    def analyze_avi(self, content: bytes) -> PostureAnalysisResult:
+        backend = pose_backend_from_environment()
+        if backend == "mediapipe":
+            estimator = self._estimator or create_mediapipe_pose_estimator()
+            return self._analyze_with_estimator(
+                content, estimator=estimator, backend="mediapipe"
+            )
+        return self._analyze_with_estimator(
+            content, estimator=_silhouette_centroid, backend="synthetic"
+        )
+
+    def _analyze_with_estimator(
+        self,
+        content: bytes,
+        *,
+        estimator: CentroidEstimator,
+        backend: str,
+    ) -> PostureAnalysisResult:
         frames = read_avi_bgr_frames(content)
         centroids: list[tuple[float, float]] = []
         annotated: list[AnnotatedFrame] = []
         for frame in frames:
-            c = _silhouette_centroid(frame)
+            c = estimator(frame)
             if c is None:
                 continue
             centroids.append(c)
@@ -156,7 +174,7 @@ class PosturePoseEngine:
                 risk=risk,
                 stability_score=0.0,
                 annotated_frames=(),
-                backend="synthetic",
+                backend=backend,
             )
 
         xs = [c[0] for c in centroids]
@@ -217,5 +235,5 @@ class PosturePoseEngine:
             risk=risk,
             stability_score=stability,
             annotated_frames=ordered,
-            backend="synthetic",
+            backend=backend,
         )

@@ -485,18 +485,23 @@ def _process_video_modality(
         )
 
     kind = resolve_video_analysis(artifact.object_key)
-    if kind == "pose":
-        analysis = PosturePoseEngine().analyze_avi(content)
-        frame_prefix = "pose"
-        annotated = analysis.annotated_frames
-    elif kind == "scene":
-        analysis = SceneDetectionEngine().analyze_avi(content)
-        frame_prefix = "scene"
-        annotated = analysis.annotated_frames
-    else:
-        raise PermanentProcessingError(
-            f"análise de vídeo não suportada: {kind}"
-        )
+    try:
+        if kind == "pose":
+            analysis = PosturePoseEngine().analyze_avi(content)
+            frame_prefix = "pose"
+            annotated = analysis.annotated_frames
+        elif kind == "scene":
+            analysis = SceneDetectionEngine().analyze_avi(content)
+            frame_prefix = "scene"
+            annotated = analysis.annotated_frames
+        else:
+            raise PermanentProcessingError(
+                f"análise de vídeo não suportada: {kind}"
+            )
+    except RuntimeError as exc:
+        # Backend real ausente/quebrado (YOLO/MediaPipe) → falha permanente
+        # da modalidade video; o outro kind/backend permanece independente.
+        raise PermanentProcessingError(str(exc)) from exc
 
     frame_artifacts: list[ArtifactRecord] = []
     for frame in annotated:

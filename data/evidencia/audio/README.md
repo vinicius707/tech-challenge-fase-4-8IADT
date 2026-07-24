@@ -19,6 +19,6 @@ Artefatos JSON gerados por `./scripts/gerar-evidencia-audio.sh` (ADR 0030).
 ./scripts/gerar-evidencia-audio.sh
 ```
 
-Orquestrador (E10 só áudio): `./scripts/gerar-evidencia-real.sh`.
+Orquestrador (E10 áudio + E11 vídeo): `./scripts/gerar-evidencia-real.sh`.
 
 Commite a saída **live** antes da entrega à banca. Dry-run marca `"mode": "dry-run"`.

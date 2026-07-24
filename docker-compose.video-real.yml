@@ -1,0 +1,20 @@
+# Override opcional: worker-video com extras Ultralytics + MediaPipe (Épico 11).
+# CI/demo padrão permanece sintético (docker-compose.yml sem este arquivo).
+#
+# Uso:
+#   docker compose -f docker-compose.yml -f docker-compose.video-real.yml \
+#     build worker-video
+#   docker compose -f docker-compose.yml -f docker-compose.video-real.yml \
+#     up -d worker-video
+#
+# A imagem da API (`backend`) continua leve (sem Torch/MediaPipe).
+
+services:
+  worker-video:
+    build:
+      context: ./backend
+      args:
+        LIMEN_UV_EXTRAS: "ultralytics mediapipe"
+    environment:
+      LIMEN_YOLO_BACKEND: ${LIMEN_YOLO_BACKEND:-ultralytics}
+      LIMEN_POSE_BACKEND: ${LIMEN_POSE_BACKEND:-mediapipe}

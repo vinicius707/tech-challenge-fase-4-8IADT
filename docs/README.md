@@ -36,7 +36,7 @@ Contratos Given/When/Then escritos **antes** da implementação TDD.
 | 4 Shell Frontend | [`../specs/epic-04-shell-frontend/04-fechamento-docs.md`](../specs/epic-04-shell-frontend/04-fechamento-docs.md) | Concluída |
 | 5 Resiliência | [`../specs/epic-05-resiliencia/01-falha-parcial-reprocess.md`](../specs/epic-05-resiliencia/01-falha-parcial-reprocess.md) | Concluída |
 | 5 Resiliência | [`../specs/epic-05-resiliencia/02-filas-dlq-retries.md`](../specs/epic-05-resiliencia/02-filas-dlq-retries.md) | Concluída |
-| 6 Modalidades | [`../specs/epic-06-modalidades/01-video-pose-yolo.md`](../specs/epic-06-modalidades/01-video-pose-yolo.md) | Concluída (E6.1) |
+| 6 Modalidades | [`../specs/epic-06-modalidades/01-video-pose-yolo.md`](../specs/epic-06-modalidades/01-video-pose-yolo.md) | Concluída (E6.1 seam); real → Épico 11 |
 | 6 Modalidades | [`../specs/epic-06-modalidades/02-audio-azure.md`](../specs/epic-06-modalidades/02-audio-azure.md) | Concluída (E6.2 seam); real → Épico 10 |
 | 6 Modalidades | [`../specs/epic-06-modalidades/03-prescricoes-seed.md`](../specs/epic-06-modalidades/03-prescricoes-seed.md) | Concluída (E6.3) |
 | 7 Alertas + polish | [`../specs/epic-07-alertas-polish/01-justificativa-sse.md`](../specs/epic-07-alertas-polish/01-justificativa-sse.md) | Concluída (E7.1) |
@@ -50,11 +50,11 @@ Contratos Given/When/Then escritos **antes** da implementação TDD.
 | 9 Vitais ML | [`../specs/epic-09-vitais-ml/03-autoencoder-notebook.md`](../specs/epic-09-vitais-ml/03-autoencoder-notebook.md) | Spec (E9.3) — pendente impl. |
 | 9 Vitais ML | [`../specs/epic-09-vitais-ml/04-comparacao-relatorio-roteiro.md`](../specs/epic-09-vitais-ml/04-comparacao-relatorio-roteiro.md) | Spec (E9.4) — pendente impl. |
 | 10 Azure áudio real | [`../specs/epic-10-azure-audio-real/01-speech-language-evidencia.md`](../specs/epic-10-azure-audio-real/01-speech-language-evidencia.md) | Concluída (E10) |
+| 11 Vídeo real (YOLO + Pose) | [`../specs/epic-11-yolo-video-real/01-ultralytics-mediapipe-evidencia.md`](../specs/epic-11-yolo-video-real/01-ultralytics-mediapipe-evidencia.md) | Concluída (E11) |
 
 > Fila de implementação das frentes de IA real: **Épico 10 (feito) → Épico 11
-> (YOLOv8, ainda sem spec) → Épico 9**. O Épico 9 tem SDD pronto; **não está
-> encerrado** (código não iniciado). Épicos 6.x permanecem Concluída
-> (seam/sintético).
+> (feito) → Épico 9**. O Épico 9 tem SDD pronto; **não está encerrado** (código
+> não iniciado). Épicos 6.x permanecem Concluída (seam/sintético).
 
 ## ADRs
 
@@ -143,9 +143,9 @@ arquivo quando o plano supersede uma decisão anterior.
 | 6 | Modalidades PDF | Concluído (E6.1 vídeo; E6.2 áudio; E6.3 prescrições + seed) |
 | 7 | Alertas + polish UI | Concluído (E7.1–E7.3) |
 | 8 | CI/CD e entrega | Concluído (E8.1–E8.2) |
-| 9 | Vitais ML (portfólio) | Specs + ADR 0029; **impl. não iniciada** (próximo após E11) |
+| 9 | Vitais ML (portfólio) | Specs + ADR 0029; **impl. não iniciada** (próximo na fila) |
 | 10 | Azure áudio real | Concluído (E10) — Speech + Language opt-in + evidência |
-| 11 | YOLOv8 vídeo real | Planejado (próximo na fila); spec ainda não escrita |
+| 11 | Vídeo real (YOLO + Pose) | Concluído (E11) — Ultralytics + MediaPipe + evidência |
 
 ## Entrega acadêmica (E8.2)
 
@@ -174,3 +174,14 @@ arquivo quando o plano supersede uma decisão anterior.
 - Evidência: [`../data/evidencia/audio/`](../data/evidencia/audio/) via
   `./scripts/gerar-evidencia-audio.sh`
 - Env: `AZURE_ENABLED` + `AZURE_SPEECH_*` + `AZURE_LANGUAGE_*` no `.env.example`
+
+## Vídeo real YOLO + MediaPipe (E11)
+
+- Spec:
+  [`../specs/epic-11-yolo-video-real/01-ultralytics-mediapipe-evidencia.md`](../specs/epic-11-yolo-video-real/01-ultralytics-mediapipe-evidencia.md)
+- ADRs: [0030](adr/0030-ia-real-opt-in-evidencia.md),
+  [0007](adr/0007-escopo-video-fisio-cirurgia-leve.md)
+- Evidência: [`../data/evidencia/video/`](../data/evidencia/video/) via
+  `./scripts/gerar-evidencia-video.sh`
+- Override Compose: [`../docker-compose.video-real.yml`](../docker-compose.video-real.yml)
+- Env: `LIMEN_YOLO_BACKEND` / `LIMEN_POSE_BACKEND` no `.env.example`

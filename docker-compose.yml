@@ -174,6 +174,10 @@ services:
       RQ_QUEUE_NAME: ${RQ_VIDEO_QUEUE_NAME:-video}
       RQ_VIDEO_QUEUE_NAME: ${RQ_VIDEO_QUEUE_NAME:-video}
       PII_ENCRYPTION_KEY: ${PII_ENCRYPTION_KEY:-}
+      # Épico 11 / ADR 0030: default synthetic (CI/demo). Real → override
+      # docker-compose.video-real.yml (+ rebuild com LIMEN_UV_EXTRAS).
+      LIMEN_YOLO_BACKEND: ${LIMEN_YOLO_BACKEND:-synthetic}
+      LIMEN_POSE_BACKEND: ${LIMEN_POSE_BACKEND:-synthetic}
     depends_on:
       postgres:
         condition: service_healthy

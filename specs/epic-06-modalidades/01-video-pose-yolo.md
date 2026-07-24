@@ -17,9 +17,14 @@ Risco do Caso.
 **Concluída em 21 de julho de 2026** (T6.0–T6.6: specs, fixtures, upload,
 Pose, Detecção em Cena, worker/fusão e fechamento docs).
 
+Caminho **real** (Ultralytics + MediaPipe + evidência):
+[Épico 11](../epic-11-yolo-video-real/01-ultralytics-mediapipe-evidencia.md) —
+não invalida este seam; o E6.1 permanece a base sintético/CI.
+
 Etapas posteriores do Épico 6 (specs próprias no início de cada uma):
 
 - E6.2 Áudio — Azure F0 + cache + fallback + CB + badge de provedor
+  (caminho real → Épico 10)
 - E6.3 Prescrições — regras + histórico + seed multimodal
 
 ## Escopo

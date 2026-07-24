@@ -1,0 +1,29 @@
+{
+  "version": "2026-07-23.1",
+  "voice": "Luciana",
+  "generator": "scripts/prepare_tts_audio_fixtures.py",
+  "fixtures": [
+    {
+      "file": "audio_tts_neutra.wav",
+      "scenario": "tts_neutra",
+      "sample_rate_hz": 16000,
+      "channels": 1,
+      "bits": 16,
+      "format": "wav_pcm_s16le",
+      "sha256": "1b78a32d4e2d22488834965e0a4ea63d23a865437ba5725aca5b89dd56b56324",
+      "script_pt_br": "Bom dia, doutor. Estou me sentindo bem hoje. Dormi bem esta noite e não tenho nenhuma queixa importante. Continuo tomando os remédios como o senhor recomendou.",
+      "notes": "TTS Luciana pt-BR ≤60s — demonstração, sem PHI."
+    },
+    {
+      "file": "audio_tts_critica.wav",
+      "scenario": "tts_critica",
+      "sample_rate_hz": 16000,
+      "channels": 1,
+      "bits": 16,
+      "format": "wav_pcm_s16le",
+      "sha256": "6ec26fa38ba59cccd067bd43e5d972f04c16f55e418ca1c6432a28e57fe2eb12",
+      "script_pt_br": "Doutor, não estou bem. Estou sentindo uma dor no peito muito forte e também estou com falta de ar desde ontem à noite. Tive uma tontura quando levantei e quase desmaiei.",
+      "notes": "TTS Luciana pt-BR ≤60s — demonstração, sem PHI."
+    }
+  ]
+}

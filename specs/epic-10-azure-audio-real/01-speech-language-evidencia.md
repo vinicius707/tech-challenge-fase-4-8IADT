@@ -156,7 +156,7 @@ Sentimento, Termos Críticos, metadados) prontos para commit
 | T10.2 | Text Analytics + degradação independente + TDD — **feita** |
 | T10.3 | Termos Críticos + score `max(acústico, nlp)` + Anomalias — **feita** |
 | T10.4 | Artefato de Transcrição no MinIO — **feita** |
-| T10.5 | Fixture TTS + `gerar-evidencia-audio.sh` + orquestrador fino |
+| T10.5 | Fixture TTS + `gerar-evidencia-audio.sh` + orquestrador fino — **feita** |
 | T10.6 | Fechamento docs (README, `.env.example`, índice) |
 
 Branch sugerida: `feature/limen-epic-10-azure-audio-real` a partir de `main`.
@@ -164,9 +164,9 @@ Branch sugerida: `feature/limen-epic-10-azure-audio-real` a partir de `main`.
 ## Critérios de pronto (DoD E10)
 
 - [x] Spec SDD aprovada (esta) + docs/ADRs da T10.0.
-- [ ] Speech + Language reais opt-in, TDD sem rede no CI.
-- [ ] Termos Críticos locais + Sentimento → Anomalias; score `max(...)`.
-- [ ] Transcrição real como Artefato; badge = origem da fala.
-- [ ] Evidência em `data/evidencia/audio/` via script versionado.
+- [x] Speech + Language reais opt-in, TDD sem rede no CI.
+- [x] Termos Críticos locais + Sentimento → Anomalias; score `max(...)`.
+- [x] Transcrição real como Artefato; badge = origem da fala.
+- [x] Evidência em `data/evidencia/audio/` via script versionado.
 - [ ] `.env.example` / README / índice atualizados.
 - [ ] Sem Azure obrigatório no CI; sem UI nova; sem Épicos 11/9.
